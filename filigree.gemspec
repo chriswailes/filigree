@@ -10,8 +10,9 @@ Gem::Specification.new do |s|
 	
 	s.name		= 'Filigree'
 	s.version		= Filigree::VERSION
-	s.summary		= ''
-	s.description	= ''
+	s.summary		= 'Extra functionality for Ruby.'
+	s.description	= 'Filigree provides new classes and extensions to core library classes ' +
+					'that add functionality to the Ruby.'
 	
 	s.files = [
 			'LICENSE',
@@ -26,7 +27,7 @@ Gem::Specification.new do |s|
 	
 	s.author		= 'Chris Wailes'
 	s.email		= 'chris.wailes@gmail.com'
-	s.homepage	= ''
+	s.homepage	= 'https://github.com/chriswailes/filigree'
 	s.license		= 'University of Illinois/NCSA Open Source License'
 	
 	s.required_ruby_version = '1.9.3'
