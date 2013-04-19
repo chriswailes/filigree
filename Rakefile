@@ -19,7 +19,6 @@ begin
 
 	YARD::Rake::YardocTask.new do |t|
 		t.options	= [
-			'-e',		yardlib,
 			'--title',	'Filigree',
 			'-m',		'markdown',
 			'-M',		'redcarpet',
