@@ -22,8 +22,8 @@ class AbstractClassError  < RuntimeError
 end
 
 class AbstractMethodError < RuntimeError
-	def initialize(method_name, class_name)
-		super "Abstract method #{method_name}, defined in #{class_name}, must be overridden by a subclass."
+	def initialize(method_name, abstract_class_name)
+		super "Abstract method #{method_name}, defined in #{abstract_class_name}, must be overridden by a subclass."
 	end
 end
 
@@ -50,8 +50,10 @@ module AbstractClass
 	end
 	
 	def abstract_method(name)
+		abstract_class_name = @abstract_class
+		
 		define_method name do
-			raise AbstractMethodError, name, abstract_class.name
+			raise AbstractMethodError.new name, abstract_class_name
 		end
 	end
 	
