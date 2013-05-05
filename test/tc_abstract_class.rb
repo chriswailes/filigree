@@ -1,7 +1,7 @@
 # Author:		Chris Wailes <chris.wailes@gmail.com>
 # Project: 	Filigree
 # Date:		2013/4/19
-# Description:	
+# Description:	Test cases for the AbstractClass module.
 
 ############
 # Requires #

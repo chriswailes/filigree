@@ -20,3 +20,4 @@ end
 
 # Test Cases
 require 'tc_abstract_class'
+require 'tc_object'
