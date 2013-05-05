@@ -15,12 +15,14 @@
 # Errors #
 ##########
 
+# An error representing an erroneous instantiation of an abstract class.
 class AbstractClassError  < RuntimeError
 	def initialize(class_name)
 		super "Instantiating abstract class #{class_name} is not allowed."
 	end
 end
 
+# An error representing a call to an unimplemented abstract method.
 class AbstractMethodError < RuntimeError
 	def initialize(method_name, abstract_class_name)
 		super "Abstract method #{method_name}, defined in #{abstract_class_name}, must be overridden by a subclass."
@@ -31,6 +33,7 @@ end
 # Classes and Modules #
 #######################
 
+# A module the implements the abstract class and abstract method patterns.
 module AbstractClass
 	
 	##################
