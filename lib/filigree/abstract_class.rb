@@ -16,7 +16,7 @@
 ##########
 
 # An error representing an erroneous instantiation of an abstract class.
-class AbstractClassError  < RuntimeError
+class AbstractClassError < RuntimeError
 	def initialize(class_name)
 		super "Instantiating abstract class #{class_name} is not allowed."
 	end
