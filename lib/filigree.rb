@@ -11,6 +11,8 @@
 
 # Filigree
 require 'filigree/abstract_class'
+require 'filigree/boolean'
+require 'class'
 require 'filigree/object'
 
 module Filigree

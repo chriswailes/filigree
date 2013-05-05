@@ -1,7 +1,7 @@
 # Author:		Chris Wailes <chris.wailes@gmail.com>
 # Project: 	Filigree
-# Date:		2013/4/19
-# Description:	
+# Date:		2013/05/04
+# Description:	Additional features for all objects.
 
 ############
 # Requires #

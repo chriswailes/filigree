@@ -1,7 +1,7 @@
 # Author:		Chris Wailes <chris.wailes@gmail.com>
 # Project: 	Filigree
-# Date:		2013/4/19
-# Description:	Test cases for the AbstractClass module.
+# Date:		2013/05/04
+# Description:	Test cases for the Object extensions.
 
 ############
 # Requires #
