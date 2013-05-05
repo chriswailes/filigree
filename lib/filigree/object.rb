@@ -30,7 +30,7 @@ class Object
 	# A copy and modification helper.
 	#
 	# @return [Object] A copy of the object with the block evaluated in the context of the copy.
-	def with(&block)
+	def clone_with(&block)
 		self.clone.tap { |clone| clone.instance_exec(&block) }
 	end
 end

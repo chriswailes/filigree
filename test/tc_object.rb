@@ -30,7 +30,7 @@ class ObjectTester < Test::Unit::TestCase
 	
 	def test_with
 		v0 = Foo.new(1, 2)
-		v1 = v0.with { self.a = 3 }
+		v1 = v0.clone_with { self.a = 3 }
 		
 		assert_equal 1, v0.a
 		assert_equal 2, v0.b
