@@ -13,6 +13,7 @@
 require 'filigree/abstract_class'
 require 'filigree/boolean'
 require 'filigree/class'
+require 'filigree/match'
 require 'filigree/object'
 require 'filigree/types'
 

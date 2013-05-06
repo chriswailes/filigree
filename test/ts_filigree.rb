@@ -22,5 +22,6 @@ end
 require 'tc_abstract_class'
 require 'tc_boolean'
 require 'tc_class'
+require 'tc_match'
 require 'tc_object'
 require 'tc_types'

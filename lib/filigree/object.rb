@@ -11,22 +11,26 @@
 
 # Filigree
 
+###########
+# Methods #
+###########
+
+# Simple implementation of the Y combinator.
+#
+# @param [Object] value Value to be returned after executing the provided block.
+#
+# @return [Object] The object passed in parameter value.
+def returning(value)
+	yield(value)
+	value
+end
+
 #######################
 # Classes and Modules #
 #######################
 
 # Object class extras.
 class Object
-	# Simple implementation of the Y combinator.
-	#
-	# @param [Object] value Value to be returned after executing the provided block.
-	#
-	# @return [Object] The object passed in parameter value.
-	def returning(value)
-		yield(value)
-		value
-	end
-	
 	# A copy and modification helper.
 	#
 	# @return [Object] A copy of the object with the block evaluated in the context of the copy.
