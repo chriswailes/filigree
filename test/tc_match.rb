@@ -19,6 +19,35 @@ require 'filigree/match'
 
 class MatchTester < Test::Unit::TestCase
 	
+	####################
+	# Internal Classes #
+	####################
+	
+	class Foo
+		extend Deconstructable
+		
+		def initialize(a)
+			@a = a
+		end
+		
+		def deconstruct
+			[@a]
+		end
+	end
+	
+	class Bar
+		extend Deconstructable
+		
+		def initialize(a, b)
+			@a = a
+			@b = b
+		end
+		
+		def deconstruct
+			[@a, @b]
+		end
+	end
+	
 	def setup
 		
 	end
@@ -27,20 +56,30 @@ class MatchTester < Test::Unit::TestCase
 	# Helpers #
 	###########
 	
+	def match_tester_deconstructor(o)
+		match o do
+			with(Foo.( 1))			{ :one }
+			with(Foo.(:a))			{ :a   }
+			with(Foo.(Foo.(:b)))	{ :b   }
+			with(Foo.( a))			{ a    }
+			with(Bar.(a, _))		{ a    }
+		end
+	end
+	
 	def match_tester_deferred(o)
 		match o do
 			with(1)
-			with(2) { :NUM }
+			with(2)	{ :NUM }
 			with(:a)
-			with(:b) { :SYM }
+			with(:b)	{ :SYM }
 		end
 	end
 	
 	def match_tester_guard(o)
 		match o do
-			with(:_, ->(n) { n < 0 })	{ :NEG  }
-			with(0)					{ :ZERO }
-			with(:_, ->(n) { n > 0 })	{ :POS  }
+			with(n, -> { n < 0 })	{ :NEG  }
+			with(0)				{ :ZERO }
+			with(n, -> { n > 0 })	{ :POS  }
 		end
 	end
 	
@@ -73,8 +112,8 @@ class MatchTester < Test::Unit::TestCase
 		match *touple do
 			with(1)
 			with(2,3)		{ :DEF }
-			with(4, :_)	{ :PART_WILD }
-			with(:_)		{ :WILD }
+			with(4, _)	{ :PART_WILD }
+			with(_)		{ :WILD }
 		end
 	end
 	
@@ -82,7 +121,7 @@ class MatchTester < Test::Unit::TestCase
 		match o do
 			with(1)	{ 1 }
 			with(2)	{ 2 }
-			with(:_)	{ |n| n   }
+			with(n)	{ n }
 		end
 	end
 	
@@ -100,6 +139,15 @@ class MatchTester < Test::Unit::TestCase
 		assert_equal :hello0, match_tester_mixed('hello')
 		assert_equal :world,  match_tester_mixed(:world)
 		assert_equal :one,    match_tester_mixed(1)
+	end
+	
+	def test_deconstructor
+		assert_equal :one, match_tester_deconstructor(Foo.new(   1))
+		assert_equal :a,   match_tester_deconstructor(Foo.new(  :a))
+		assert_equal 42.0, match_tester_deconstructor(Foo.new(42.0))
+		
+		assert_equal :b,   match_tester_deconstructor(Foo.new(Foo.new(:b)))
+		assert_equal 42,   match_tester_deconstructor(Bar.new(42, nil))
 	end
 	
 	def test_deferred_block
@@ -140,7 +188,7 @@ class MatchTester < Test::Unit::TestCase
 	def test_wildcard_pattern
 		result =
 		match 42 do
-			with(:_) { |n| n }
+			with(n) { n }
 		end
 		
 		assert_equal 42, result
