@@ -72,6 +72,7 @@ class MatchEnvironment
 			@deferred << mp
 		end
 	end
+	alias :w :with
 	
 	#############
 	# Callbacks #
@@ -135,7 +136,7 @@ class DeconstructionPattern < BasicPattern
 	end
 	
 	def match?(object, env)
-		object.is_a?(@klass) && object.respond_to?(:deconstruct) && super(object.deconstruct, env)
+		object.is_a?(@klass) and object.respond_to?(:deconstruct) and super(object.deconstruct(@pattern.length), env)
 	end
 end
 
@@ -154,7 +155,7 @@ class MatchPattern < BasicPattern
 	end
 	
 	def match?(objects, env)
-		super(objects, env) && (@guard.nil? or env.instance_exec(&@guard))
+		super(objects, env) and (@guard.nil? or env.instance_exec(&@guard))
 	end
 end
 
@@ -175,6 +176,18 @@ class MatchBinding
 		(@pattern.nil? or @pattern.match?(object, env)).tap do |match|
 			env.send("#{@name}=", object) if match
 		end
+	end
+end
+
+###################################
+# Standard Library Deconstructors #
+###################################
+
+class Array
+	extend Deconstructable
+	
+	def deconstruct(num_names)
+		[*self.first(num_names - 1), self[(num_names - 1)..-1]]
 	end
 end
 

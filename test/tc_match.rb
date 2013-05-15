@@ -30,7 +30,7 @@ class MatchTester < Test::Unit::TestCase
 			@a = a
 		end
 		
-		def deconstruct
+		def deconstruct(_)
 			[@a]
 		end
 	end
@@ -43,7 +43,7 @@ class MatchTester < Test::Unit::TestCase
 			@b = b
 		end
 		
-		def deconstruct
+		def deconstruct(_)
 			[@a, @b]
 		end
 	end
@@ -179,6 +179,15 @@ class MatchTester < Test::Unit::TestCase
 		assert_equal :NEG,  match_tester_guard(-5)
 		assert_equal :ZERO, match_tester_guard(0)
 		assert_equal :POS,  match_tester_guard(6)
+	end
+	
+	def test_match_array
+		result =
+		match [1,2,3,4] do
+		with(Array.(a, b, c))	{ [a, b, c] }
+		end
+		
+		assert_equal [1, 2, [3, 4]], result
 	end
 	
 	def test_regexp
