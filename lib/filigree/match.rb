@@ -48,24 +48,11 @@ class MatchEnvironment
 	end
 	
 	def find_match(objects)
-#		puts
-#		puts 'Finding match for:'
-#		pp objects
-		
 		@patterns.each do |pattern|
-#			puts
-#			puts 'Considering pattern:'
-#			pp pattern
 			
 			env = OpenStruct.new 
 			
-			if pattern.match?(objects, env)
-#				puts 'Pattern matched.'
-				
-				return pattern.(env, objects)
-			else
-#				puts "Pattern didn't match."
-			end
+			return pattern.(env, objects) if pattern.match?(objects, env)
 		end
 		
 		# If we didn't find anything we raise a MatchError.
@@ -100,24 +87,21 @@ class MatchEnvironment
 end
 
 class BasicPattern
+	def as(binding)
+		binding.tap { binding.pattern = self }
+	end
+	
 	def initialize(pattern)
 		@pattern = pattern
 	end
 	
-	def match?(objects, env = OpenStruct.new)
-		result = true
-		
+	def match?(objects, env)
 		if objects.length == @pattern.length
 			@pattern.zip(objects).each do |pattern, object|
-				ok = match_prime(pattern, object, env)
-				
-				if not ok
-					result = false
-					break
-				end
+				return false unless match_prime(pattern, object, env)
 			end
 			
-			result
+			true
 			
 		else
 			(@pattern.length == 1 and @pattern.first == Wildcard.instance)
@@ -132,10 +116,7 @@ class BasicPattern
 		when Regexp
 			object.is_a?(String) and pattern.match(object)
 			
-		when MatchBinding
-			pattern.match?(object, env).tap { |match| env.send("#{pattern.name}=", object) if match }
-			 
-		when DeconstructionPattern
+		when DeconstructionPattern, MatchBinding
 			pattern.match?(object, env)
 			 
 		else
@@ -153,16 +134,7 @@ class DeconstructionPattern < BasicPattern
 		@klass = klass
 	end
 	
-	def match?(object, env = OpenStruct.new)
-#		puts 'Testing DeconstructionPattern:'
-#		pp self
-#		
-#		puts 'On object:'
-#		pp object
-#		
-#		puts "Object is of correct class: #{object.is_a?(@klass)}"
-#		puts "Object is deconstructable : #{object.respond_to?(:deconstruct)}"
-		
+	def match?(object, env)
 		object.is_a?(@klass) && object.respond_to?(:deconstruct) && super(object.deconstruct, env)
 	end
 end
@@ -178,16 +150,10 @@ class MatchPattern < BasicPattern
 	end
 	
 	def call(env, objects)
-		env.instance_exec(&@block)
+		if @block then env.instance_exec(&@block) else nil end
 	end
 	
-	def match?(objects, env = OpenStruct.new)
-#		puts 'Checking MatchPattern:'
-#		pp self
-#		
-#		puts 'On objects:'
-#		pp objects
-		
+	def match?(objects, env)
 		super(objects, env) && (@guard.nil? or env.instance_exec(&@guard))
 	end
 end
@@ -205,8 +171,10 @@ class MatchBinding
 		@pattern	= pattern
 	end
 	
-	def match?(object, env = OpenStruct.new)
-		@pattern.nil? or @pattern.match?(object, env)
+	def match?(object, env)
+		(@pattern.nil? or @pattern.match?(object, env)).tap do |match|
+			env.send("#{@name}=", object) if match
+		end
 	end
 end
 

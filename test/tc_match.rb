@@ -61,8 +61,11 @@ class MatchTester < Test::Unit::TestCase
 			with(Foo.( 1))			{ :one }
 			with(Foo.(:a))			{ :a   }
 			with(Foo.(Foo.(:b)))	{ :b   }
-			with(Foo.( a))			{ a    }
-			with(Bar.(a, _))		{ a    }
+			
+			with(Foo.(Foo.(a).as b))	{ [a, b] }
+			
+			with(Foo.(a))
+			with(Bar.(a, _))		{ a }
 		end
 	end
 	
@@ -89,6 +92,13 @@ class MatchTester < Test::Unit::TestCase
 			with('hello')	{ :hello1 }
 			with(:world)	{ :world  }
 			with(1)		{ :one    }
+		end
+	end
+	
+	def match_tester_regexp(s)
+		match s do
+			with(/(ab)+/)	{ :a }
+			with(/[abc]+/)	{ :b }
 		end
 	end
 	
@@ -129,6 +139,13 @@ class MatchTester < Test::Unit::TestCase
 	# Tests #
 	#########
 	
+	def test_as
+		v0 = Foo.new(:dog)
+		v1 = Foo.new(v0)
+		
+		assert_equal([:dog, v0], match_tester_deconstructor(v1))
+	end
+	
 	def test_constants
 		assert_equal :one,   match_tester_simple(1)
 		assert_equal :two,   match_tester_simple(2)
@@ -162,6 +179,13 @@ class MatchTester < Test::Unit::TestCase
 		assert_equal :NEG,  match_tester_guard(-5)
 		assert_equal :ZERO, match_tester_guard(0)
 		assert_equal :POS,  match_tester_guard(6)
+	end
+	
+	def test_regexp
+		assert_equal :a, match_tester_regexp('abab')
+		assert_equal :b, match_tester_regexp('acba')
+		
+		assert_raise(MatchError) { match_tester_regexp('def') }
 	end
 	
 	def test_tuple_wildcard
