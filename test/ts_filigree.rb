@@ -20,10 +20,11 @@ end
 
 # Test Cases
 require 'tc_abstract_class'
-#require 'tc_application'
+require 'tc_application'
 require 'tc_boolean'
 require 'tc_class'
 require 'tc_class_methods_module'
+require 'tc_configuration'
 require 'tc_match'
 require 'tc_object'
 require 'tc_types'

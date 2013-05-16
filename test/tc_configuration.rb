@@ -11,12 +11,25 @@
 require 'test/unit'
 
 # Filigree
-require 'filigree/application'
+require 'filigree/configuration'
 
 #######################
 # Classes and Modules #
 #######################
 
 class ConfigurationTester < Test::Unit::TestCase
-
+	class TestConfig
+		include Filigree::Configuration
+		
+		auto :foo do
+			:foo
+		end
+		
+		help 'foo'
+	end
+	
+	def test_auto
+		assert_equal :foo, TestConfig.new.foo
+		assert_equal 'foo', TestConfig.new.help_string
+	end
 end

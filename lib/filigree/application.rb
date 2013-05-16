@@ -10,7 +10,8 @@
 # Standard Library
 
 # Filigree
-#require 'filigree/configuration'
+require 'filigree/class_methods_module'
+require 'filigree/configuration'
 
 ##########
 # Errors #
@@ -27,18 +28,67 @@
 module Filigree; end
 
 module Filigree::Application
+	include ClassMethodsModule
+	
+	#############
+	# Constants #
+	#############
+	
+	REQUIRED_METHODS = [
+		:kill,
+		:pause,
+		:resume,
+		:run,
+		:stop
+	]
+
+	####################
+	# Instance Methods #
+	####################
+	
+	attr_accessor :configuration
+	alias :config :configuration
+	
 	def initialize
-#		@config = self.class::Configuration.new(ARGV)
+		@configuration = self.class::Configuration.new(ARGV)
+		
+		# Set up signal handlers.
+		Signal.trap('ABRT')	{ self.stop }
+		Signal.trap('INT')	{ self.stop }
+		Signal.trap('QUIT')	{ self.stop }
+		Signal.trap('TERM')	{ self.stop }
+		
+		Signal.trap('KILL')	{ self.kill }
+		
+		Signal.trap('CONT')	{ self.resume }
+		Signal.trap('STOP')	{ self.pause  }
+	end
+	
+	#################
+	# Class Methods #
+	#################
+	
+	module ClassMethods
+		def finalize
+			REQUIRED_METHODS.each do |m|
+				raise(NoMethodError, "Application missing method: #{m}") if not self.instance_methods.include?(m)
+			end
+		end
 	end
 	
 	#############
 	# Callbacks #
 	#############
 	
-	def included(klass)
-#		klass.instance_exec do
-#			Configuration = Class.new
-#			Configuration.extend(Filigree::Configuration)
-#		end
+	class << self
+		alias :old_included :included
+		
+		def included(klass)
+			old_included(klass)
+			
+			klass.const_set(:Configuration, Class.new do
+				include Filigree::Configuration
+			end)
+		end
 	end
 end
