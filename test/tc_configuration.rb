@@ -1,32 +1,22 @@
 # Author:		Chris Wailes <chris.wailes@gmail.com>
 # Project: 	Filigree
-# Date:		2013/05/14
-# Description:	Easy application configuration.
+# Date:		2013/05/15
+# Description:	Test cases the Configuration module.
 
 ############
 # Requires #
 ############
 
 # Standard Library
+require 'test/unit'
 
 # Filigree
-
-##########
-# Errors #
-##########
-
-###########
-# Methods #
-###########
+require 'filigree/application'
 
 #######################
 # Classes and Modules #
 #######################
 
-module Filigree; end
+class ConfigurationTester < Test::Unit::TestCase
 
-module Filigree::Configuration
-	def foo
-		:foo
-	end
 end
