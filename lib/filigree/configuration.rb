@@ -39,42 +39,85 @@ module Filigree::Configuration
 	
 	attr_accessor :rest
 	
-	def initialize(argv = ARGV.clone)
-		set = self.class.options_long.keys.inject(Hash.new) { |h, option| h[option] = false; h }
+	def dump(io = nil, *fields)
+		require 'yaml'
 		
-		# Process the command line.
-		while str = argv.shift
-			
-			break if str == '--'
-			
-			if option = find_option(str)
-				args =
-				if option.arity == -1
-					argv.shift (argv.index { |s| s[0,1] == '-'})
-				else
-					argv.shift option.arity
-				end
-				
-				case option.handler
-				when Array
-					tmp = args.zip(option.handler).map { |s, sym| s.send sym }
-					
-					if option.arity == 1 and tmp.length == 1
-						self.send("#{option.long}=", tmp.first)
-					else
-						self.send("#{option.long}=", tmp)
-					end
-					
-				when Proc
-					self.send("#{option.long}=", option.handler.call(*args))
-				end
-				
-				set[option.long] = true
-			end
+		vals =
+		if fields.empty? then self.class.options_long.keys else fields end.inject(Hash.new) do |h, f|
+			h[f] = self.send(f)
+			h
 		end
 		
-		# Save the rest of the command line for later.
-		self.rest = argv
+		case io
+		when nil
+			YAML.dump vals
+			
+		when String
+			File.open(io, 'w') { |f| YAML.dump vals, f }
+			
+		when IO
+			YAML.dump vals, io
+		end
+	end
+	
+	
+	def initialize(overloaded = ARGV.clone)
+		set = self.class.options_long.keys.inject(Hash.new) { |h, option| h[option] = false; h }
+		
+		case overloaded
+		when Array
+			# Process the command line.
+			argv = overloaded
+			
+			while str = argv.shift
+			
+				break if str == '--'
+			
+				if option = find_option(str)
+					args =
+					if option.arity == -1
+						argv.shift (argv.index { |s| s[0,1] == '-'})
+					else
+						argv.shift option.arity
+					end
+				
+					case option.handler
+					when Array
+						tmp = args.zip(option.handler).map { |s, sym| s.send sym }
+					
+						if option.arity == 1 and tmp.length == 1
+							self.send("#{option.long}=", tmp.first)
+						else
+							self.send("#{option.long}=", tmp)
+						end
+					
+					when Proc
+						self.send("#{option.long}=", option.handler.call(*args))
+					end
+				
+					set[option.long] = true
+				end
+			end
+		
+			# Save the rest of the command line for later.
+			self.rest = argv
+			
+		when String, IO
+			options =
+			if overloaded.is_a String
+				if File.exist overloaded
+					YAML.load_file overloaded
+				else
+					YAML.load overloaded
+			else
+				YAML.load io.read
+			end
+			
+			options.each do |option, val|
+				set[option] = true
+				self.send "#{option}=", val
+			end
+		end
 		
 		# Set defaults.
 		set.each do |name, is_set|
