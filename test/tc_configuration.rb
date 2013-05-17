@@ -84,6 +84,65 @@ class ConfigurationTester < Test::Unit::TestCase
 		assert_nothing_raised		{ TestConfig.new(@defaults) }
 	end
 	
+	def test_serialization
+		require 'tempfile'
+		
+		conf = TestConfig.new (@defaults + ['-f', 'hello world', '-b', '32', '-z', 'a', 'b'])
+		
+		yaml_string = conf.dump
+		
+		conf = TestConfig.new yaml_string
+		
+		assert_equal 60,			conf.moo
+		assert_equal 'hello world',	conf.foo
+		assert_equal 32,			conf.bar
+		assert_equal [:a, :b],		conf.baz
+		
+		yaml_file		= Tempfile.new 'tc_configuration_serialization'
+		yaml_file_path	= yaml_file.path
+		yaml_file.close
+		
+		# Dump the file.
+		File.open(yaml_file_path, 'w') { |f| conf.dump f }
+		
+		# Load the configuration from the file.
+		conf = File.open(yaml_file_path, 'r') { |f| TestConfig.new f }
+		
+		assert_equal 60,			conf.moo
+		assert_equal 'hello world',	conf.foo
+		assert_equal 32,			conf.bar
+		assert_equal [:a, :b],		conf.baz
+		
+		# Remove the file.
+		FileUtils.rm yaml_file_path
+		
+		# Re-create an empty file.
+		FileUtils.touch yaml_file_path
+		
+		# Dump the config again.
+		conf.dump yaml_file_path
+		
+		# Load the configuration again.
+		conf = TestConfig.new yaml_file_path
+		
+		assert_equal 60,			conf.moo
+		assert_equal 'hello world',	conf.foo
+		assert_equal 32,			conf.bar
+		assert_equal [:a, :b],		conf.baz
+		
+		#########################
+		# Partial Serialization #
+		#########################
+		
+		yaml_string = conf.dump nil, :moo, :foo, :bar
+		
+		conf = TestConfig.new yaml_string
+		
+		assert_equal 60,			conf.moo
+		assert_equal 'hello world',	conf.foo
+		assert_equal 32,			conf.bar
+	end
+	
 	def test_short_option
 		conf = TestConfig.new ['-m', 10]
 		
@@ -97,8 +156,8 @@ class ConfigurationTester < Test::Unit::TestCase
 	end
 	
 	def test_symbol_handler
-		conf = TestConfig.new (@defaults + ['-b', '42'])
-		assert_equal 42, conf.bar
+		conf = TestConfig.new (@defaults + ['-b', '32'])
+		assert_equal 32, conf.bar
 		
 		conf = TestConfig.new (@defaults + ['-z', 'a', 'b'])
 		assert_equal [:a, :b], conf.baz

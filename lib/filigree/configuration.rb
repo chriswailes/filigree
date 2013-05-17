@@ -44,7 +44,7 @@ module Filigree::Configuration
 		
 		vals =
 		if fields.empty? then self.class.options_long.keys else fields end.inject(Hash.new) do |h, f|
-			h[f] = self.send(f)
+			h[f.to_s] = self.send(f)
 			h
 		end
 		
@@ -59,6 +59,7 @@ module Filigree::Configuration
 			YAML.dump vals, io
 		end
 	end
+	alias :serialize :dump
 	
 	
 	def initialize(overloaded = ARGV.clone)
@@ -98,19 +99,20 @@ module Filigree::Configuration
 					set[option.long] = true
 				end
 			end
-		
+			
 			# Save the rest of the command line for later.
 			self.rest = argv
 			
 		when String, IO
 			options =
-			if overloaded.is_a String
-				if File.exist overloaded
+			if overloaded.is_a? String
+				if File.exists? overloaded
 					YAML.load_file overloaded
 				else
 					YAML.load overloaded
+				end
 			else
-				YAML.load io.read
+				YAML.load overloaded
 			end
 			
 			options.each do |option, val|
@@ -144,9 +146,6 @@ module Filigree::Configuration
 			
 		elsif str[0,1] == '-'
 			self.class.options_short[str[1..-1]]
-			
-		else
-			nil
 		end
 	end
 	
