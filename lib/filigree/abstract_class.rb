@@ -53,7 +53,7 @@ module AbstractClass
 	end
 	
 	def abstract_method(name)
-		abstract_class_name = @abstract_class
+		abstract_class_name = @abstract_class.name
 		
 		define_method name do
 			raise AbstractMethodError.new name, abstract_class_name
