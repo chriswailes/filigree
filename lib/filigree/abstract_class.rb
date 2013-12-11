@@ -68,7 +68,7 @@ module AbstractClass
 		if @abstract_class == self
 			raise AbstractClassError, self.name
 		else
-			super
+			super(*args)
 		end
 	end
 end

@@ -44,8 +44,7 @@ module Filigree::Configuration
 		
 		vals =
 		if fields.empty? then self.class.options_long.keys else fields end.inject(Hash.new) do |h, f|
-			h[f.to_s] = self.send(f)
-			h
+			h.tap { h[f.to_s] = self.send(f) }
 		end
 		
 		case io
@@ -63,7 +62,7 @@ module Filigree::Configuration
 	
 	
 	def initialize(overloaded = ARGV.clone)
-		set = self.class.options_long.keys.inject(Hash.new) { |h, option| h[option] = false; h }
+		set = self.class.options_long.keys.inject(Hash.new) { |h, option| h.tap {h[option] = false} }
 		
 		case overloaded
 		when Array
