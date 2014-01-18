@@ -7,8 +7,8 @@
 # Requires #
 ############
 
-# Standard Library
-require 'test/unit'
+# Gems
+require 'minitest/autorun'
 
 # Filigree
 require 'filigree/object'
@@ -17,7 +17,7 @@ require 'filigree/object'
 # Classes and Modules #
 #######################
 
-class ObjectTester < Test::Unit::TestCase
+class ObjectTester < Minitest::Test
 	Foo = Struct.new :a, :b
 	
 	def setup
@@ -38,6 +38,6 @@ class ObjectTester < Test::Unit::TestCase
 		assert_equal 3, v1.a
 		assert_equal 2, v1.b
 		
-		assert_not_equal v0.object_id, v1.object_id
+		refute_equal v0.object_id, v1.object_id
 	end
 end

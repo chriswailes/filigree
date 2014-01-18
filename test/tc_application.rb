@@ -7,8 +7,8 @@
 # Requires #
 ############
 
-# Standard Library
-require 'test/unit'
+# Gems
+require 'minitest/autorun'
 
 # Filigree
 require 'filigree/application'
@@ -17,7 +17,7 @@ require 'filigree/application'
 # Classes and Modules #
 #######################
 
-class ApplicationTester < Test::Unit::TestCase
+class ApplicationTester < Minitest::Test
 	class Foo
 		include Filigree::Application
 	end
@@ -43,8 +43,8 @@ class ApplicationTester < Test::Unit::TestCase
 	end
 	
 	def test_application
-		assert_raise(NoMethodError)	{ Foo.finalize }
-		assert_nothing_raised		{ Bar.finalize }
+		assert_raises(NoMethodError)	{ Foo.finalize }
+		Bar.finalize
 	end
 	
 	def test_embedded_config

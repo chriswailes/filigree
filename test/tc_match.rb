@@ -7,8 +7,8 @@
 # Requires #
 ############
 
-# Standard Library
-require 'test/unit'
+# Gems
+require 'minitest/autorun'
 
 # Filigree
 require 'filigree/match'
@@ -17,7 +17,7 @@ require 'filigree/match'
 # Classes and Modules #
 #######################
 
-class MatchTester < Test::Unit::TestCase
+class MatchTester < Minitest::Test
 	
 	####################
 	# Internal Classes #
@@ -151,7 +151,7 @@ class MatchTester < Test::Unit::TestCase
 		assert_equal :two,   match_tester_simple(2)
 		assert_equal :three, match_tester_simple(3)
 		
-		assert_raise(MatchError) { match_tester_simple(4) }
+		assert_raises(MatchError) { match_tester_simple(4) }
 		
 		assert_equal :hello0, match_tester_mixed('hello')
 		assert_equal :world,  match_tester_mixed(:world)
@@ -194,7 +194,7 @@ class MatchTester < Test::Unit::TestCase
 		assert_equal :a, match_tester_regexp('abab')
 		assert_equal :b, match_tester_regexp('acba')
 		
-		assert_raise(MatchError) { match_tester_regexp('def') }
+		assert_raises(MatchError) { match_tester_regexp('def') }
 	end
 	
 	def test_tuple_wildcard
@@ -214,8 +214,8 @@ class MatchTester < Test::Unit::TestCase
 		assert_equal :BAR, match_tester_tuple(3, 4)
 		assert_equal :BAF, match_tester_tuple(5)
 		
-		assert_raise(MatchError) { match_tester_tuple(1, 2, 3) }
-		assert_raise(MatchError) { match_tester_tuple(6)		}
+		assert_raises(MatchError) { match_tester_tuple(1, 2, 3) }
+		assert_raises(MatchError) { match_tester_tuple(6)		}
 	end
 	
 	def test_wildcard_pattern

@@ -3,16 +3,84 @@
 # Date:		2013/4/19
 # Description:	Filigree's Rakefile.
 
-##############
-# Rake Tasks #
-##############
+############
+# Requires #
+############
 
-# Gems
-require 'rake/notes/rake_task'
-require 'rake/testtask'
-require 'bundler'
-
+# Project
 require File.expand_path("../lib/filigree/version", __FILE__)
+
+###########
+# Bundler #
+###########
+
+begin
+	require 'bundler'
+	
+	Bundler::GemHelper.install_tasks
+	
+rescue LoadError
+	warn "Bundler isn't installed. `gem install bundler` to bundle."
+end
+
+############
+# MiniTest #
+############
+
+begin
+	require 'rake/testtask'
+	
+	Rake::TestTask.new do |t|
+		t.libs << 'test'
+		t.test_files = FileList['test/ts_filigree.rb']
+	end
+rescue LoadError
+	warn "Minitest isn't installed. `gem install minitest` to test."
+end
+
+#########
+# Notes #
+#########
+
+begin
+	require 'rake/notes/rake_task'
+rescue LoadError
+	warn "Rake-notes isn't installed."
+end
+
+########
+# Reek #
+########
+
+begin
+	require 'reek/rake/task'
+
+	Reek::Rake::Task.new do |t|
+	  t.fail_on_error = false
+	end
+	
+rescue LoadError
+	warn "Reek ins't installed.  `gem install reek` to smell."
+end
+
+##################
+# Rubygems Tasks #
+##################
+
+begin
+	require 'rubygems/tasks'
+	
+	Gem::Tasks.new do |t|
+		t.console.command = 'pry'
+	end
+	
+rescue LoadError
+	warn "rubygems-tasks isn't installed."
+end
+
+########
+# YARD #
+########
 
 begin
 	require 'yard'
@@ -26,31 +94,9 @@ begin
 			'--private'
 		]
 		
-		
 		t.files	= Dir['lib/**/*.rb']
 	end
 	
 rescue LoadError
-	warn 'Yard is not installed. `gem install yard` to build documentation.'
-end
-
-Rake::TestTask.new do |t|
-	t.libs << 'test'
-	t.loader = :testrb
-	t.test_files = FileList['test/ts_filigree.rb']
-end
-
-# Bundler tasks.
-Bundler::GemHelper.install_tasks
-
-# Rubygems Taks
-begin
-	require 'rubygems/tasks'
-	
-	Gem::Tasks.new do |t|
-		t.console.command = 'pry'
-	end
-	
-rescue LoadError
-	'rubygems-tasks not installed.'
+	warn "Yard isn't installed. `gem install yard` to build documentation."
 end

@@ -7,8 +7,8 @@
 # Requires #
 ############
 
-# Standard Library
-require 'test/unit'
+# Gems
+require 'minitest/autorun'
 
 # Filigree
 require 'filigree/class'
@@ -17,7 +17,7 @@ require 'filigree/class'
 # Classes and Modules #
 #######################
 
-class ClassTester < Test::Unit::TestCase
+class ClassTester < Minitest::Test
 	module Foo; end
 	
 	class Bar
@@ -40,6 +40,6 @@ class ClassTester < Test::Unit::TestCase
 		
 		assert  Baz.subclass_of?(Bar)
 		assert !Baz.subclass_of?(Fixnum)
-		assert_raise(RuntimeError) { Baz.subclass_of?(1) }
+		assert_raises(RuntimeError) { Baz.subclass_of?(1) }
 	end
 end

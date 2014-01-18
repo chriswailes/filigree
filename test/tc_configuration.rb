@@ -7,8 +7,8 @@
 # Requires #
 ############
 
-# Standard Library
-require 'test/unit'
+# Gems
+require 'minitest/autorun'
 
 # Filigree
 require 'filigree/configuration'
@@ -17,7 +17,7 @@ require 'filigree/configuration'
 # Classes and Modules #
 #######################
 
-class ConfigurationTester < Test::Unit::TestCase
+class ConfigurationTester < Minitest::Test
 	class TestConfig
 		include Filigree::Configuration
 		
@@ -80,8 +80,8 @@ class ConfigurationTester < Test::Unit::TestCase
 	end
 	
 	def test_required
-		assert_raise(ArgumentError)	{ TestConfig.new([]) }
-		assert_nothing_raised		{ TestConfig.new(@defaults) }
+		assert_raises(ArgumentError)	{ TestConfig.new([]) }
+		TestConfig.new(@defaults)
 	end
 	
 	def test_serialization

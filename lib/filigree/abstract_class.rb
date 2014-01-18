@@ -48,10 +48,6 @@ module AbstractClass
 	# Instance Methods #
 	####################
 	
-	def abstract_class
-		@abstract_class
-	end
-	
 	def abstract_method(name)
 		abstract_class_name = @abstract_class.name
 		

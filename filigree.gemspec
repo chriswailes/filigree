@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
 	s.version		= Filigree::VERSION
 	s.summary		= 'Extra functionality for Ruby.'
 	s.description	= 'Filigree provides new classes and extensions to core library classes ' +
-					'that add functionality to the Ruby.'
+				  'that add functionality to the Ruby.'
 	
 	s.files = [
 			'LICENSE',
@@ -30,7 +30,9 @@ Gem::Specification.new do |s|
 	s.homepage	= 'https://github.com/chriswailes/filigree'
 	s.license		= 'University of Illinois/NCSA Open Source License'
 	
-	s.required_ruby_version = '1.9.3'
+	s.required_ruby_version = '2.0.0'
+	
+	s.test_files = Dir.glob('test/tc_*.rb') + Dir.glob('test/ts_*.rb')
 	
 	################
 	# Dependencies #
@@ -41,13 +43,14 @@ Gem::Specification.new do |s|
 	############################
 	
 	s.add_development_dependency('bundler')
+	s.add_development_dependency('flay')
+	s.add_development_dependency('flog')
 	s.add_development_dependency('minitest')
 	s.add_development_dependency('pry')
 	s.add_development_dependency('rake')
 	s.add_development_dependency('rake-notes')
+	s.add_development_dependency('reek')
 	s.add_development_dependency('rubygems-tasks')
 	s.add_development_dependency('simplecov')
 	s.add_development_dependency('yard', '>= 0.8.1')
-	
-	s.test_files	= Dir.glob('test/tc_*.rb') + Dir.glob('test/ts_*.rb')
 end

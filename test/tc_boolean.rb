@@ -7,8 +7,8 @@
 # Requires #
 ############
 
-# Standard Library
-require 'test/unit'
+# Gems
+require 'minitest/autorun'
 
 # Filigree
 require 'filigree/boolean'
@@ -17,7 +17,7 @@ require 'filigree/boolean'
 # Classes and Modules #
 #######################
 
-class BooleanTester < Test::Unit::TestCase
+class BooleanTester < Minitest::Test
 	def setup
 		
 	end
