@@ -10,12 +10,7 @@
 # Standard Library
 
 # Filigree
-
-##########
-# Errors #
-##########
-
-#class TypeError < RuntimeError; end
+require 'filigree/class_methods_module'
 
 ###########
 # Methods #
@@ -77,48 +72,54 @@ end
 # Classes and Modules #
 #######################
 
-class Class
-	def default_constructor(strict = false)
-		class_eval do
-			if strict
-				def initialize(*vals)
-					if self.class.typed_ivars.length != vals.length
-						raise ArgumentError, "#{self.class.typed_ivars.length} arguments expected, #{vals.length} given."
-					end
+module TypedClass
+	include ClassMethodsModule
+	
+	def set_typed_ivars(vals)
+		self.class.typed_ivars.zip(vals).each do |name, val|
+			self.send("#{name}=".to_sym, val)
+		end
+	end
+	
+	module ClassMethods
+		def default_constructor(strict = false)
+			class_eval do
+				if strict
+					def initialize(*vals)
+						if self.class.typed_ivars.length != vals.length
+							raise ArgumentError, "#{self.class.typed_ivars.length} arguments expected, #{vals.length} given."
+						end
 				
-					self.class.typed_ivars.zip(vals).each do |name, val|
-						self.send("#{name}=".to_sym, val)
+						self.set_typed_ivars(vals)
 					end
-				end
-			else
-				def initialize(*vals)
-					self.class.typed_ivars.zip(vals).each do |name, val|
-						self.send("#{name}=".to_sym, val)
+				else
+					def initialize(*vals)
+						self.set_typed_ivars(vals)
 					end
 				end
 			end
 		end
-	end
-	
-	def typed_ivar(name, type, nillable = false, strict = false)
-		typed_ivars << name
 		
-		if type.is_a?(Array)
-			define_method "#{name}=".to_sym do |o|
-				self.instance_variable_set("@#{name}".to_sym, check_array_type(o, type.first, name, nillable, strict))  
+		def define_typed_accessor(name, nillable, strict, type, checker)
+			define_method "#{name}=".to_sym do |obj|
+				self.instance_variable_set("@#{name}".to_sym, checker.call(obj, type, name, nillable, strict))
 			end
+		end
+		private :define_typed_accessor
+		
+		def typed_ivar(name, type, nillable = false, strict = false)
+			typed_ivars << name
 			
-		else
-			define_method "#{name}=".to_sym do |o|
-				self.instance_variable_set("@#{name}".to_sym, check_type(o, type, name, nillable, strict))
-			end
-		end
+			define_typed_accessor(name, nillable, strict, *
+				type.is_a?(Array) ? [type.first, method(:check_array_type)] : [type, method(:check_type)]
+			)
 		
-		attr_reader name
-	end
+			attr_reader name
+		end
 	
-	def typed_ivars
-		@typed_ivars ||= Array.new
+		def typed_ivars
+			@typed_ivars ||= Array.new
+		end
 	end
 end
 

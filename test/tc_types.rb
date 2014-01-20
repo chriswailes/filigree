@@ -20,12 +20,16 @@ require 'filigree/types'
 class TypeTester < Minitest::Test
 	
 	class Foo
+		include TypedClass
+		
 		typed_ivar :foo, Integer
 		typed_ivar :bar, String
 		typed_ivar :baf, [Integer]
 	end
 	
 	class Bar
+		include TypedClass
+		
 		typed_ivar :foo, Integer
 		typed_ivar :bar, String
 		
@@ -33,6 +37,8 @@ class TypeTester < Minitest::Test
 	end
 	
 	class Baf
+		include TypedClass
+		
 		typed_ivar :foo, Integer
 		typed_ivar :bar, String, true
 		
@@ -40,6 +46,8 @@ class TypeTester < Minitest::Test
 	end
 	
 	class Baz
+		include TypedClass
+		
 		typed_ivar :foo, Integer
 		typed_ivar :bar, String
 		
