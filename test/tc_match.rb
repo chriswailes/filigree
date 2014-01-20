@@ -58,31 +58,31 @@ class MatchTester < Minitest::Test
 	
 	def match_tester_destructure(o)
 		match o do
-			with(Foo.( 1))			{ :one }
-			with(Foo.(:a))			{ :a   }
-			with(Foo.(Foo.(:b)))	{ :b   }
+			with(Foo.( 1))           { :one }
+			with(Foo.(:a))           { :a   }
+			with(Foo.(Foo.(:b)))     { :b   }
 			
-			with(Foo.(Foo.(a).as b))	{ [a, b] }
+			with(Foo.(Foo.(a).as b)) { [a, b] }
 			
 			with(Foo.(a))
-			with(Bar.(a, _))		{ a }
+			with(Bar.(a, _))         { a }
 		end
 	end
 	
 	def match_tester_deferred(o)
 		match o do
 			with(1)
-			with(2)	{ :NUM }
+			with(2)  { :NUM }
 			with(:a)
-			with(:b)	{ :SYM }
+			with(:b) { :SYM }
 		end
 	end
 	
 	def match_tester_guard(o)
 		match o do
-			with(n, -> { n < 0 })	{ :NEG  }
-			with(0)				{ :ZERO }
-			with(n, -> { n > 0 })	{ :POS  }
+			with(n, -> { n < 0 }) { :NEG  }
+			with(0)               { :ZERO }
+			with(n, -> { n > 0 }) { :POS  }
 		end
 	end
 	
@@ -96,17 +96,17 @@ class MatchTester < Minitest::Test
 	
 	def match_tester_mixed(o)
 		match o do
-			with('hello')	{ :hello0 }
-			with('hello')	{ :hello1 }
-			with(:world)	{ :world  }
-			with(1)		{ :one    }
+			with('hello') { :hello0 }
+			with('hello') { :hello1 }
+			with(:world)  { :world  }
+			with(1)       { :one    }
 		end
 	end
 	
 	def match_tester_regexp(s)
 		match s do
-			with(/(ab)+/)	{ :a }
-			with(/[abc]+/)	{ :b }
+			with(/(ab)+/)  { :a }
+			with(/[abc]+/) { :b }
 		end
 	end
 	
@@ -120,26 +120,26 @@ class MatchTester < Minitest::Test
 	
 	def match_tester_tuple(*touple)
 		match *touple do
-			with(1, 2)	{ :FOO }
-			with(3, 4)	{ :BAR }
-			with(5)		{ :BAF }
+			with(1, 2) { :FOO }
+			with(3, 4) { :BAR }
+			with(5)    { :BAF }
 		end
 	end
 	
 	def match_tester_tuple_wildcard(*touple)
 		match *touple do
 			with(1)
-			with(2,3)		{ :DEF }
-			with(4, _)	{ :PART_WILD }
-			with(_)		{ :WILD }
+			with(2,3)  { :DEF }
+			with(4, _) { :PART_WILD }
+			with(_)    { :WILD }
 		end
 	end
 	
 	def match_tester_wildcard(o)
 		match o do
-			with(1)	{ 1 }
-			with(2)	{ 2 }
-			with(n)	{ n }
+			with(1) { 1 }
+			with(2) { 2 }
+			with(n) { n }
 		end
 	end
 	
