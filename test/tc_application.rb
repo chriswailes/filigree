@@ -31,11 +31,11 @@ class ApplicationTester < Minitest::Test
 			end
 		end
 		
-		def kill;		end
-		def pause;	end
-		def resume;	end
-		def run;		end
-		def stop;		end
+		def kill;   end
+		def pause;  end
+		def resume; end
+		def run;    end
+		def stop;   end
 	end
 	
 	def setup

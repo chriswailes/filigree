@@ -1,6 +1,5 @@
 Features:
 * Switch to using refinements once Ruby 2.1 is more common.
-* Finish implementing the Application class.
 * Add documentation
 
 Bugs:
