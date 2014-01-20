@@ -24,26 +24,26 @@ class MatchTester < Minitest::Test
 	####################
 	
 	class Foo
-		extend Deconstructable
+		extend Destructurable
 		
 		def initialize(a)
 			@a = a
 		end
 		
-		def deconstruct(_)
+		def destructure(_)
 			[@a]
 		end
 	end
 	
 	class Bar
-		extend Deconstructable
+		extend Destructurable
 		
 		def initialize(a, b)
 			@a = a
 			@b = b
 		end
 		
-		def deconstruct(_)
+		def destructure(_)
 			[@a, @b]
 		end
 	end
@@ -56,7 +56,7 @@ class MatchTester < Minitest::Test
 	# Helpers #
 	###########
 	
-	def match_tester_deconstructor(o)
+	def match_tester_destructure(o)
 		match o do
 			with(Foo.( 1))			{ :one }
 			with(Foo.(:a))			{ :a   }
@@ -143,7 +143,7 @@ class MatchTester < Minitest::Test
 		v0 = Foo.new(:dog)
 		v1 = Foo.new(v0)
 		
-		assert_equal([:dog, v0], match_tester_deconstructor(v1))
+		assert_equal([:dog, v0], match_tester_destructure(v1))
 	end
 	
 	def test_constants
@@ -159,12 +159,12 @@ class MatchTester < Minitest::Test
 	end
 	
 	def test_deconstructor
-		assert_equal :one, match_tester_deconstructor(Foo.new(   1))
-		assert_equal :a,   match_tester_deconstructor(Foo.new(  :a))
-		assert_equal 42.0, match_tester_deconstructor(Foo.new(42.0))
+		assert_equal :one, match_tester_destructure(Foo.new(   1))
+		assert_equal :a,   match_tester_destructure(Foo.new(  :a))
+		assert_equal 42.0, match_tester_destructure(Foo.new(42.0))
 		
-		assert_equal :b,   match_tester_deconstructor(Foo.new(Foo.new(:b)))
-		assert_equal 42,   match_tester_deconstructor(Bar.new(42, nil))
+		assert_equal :b,   match_tester_destructure(Foo.new(Foo.new(:b)))
+		assert_equal 42,   match_tester_destructure(Bar.new(42, nil))
 	end
 	
 	def test_deferred_block
