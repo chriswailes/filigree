@@ -7,84 +7,60 @@
 # Requires #
 ############
 
-# Project
+# Filigree
+require File.expand_path("../lib/filigree/request_file", __FILE__)
 require File.expand_path("../lib/filigree/version", __FILE__)
 
 ###########
 # Bundler #
 ###########
 
-begin
-	require 'bundler'
-	
+request_file('bundler', 'Bundler is not installed.') do
 	Bundler::GemHelper.install_tasks
-	
-rescue LoadError
-	warn "Bundler isn't installed. `gem install bundler` to bundle."
 end
 
 ############
 # MiniTest #
 ############
 
-begin
-	require 'rake/testtask'
-	
+request_file('rake/testtask', 'Minitest is not installed.') do
 	Rake::TestTask.new do |t|
 		t.libs << 'test'
 		t.test_files = FileList['test/ts_filigree.rb']
 	end
-rescue LoadError
-	warn "Minitest isn't installed. `gem install minitest` to test."
 end
 
 #########
 # Notes #
 #########
 
-begin
-	require 'rake/notes/rake_task'
-rescue LoadError
-	warn "Rake-notes isn't installed."
-end
+request_file('rake/notes/rake_task', 'Rake-notes is not installed.')
 
 ########
 # Reek #
 ########
 
-begin
-	require 'reek/rake/task'
-
+request_file('reek/rake/task', 'Reek is not installed.') do
 	Reek::Rake::Task.new do |t|
 	  t.fail_on_error = false
 	end
-	
-rescue LoadError
-	warn "Reek ins't installed.  `gem install reek` to smell."
 end
 
 ##################
 # Rubygems Tasks #
 ##################
 
-begin
-	require 'rubygems/tasks'
-	
+request_file('rubygems/tasks', 'Rubygems-tasks is not installed.') do
 	Gem::Tasks.new do |t|
 		t.console.command = 'pry'
 	end
-	
-rescue LoadError
-	warn "rubygems-tasks isn't installed."
 end
 
 ########
 # YARD #
 ########
 
-begin
-	require 'yard'
-
+request_file('yard', 'Yard is not installed.') do
 	YARD::Rake::YardocTask.new do |t|
 		t.options	= [
 			'--title',	'Filigree',
@@ -96,7 +72,4 @@ begin
 		
 		t.files	= Dir['lib/**/*.rb']
 	end
-	
-rescue LoadError
-	warn "Yard isn't installed. `gem install yard` to build documentation."
 end
