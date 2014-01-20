@@ -19,6 +19,32 @@ request_file('bundler', 'Bundler is not installed.') do
 	Bundler::GemHelper.install_tasks
 end
 
+########
+# Flay #
+########
+
+request_file('flay', 'Flay is not installed.') do
+	desc 'Analyze code for similarities with Flay'
+	task :flay do
+		flay = Flay.new
+		flay.process(*Dir['lib/**/*.rb'])
+		flay.report
+	end
+end
+
+########
+# Flog #
+########
+
+request_file('flog_cli', 'Flog is not installed.') do
+	desc 'Analyze code complexity with Flog'
+	task :flog do
+		whip = FlogCLI.new
+		whip.flog('lib')
+		whip.report
+	end
+end
+
 ############
 # MiniTest #
 ############
