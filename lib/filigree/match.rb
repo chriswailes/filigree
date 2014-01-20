@@ -42,6 +42,10 @@ module Destructurable
 end
 
 class MatchEnvironment
+	def Bind(name)
+		MatchBinding.new(name)
+	end
+
 	def initialize
 		@patterns = Array.new
 		@deferred = Array.new
@@ -191,3 +195,26 @@ class Array
 	end
 end
 
+class Fixnum
+	extend Destructurable
+	
+	def destructure(_)
+		[self]
+	end
+end
+
+class Float
+	extend Destructurable
+	
+	def destructure(_)
+		[self]
+	end
+end
+
+class String
+	extend Destructurable
+	
+	def destructure(_)
+		[self]
+	end
+end

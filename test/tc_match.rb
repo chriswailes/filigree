@@ -86,6 +86,14 @@ class MatchTester < Minitest::Test
 		end
 	end
 	
+	def match_tester_manual_bind(o)
+		match o do
+			with(Fixnum.(Bind(:a))) { [:Fix,    a] }
+			with(Float.(Bind(:a)))  { [:Float,  a] }
+			with(String.(Bind(:a))) { [:String, a] }
+		end
+	end
+	
 	def match_tester_mixed(o)
 		match o do
 			with('hello')	{ :hello0 }
@@ -179,6 +187,12 @@ class MatchTester < Minitest::Test
 		assert_equal :NEG,  match_tester_guard(-5)
 		assert_equal :ZERO, match_tester_guard(0)
 		assert_equal :POS,  match_tester_guard(6)
+	end
+	
+	def test_manual_bind
+		assert_equal [:Fix, 42],       match_tester_manual_bind(42)
+		assert_equal [:Float, 42.0],   match_tester_manual_bind(42.0)
+		assert_equal [:String, 'foo'], match_tester_manual_bind('foo')
 	end
 	
 	def test_match_array
