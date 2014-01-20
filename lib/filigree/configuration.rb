@@ -36,8 +36,8 @@ module Filigree::Configuration
 		require 'yaml'
 		
 		vals =
-		if fields.empty? then self.class.options_long.keys else fields end.inject(Hash.new) do |h, f|
-			h.tap { h[f.to_s] = self.send(f) }
+		if fields.empty? then self.class.options_long.keys else fields end.inject(Hash.new) do |hash, field|
+			hash.tap { hash[field.to_s] = self.send(field) }
 		end
 		
 		case io
@@ -45,7 +45,7 @@ module Filigree::Configuration
 			YAML.dump vals
 			
 		when String
-			File.open(io, 'w') { |f| YAML.dump vals, f }
+			File.open(io, 'w') { |file| YAML.dump vals, file }
 			
 		when IO
 			YAML.dump vals, io
@@ -93,22 +93,12 @@ module Filigree::Configuration
 			break if str == '--'
 		
 			if option = find_option(str)
-				args =
-				if option.arity == -1
-					argv.shift (argv.index { |s| s[0,1] == '-'})
-				else
-					argv.shift option.arity
-				end
+				args = argv.shift(option.arity == -1 ? argv.index { |str| str[0,1] == '-' } : option.arity)
 			
 				case option.handler
 				when Array
 					tmp = args.zip(option.handler).map { |arg, sym| arg.send sym }
-				
-					if option.arity == 1 and tmp.length == 1
-						self.send("#{option.long}=", tmp.first)
-					else
-						self.send("#{option.long}=", tmp)
-					end
+					self.send("#{option.long}=", (option.arity == 1 and tmp.length == 1) ? tmp.first : tmp)
 				
 				when Proc
 					self.send("#{option.long}=", option.handler.call(*args))
@@ -218,7 +208,7 @@ module Filigree::Configuration
 					help 'Prints this help message.'
 					option 'help', 'h' do
 						option_names	= @options_long.keys.sort
-						max_length	= option_names.inject(0) { |m, s| if m <= s.length then s.length else m end }
+						max_length	= option_names.inject(0) { |max, str| if m <= s.length then s.length else m end }
 						segment_indent	= max_length + 3
 			
 						puts "Usage: #{@usage}"

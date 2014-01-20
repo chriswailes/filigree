@@ -70,8 +70,8 @@ module Filigree::Application
 	
 	module ClassMethods
 		def finalize
-			REQUIRED_METHODS.each do |m|
-				raise(NoMethodError, "Application missing method: #{m}") if not self.instance_methods.include?(m)
+			REQUIRED_METHODS.each do |method|
+				raise(NoMethodError, "Application missing method: #{method}") if not self.instance_methods.include?(method)
 			end
 		end
 	end

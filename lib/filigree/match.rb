@@ -69,7 +69,7 @@ class MatchEnvironment
 		@patterns << (mp = MatchPattern.new(pattern, guard, block))
 		
 		if block
-			@deferred.each { |p| p.block = block }
+			@deferred.each { |pattern| pattern.block = block }
 			@deferred.clear
 			
 		else
@@ -128,6 +128,7 @@ class BasicPattern
 			object == pattern
 		end
 	end
+	private :match_prime
 end
 
 class DestructuringPattern < BasicPattern
@@ -154,7 +155,7 @@ class MatchPattern < BasicPattern
 		@block = block
 	end
 	
-	def call(env, objects)
+	def call(env, _)
 		if @block then env.instance_exec(&@block) else nil end
 	end
 	
