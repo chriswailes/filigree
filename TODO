@@ -6,6 +6,7 @@
 # Features #
 ############
 
+* Switch to using refinements once Ruby 2.1 is more common.
 * Finish the Commands module.
 * Pull visitor.rb from RLTK, make it feature complete, and implement the traditional visitor pattern.
 	* Add support for arrays of objects.  This should support matching (e.g. `on [:fib, Integer]` or `on [Integer, String]`. (visitor.rb)

@@ -11,14 +11,7 @@
 
 # Filigree
 require 'filigree/class_methods_module'
-
-##########
-# Errors #
-##########
-
-###########
-# Methods #
-###########
+require 'filigree/string'
 
 #######################
 # Classes and Modules #
@@ -43,9 +36,8 @@ module Filigree::Configuration
 		require 'yaml'
 		
 		vals =
-		if fields.empty? then self.class.options_long.keys else fields end.inject(Hash.new) do |h, f|
-			h[f.to_s] = self.send(f)
-			h
+		if fields.empty? then self.class.options_long.keys else fields end.inject(Hash.new) do |hash, field|
+			hash.tap { hash[field.to_s] = self.send(field) }
 		end
 		
 		case io
@@ -53,7 +45,7 @@ module Filigree::Configuration
 			YAML.dump vals
 			
 		when String
-			File.open(io, 'w') { |f| YAML.dump vals, f }
+			File.open(io, 'w') { |file| YAML.dump vals, file }
 			
 		when IO
 			YAML.dump vals, io
@@ -63,80 +55,26 @@ module Filigree::Configuration
 	
 	
 	def initialize(overloaded = ARGV.clone)
-		set = self.class.options_long.keys.inject(Hash.new) { |h, option| h[option] = false; h }
+		set_opts = Array.new
 		
 		case overloaded
 		when Array
-			# Process the command line.
-			argv = overloaded
-			
-			while str = argv.shift
-			
-				break if str == '--'
-			
-				if option = find_option(str)
-					args =
-					if option.arity == -1
-						argv.shift (argv.index { |s| s[0,1] == '-'})
-					else
-						argv.shift option.arity
-					end
-				
-					case option.handler
-					when Array
-						tmp = args.zip(option.handler).map { |s, sym| s.send sym }
-					
-						if option.arity == 1 and tmp.length == 1
-							self.send("#{option.long}=", tmp.first)
-						else
-							self.send("#{option.long}=", tmp)
-						end
-					
-					when Proc
-						self.send("#{option.long}=", option.handler.call(*args))
-					end
-				
-					set[option.long] = true
-				end
-			end
-			
-			# Save the rest of the command line for later.
-			self.rest = argv
+			handle_array_options(overloaded, set_opts)
 			
 		when String, IO
-			options =
-			if overloaded.is_a? String
-				if File.exists? overloaded
-					YAML.load_file overloaded
-				else
-					YAML.load overloaded
-				end
-			else
-				YAML.load overloaded
-			end
-			
-			options.each do |option, val|
-				set[option] = true
-				self.send "#{option}=", val
-			end
+			handle_serialized_options(overloaded, set_opts)
 		end
 		
-		# Set defaults.
-		set.each do |name, is_set|
-			if not is_set
-				default = self.class.options_long[name].default
+		(self.class.options_long.keys - set_opts).each do |opt_name|
+			default = self.class.options_long[opt_name].default
+			default = self.instance_exec(&default) if default.is_a? Proc
 			
-				default = self.instance_exec &default if default.is_a? Proc
-				
-				self.send("#{name}=", default)
-			end
+			self.send("#{opt_name}=", default)
 		end
 		
 		# Check to make sure all the required options are set.
 		self.class.required_options.each do |option|
-			if self.send(option).nil?
-				raise ArgumentError, "Option #{option} not set."
-			end
+			raise ArgumentError, "Option #{option} not set." if self.send(option).nil?
 		end
 	end
 	
@@ -146,6 +84,49 @@ module Filigree::Configuration
 			
 		elsif str[0,1] == '-'
 			self.class.options_short[str[1..-1]]
+		end
+	end
+	
+	def handle_array_options(argv, set_opts)
+		while str = argv.shift
+		
+			break if str == '--'
+		
+			if option = find_option(str)
+				args = argv.shift(option.arity == -1 ? argv.index { |str| str[0,1] == '-' } : option.arity)
+			
+				case option.handler
+				when Array
+					tmp = args.zip(option.handler).map { |arg, sym| arg.send sym }
+					self.send("#{option.long}=", (option.arity == 1 and tmp.length == 1) ? tmp.first : tmp)
+				
+				when Proc
+					self.send("#{option.long}=", option.handler.call(*args))
+				end
+			
+				set_opts << option.long
+			end
+		end
+		
+		# Save the rest of the command line for later.
+		self.rest = argv
+	end
+	
+	def handle_serialized_options(overloaded, set_opts)
+		options =
+		if overloaded.is_a? String
+			if File.exists? overloaded
+				YAML.load_file overloaded
+			else
+				YAML.load overloaded
+			end
+		else
+			YAML.load overloaded
+		end
+		
+		options.each do |option, val|
+			set_opts << option
+			self.send "#{option}=", val
 		end
 	end
 	
@@ -207,28 +188,6 @@ module Filigree::Configuration
 			@required
 		end
 		
-		def segment(str, indent, max_length = 80)
-			lines = Array.new
-			line  = ''
-			
-			str.split(/\s/).each do |word|
-				new_length  = line.length + word.length + indent + 1
-				
-				if new_length < max_length
-					line += ' ' if line.length != 0
-					line += word
-					
-				else
-					lines << line
-					line = word
-				end
-			end
-			
-			lines << line if not line.empty?
-			
-			lines.join("\n\t" + (' ' * indent))
-		end
-		
 		def usage(str)
 			@usage = str
 		end
@@ -249,7 +208,7 @@ module Filigree::Configuration
 					help 'Prints this help message.'
 					option 'help', 'h' do
 						option_names	= @options_long.keys.sort
-						max_length	= option_names.inject(0) { |m, s| if m <= s.length then s.length else m end }
+						max_length	= option_names.inject(0) { |max, str| if m <= s.length then s.length else m end }
 						segment_indent	= max_length + 3
 			
 						puts "Usage: #{@usage}"
@@ -257,7 +216,7 @@ module Filigree::Configuration
 						puts 'Options:'
 			
 						option_names.each do |name|
-							printf "\t% #{max_length}s - %s\n", name, segment(@options_long[name].help, segment_indent)
+							printf "\t% #{max_length}s - %s\n", name, @options_long[name].help.segment(segment_indent)
 						end
 			
 						# Quit the application after printing the help message.

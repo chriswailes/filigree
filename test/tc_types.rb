@@ -7,8 +7,8 @@
 # Requires #
 ############
 
-# Standard Library
-require 'test/unit'
+# Gems
+require 'minitest/autorun'
 
 # Filigree
 require 'filigree/types'
@@ -17,15 +17,19 @@ require 'filigree/types'
 # Classes and Modules #
 #######################
 
-class TypeTester < Test::Unit::TestCase
+class TypeTester < Minitest::Test
 	
 	class Foo
+		include TypedClass
+		
 		typed_ivar :foo, Integer
 		typed_ivar :bar, String
 		typed_ivar :baf, [Integer]
 	end
 	
 	class Bar
+		include TypedClass
+		
 		typed_ivar :foo, Integer
 		typed_ivar :bar, String
 		
@@ -33,6 +37,8 @@ class TypeTester < Test::Unit::TestCase
 	end
 	
 	class Baf
+		include TypedClass
+		
 		typed_ivar :foo, Integer
 		typed_ivar :bar, String, true
 		
@@ -40,6 +46,8 @@ class TypeTester < Test::Unit::TestCase
 	end
 	
 	class Baz
+		include TypedClass
+		
 		typed_ivar :foo, Integer
 		typed_ivar :bar, String
 		
@@ -59,8 +67,8 @@ class TypeTester < Test::Unit::TestCase
 		assert check_type(nil, Fixnum, nil, true, true).nil?
 		assert check_type(1, Integer)
 		
-		assert_raise(TypeError) { check_type(1, Integer, nil, false, true) }
-		assert_raise(TypeError) { check_type(1, Array) }
+		assert_raises(TypeError) { check_type(1, Integer, nil, false, true) }
+		assert_raises(TypeError) { check_type(1, Array) }
 	end
 	
 	def test_check_array_type
@@ -68,8 +76,9 @@ class TypeTester < Test::Unit::TestCase
 		assert check_array_type([1, 2, 3], Fixnum, nil, true)
 		assert check_array_type([1, 2, 3], Integer)
 		
-		assert_raise(TypeError) { check_array_type([1, 2, 3], Integer, nil, false, true) }
-		assert_raise(TypeError) { check_array_type([1, :hello, 'world'], Fixnum) }
+		assert_raises(TypeError) { check_array_type([1, 2, 3], Integer, nil, false, true) }
+		assert_raises(TypeError) { check_array_type([1, :hello, 'world'], Fixnum) }
+		assert_raises(TypeError) { check_array_type([1, 2, 3], Float, 'foo') }
 	end
 	
 	def test_default_constructor
@@ -83,7 +92,7 @@ class TypeTester < Test::Unit::TestCase
 		assert_equal 2, v1.foo
 		assert_nil v1.bar
 		
-		assert_raise(ArgumentError) { Baz.new(3) }
+		assert_raises(ArgumentError) { Baz.new(3) }
 		
 		v2 = Baz.new(2, 'world')
 		
@@ -102,6 +111,6 @@ class TypeTester < Test::Unit::TestCase
 		assert_equal 'hello', v0.bar
 		assert_equal [1,2,3], v0.baf
 		
-		assert_raise(TypeError) { v0.foo = 'world' }
+		assert_raises(TypeError) { v0.foo = 'world' }
 	end
 end

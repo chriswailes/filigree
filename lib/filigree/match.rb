@@ -35,13 +35,17 @@ end
 # Classes and Modules #
 #######################
 
-module Deconstructable
+module Destructurable
 	def call(*pattern)
-		DeconstructionPattern.new(self, pattern)
+		DestructuringPattern.new(self, pattern)
 	end
 end
 
 class MatchEnvironment
+	def Bind(name)
+		MatchBinding.new(name)
+	end
+
 	def initialize
 		@patterns = Array.new
 		@deferred = Array.new
@@ -65,7 +69,7 @@ class MatchEnvironment
 		@patterns << (mp = MatchPattern.new(pattern, guard, block))
 		
 		if block
-			@deferred.each { |p| p.block = block }
+			@deferred.each { |pattern| pattern.block = block }
 			@deferred.clear
 			
 		else
@@ -117,16 +121,17 @@ class BasicPattern
 		when Regexp
 			object.is_a?(String) and pattern.match(object)
 			
-		when DeconstructionPattern, MatchBinding
+		when DestructuringPattern, MatchBinding
 			pattern.match?(object, env)
 			 
 		else
 			object == pattern
 		end
 	end
+	private :match_prime
 end
 
-class DeconstructionPattern < BasicPattern
+class DestructuringPattern < BasicPattern
 	attr_reader :klass
 	
 	def initialize(klass, pattern)
@@ -136,7 +141,7 @@ class DeconstructionPattern < BasicPattern
 	end
 	
 	def match?(object, env)
-		object.is_a?(@klass) and object.respond_to?(:deconstruct) and super(object.deconstruct(@pattern.length), env)
+		object.is_a?(@klass) and object.class.is_a?(Destructurable) and super(object.destructure(@pattern.length), env)
 	end
 end
 
@@ -150,7 +155,7 @@ class MatchPattern < BasicPattern
 		@block = block
 	end
 	
-	def call(env, objects)
+	def call(env, _)
 		if @block then env.instance_exec(&@block) else nil end
 	end
 	
@@ -184,10 +189,33 @@ end
 ###################################
 
 class Array
-	extend Deconstructable
+	extend Destructurable
 	
-	def deconstruct(num_names)
+	def destructure(num_names)
 		[*self.first(num_names - 1), self[(num_names - 1)..-1]]
 	end
 end
 
+class Fixnum
+	extend Destructurable
+	
+	def destructure(_)
+		[self]
+	end
+end
+
+class Float
+	extend Destructurable
+	
+	def destructure(_)
+		[self]
+	end
+end
+
+class String
+	extend Destructurable
+	
+	def destructure(_)
+		[self]
+	end
+end

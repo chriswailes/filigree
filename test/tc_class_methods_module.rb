@@ -7,8 +7,8 @@
 # Requires #
 ############
 
-# Standard Library
-require 'test/unit'
+# Gems
+require 'minitest/autorun'
 
 # Filigree
 require 'filigree/class_methods_module'
@@ -17,7 +17,7 @@ require 'filigree/class_methods_module'
 # Classes and Modules #
 #######################
 
-class ClassMethodsModuleTester < Test::Unit::TestCase
+class ClassMethodsModuleTester < Minitest::Test
 	module Foo
 		include ClassMethodsModule
 		

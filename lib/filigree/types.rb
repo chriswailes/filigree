@@ -10,12 +10,7 @@
 # Standard Library
 
 # Filigree
-
-##########
-# Errors #
-##########
-
-#class TypeError < RuntimeError; end
+require 'filigree/class_methods_module'
 
 ###########
 # Methods #
@@ -23,45 +18,45 @@
 
 # A method for type checking Ruby values.
 #
-# @param [Object]		o		Object to type check.
-# @param [Class]		type		Class the object should be an instance of.
-# @param [String, nil]	blame	Variable name to blame for failed type checks.
-# @param [Boolean]		nillable	Object can be nil?
-# @param [Boolean]		strict	Strict or non-strict checking.  Uses `instance_of?` and `is_a?` respectively.
+# @param [Object]       obj       Object to type check.
+# @param [Class]        type      Class the object should be an instance of.
+# @param [String, nil]  blame     Variable name to blame for failed type checks.
+# @param [Boolean]      nillable  Object can be nil?
+# @param [Boolean]      strict    Strict or non-strict checking.  Uses `instance_of?` and `is_a?` respectively.
 #
 # @raise [ArgumentError] An error is raise if the type checking fails.
 #
 # @return [Object] The object passed as parameter o.
-def check_type(o, type, blame = nil, nillable = false, strict = false)
-	type_ok = if strict then o.instance_of?(type) else o.is_a?(type) end || (o.nil? and nillable)	
+def check_type(obj, type, blame = nil, nillable = false, strict = false)
+	type_ok = if strict then obj.instance_of?(type) else obj.is_a?(type) end || (obj.nil? and nillable)	
 	
 	if type_ok
-		o
+		obj
 	else
 		if blame
 			raise TypeError,
-				"Parameter #{blame} must be an instance of the #{type.name} class.  Received an instance of #{o.class.name}."
+				"Parameter #{blame} must be an instance of the #{type.name} class.  Received an instance of #{obj.class.name}."
 		else
 			raise TypeError,
-				"Expected an object of type #{type.name}.  Received an instance of #{o.class.name}."
+				"Expected an object of type #{type.name}.  Received an instance of #{obj.class.name}."
 		end
 	end
 end
 
 # A method for type checking Ruby array values.
 #
-# @param [Array<Object>]	array	Array of objects to type check.
-# @param [Class]		type		Class the objects should be an instance of.
-# @param [String, nil]	blame	Variable name to blame for failed type checks.
-# @param [Boolean]		nillable	Object can be nil?
-# @param [Boolean]		strict	Strict or non-strict checking.  Uses `instance_of?` and `is_a?` respectively.
+# @param [Array<Object>]  array     Array of objects to type check.
+# @param [Class]          type      Class the objects should be an instance of.
+# @param [String, nil]    blame     Variable name to blame for failed type checks.
+# @param [Boolean]        nillable  Object can be nil?
+# @param [Boolean]        strict    Strict or non-strict checking.  Uses `instance_of?` and `is_a?` respectively.
 #
 # @raise [ArgumentError] An error is raise if the type checking fails.
 #
 # @return [Object] The object passed in parameter o.
 def check_array_type(array, type, blame = nil, nillable = false, strict = false)
-	array.each do |o|
-		type_ok = if strict then o.instance_of?(type) else o.is_a?(type) end || (o.nil? and nillable)
+	array.each do |obj|
+		type_ok = if strict then obj.instance_of?(type) else obj.is_a?(type) end || (obj.nil? and nillable)
 		
 		if not type_ok
 			if blame
@@ -77,48 +72,54 @@ end
 # Classes and Modules #
 #######################
 
-class Class
-	def default_constructor(strict = false)
-		class_eval do
-			if strict
-				def initialize(*vals)
-					if self.class.typed_ivars.length != vals.length
-						raise ArgumentError, "#{self.class.typed_ivars.length} arguments expected, #{vals.length} given."
-					end
+module TypedClass
+	include ClassMethodsModule
+	
+	def set_typed_ivars(vals)
+		self.class.typed_ivars.zip(vals).each do |name, val|
+			self.send("#{name}=", val)
+		end
+	end
+	
+	module ClassMethods
+		def default_constructor(strict = false)
+			class_eval do
+				if strict
+					def initialize(*vals)
+						if self.class.typed_ivars.length != vals.length
+							raise ArgumentError, "#{self.class.typed_ivars.length} arguments expected, #{vals.length} given."
+						end
 				
-					self.class.typed_ivars.zip(vals).each do |name, val|
-						self.send("#{name}=".to_sym, val)
+						self.set_typed_ivars(vals)
 					end
-				end
-			else
-				def initialize(*vals)
-					self.class.typed_ivars.zip(vals).each do |name, val|
-						self.send("#{name}=".to_sym, val)
+				else
+					def initialize(*vals)
+						self.set_typed_ivars(vals)
 					end
 				end
 			end
 		end
-	end
-	
-	def typed_ivar(name, type, nillable = false, strict = false)
-		typed_ivars << name
 		
-		if type.is_a?(Array)
-			define_method "#{name}=".to_sym do |o|
-				self.instance_variable_set("@#{name}".to_sym, check_array_type(o, type.first, name, nillable, strict))  
+		def define_typed_accessor(name, nillable, strict, type, checker)
+			define_method "#{name}=" do |obj|
+				self.instance_variable_set("@#{name}", checker.call(obj, type, name, nillable, strict))
 			end
+		end
+		private :define_typed_accessor
+		
+		def typed_ivar(name, type, nillable = false, strict = false)
+			typed_ivars << name
 			
-		else
-			define_method "#{name}=".to_sym do |o|
-				self.instance_variable_set("@#{name}".to_sym, check_type(o, type, name, nillable, strict))
-			end
-		end
+			define_typed_accessor(name, nillable, strict, *
+				type.is_a?(Array) ? [type.first, method(:check_array_type)] : [type, method(:check_type)]
+			)
 		
-		attr_reader name
-	end
+			attr_reader name
+		end
 	
-	def typed_ivars
-		@typed_ivars ||= Array.new
+		def typed_ivars
+			@typed_ivars ||= Array.new
+		end
 	end
 end
 

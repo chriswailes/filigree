@@ -7,8 +7,8 @@
 # Requires #
 ############
 
-# Standard Library
-require 'test/unit'
+# Gems
+require 'minitest/autorun'
 
 # Filigree
 require 'filigree/abstract_class'
@@ -17,7 +17,7 @@ require 'filigree/abstract_class'
 # Classes and Modules #
 #######################
 
-class AbstractClassTester < Test::Unit::TestCase
+class AbstractClassTester < Minitest::Test
 	class Foo
 		extend AbstractClass
 		
@@ -37,27 +37,27 @@ class AbstractClassTester < Test::Unit::TestCase
 	end
 	
 	def test_abstract_method
-		assert_raise(AbstractMethodError) { Bar.new.foo }
+		assert_raises(AbstractMethodError) { Bar.new.foo }
 		
-		assert_nothing_raised { Bam.new.foo }
+		Bam.new.foo
 	end
 	
 	def test_instantiate_abstract_class
-		assert_raise(AbstractClassError) { Foo.new }
+		assert_raises(AbstractClassError) { Foo.new }
 	end
 	
 	def test_instantiate_subclass
-		assert_nothing_raised { Bar.new }
+		Bar.new 
 	end
 	
 	def test_multiple_hierarchies
 		baf = Class.new { extend AbstractClass }
 		baz = Class.new(baf)
 		
-		assert_raise(AbstractClassError) { Foo.new }
-		assert_raise(AbstractClassError) { baf.new }
+		assert_raises(AbstractClassError) { Foo.new }
+		assert_raises(AbstractClassError) { baf.new }
 		
-		assert_nothing_raised { Bar.new }
-		assert_nothing_raised { baz.new }
+		Bar.new
+		baz.new
 	end
 end

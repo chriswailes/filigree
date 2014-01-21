@@ -50,18 +50,18 @@ module Filigree::Application
 	alias :config :configuration
 	
 	def initialize
-		@configuration = self.class::Configuration.new(ARGV)
+		@configuration = self.class::Configuration.new
 		
 		# Set up signal handlers.
-		Signal.trap('ABRT')	{ self.stop }
-		Signal.trap('INT')	{ self.stop }
-		Signal.trap('QUIT')	{ self.stop }
-		Signal.trap('TERM')	{ self.stop }
+		Signal.trap('ABRT') { self.stop }
+		Signal.trap('INT')  { self.stop }
+		Signal.trap('QUIT') { self.stop }
+		Signal.trap('TERM') { self.stop }
 		
-		Signal.trap('KILL')	{ self.kill }
+		Signal.trap('KILL') { self.kill }
 		
-		Signal.trap('CONT')	{ self.resume }
-		Signal.trap('STOP')	{ self.pause  }
+		Signal.trap('CONT') { self.resume }
+		Signal.trap('STOP') { self.pause  }
 	end
 	
 	#################
@@ -70,25 +70,26 @@ module Filigree::Application
 	
 	module ClassMethods
 		def finalize
-			REQUIRED_METHODS.each do |m|
-				raise(NoMethodError, "Application missing method: #{m}") if not self.instance_methods.include?(m)
+			REQUIRED_METHODS.each do |method|
+				raise(NoMethodError, "Application #{self.name} missing method: #{method}") if not self.instance_methods.include?(method)
 			end
+		end
+		
+		def run
+			self.new.run
 		end
 	end
 	
 	#############
 	# Callbacks #
 	#############
-	
+   
 	class << self
 		alias :old_included :included
-		
+
 		def included(klass)
 			old_included(klass)
-			
-			klass.const_set(:Configuration, Class.new do
-				include Filigree::Configuration
-			end)
+			klass.const_set(:Configuration, Class.new { include Filigree::Configuration })
 		end
 	end
 end

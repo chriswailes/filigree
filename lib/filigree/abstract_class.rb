@@ -48,12 +48,8 @@ module AbstractClass
 	# Instance Methods #
 	####################
 	
-	def abstract_class
-		@abstract_class
-	end
-	
 	def abstract_method(name)
-		abstract_class_name = @abstract_class
+		abstract_class_name = @abstract_class.name
 		
 		define_method name do
 			raise AbstractMethodError.new name, abstract_class_name
@@ -68,7 +64,7 @@ module AbstractClass
 		if @abstract_class == self
 			raise AbstractClassError, self.name
 		else
-			super
+			super(*args)
 		end
 	end
 end
