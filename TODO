@@ -1,0 +1,18 @@
+########
+# Bugs #
+########
+
+############
+# Features #
+############
+
+* Finish the Commands module.
+* Pull visitor.rb from RLTK, make it feature complete, and implement the traditional visitor pattern.
+	* Add support for arrays of objects.  This should support matching (e.g. `on [:fib, Integer]` or `on [Integer, String]`. (visitor.rb)
+	* Allow blocks to be passed to the `on` clauses of the Visitor class. (visitor.rb)
+	* Support matching literals. (visitor.rb) 
+* Complete documentation.
+
+###############
+# Crazy Ideas #
+###############
