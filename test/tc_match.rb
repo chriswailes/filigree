@@ -121,7 +121,7 @@ class MatchTester < Test::Unit::TestCase
 	def match_tester_tuple_wildcard(*touple)
 		match *touple do
 			with(1)
-			with(2,3)		{ :DEF }
+			with(2, 3)	{ :DEF }
 			with(4, _)	{ :PART_WILD }
 			with(_)		{ :WILD }
 		end
