@@ -8,7 +8,7 @@
 ############
 
 # Standard Library
-require 'test/unit'
+require 'minitest/autorun'
 
 # Filigree
 require 'filigree/commands'
@@ -17,7 +17,7 @@ require 'filigree/commands'
 # Classes and Modules #
 #######################
 
-class ConfigurationTester < Test::Unit::TestCase
+class ConfigurationTester < Minitest::Test
 	def setup
 	
 	end

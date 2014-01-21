@@ -8,16 +8,13 @@
 # Requires #
 ############
 
-# Gems
+# Filigree
+require 'filigree/request_file'
 
-begin
-	require 'simplecov'
+request_file('simplecov', 'SimpleCov is not installed.') do
 	SimpleCov.start do
 		add_filter 'tc_*'
 	end
-	
-rescue LoadError
-	puts 'SimpleCov not installed.  Continuing without it.'
 end
 
 # Test Cases
