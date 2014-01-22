@@ -86,9 +86,17 @@ class MatchTester < Minitest::Test
 		end
 	end
 	
+	def match_tester_instance_pattern(o)
+		match o do
+			with(Instance(Fixnum, a)) { [:Fixnum, a] }
+			with(Instance(Float, a))  { [:Float,  a] }
+			with(Instance(String, a)) { [:String, a] }
+		end
+	end
+	
 	def match_tester_manual_bind(o)
 		match o do
-			with(Fixnum.(Bind(:a))) { [:Fix,    a] }
+			with(Fixnum.(Bind(:a))) { [:Fixnum, a] }
 			with(Float.(Bind(:a)))  { [:Float,  a] }
 			with(String.(Bind(:a))) { [:String, a] }
 		end
@@ -189,8 +197,14 @@ class MatchTester < Minitest::Test
 		assert_equal :POS,  match_tester_guard(6)
 	end
 	
+	def test_instance_pattern
+		assert_equal [:Fixnum, 42],    match_tester_instance_pattern(42)
+		assert_equal [:Float, 42.0],   match_tester_instance_pattern(42.0)
+		assert_equal [:String, 'foo'], match_tester_instance_pattern('foo')
+	end
+	
 	def test_manual_bind
-		assert_equal [:Fix, 42],       match_tester_manual_bind(42)
+		assert_equal [:Fixnum, 42],    match_tester_manual_bind(42)
 		assert_equal [:Float, 42.0],   match_tester_manual_bind(42.0)
 		assert_equal [:String, 'foo'], match_tester_manual_bind('foo')
 	end

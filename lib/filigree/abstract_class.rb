@@ -36,14 +36,6 @@ end
 # A module the implements the abstract class and abstract method patterns.
 module AbstractClass
 	
-	##################
-	# Module Methods #
-	##################
-	
-	def self.extended(klass)
-		klass.install_icvars
-	end
-	
 	####################
 	# Instance Methods #
 	####################
@@ -66,5 +58,13 @@ module AbstractClass
 		else
 			super(*args)
 		end
+	end
+	
+	#############
+	# Callbacks #
+	#############
+	
+	def self.extended(klass)
+		klass.install_icvars
 	end
 end

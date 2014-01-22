@@ -12,6 +12,7 @@ require 'ostruct'
 require 'singleton'
 
 # Filigree
+require 'filigree/abstract_class'
 
 ##########
 # Errors #
@@ -44,6 +45,10 @@ end
 class MatchEnvironment
 	def Bind(name)
 		MatchBinding.new(name)
+	end
+	
+	def Instance(klass, pattern = Wildcard.instance)
+		InstancePattern.new(klass, [pattern])
 	end
 
 	def initialize
@@ -121,7 +126,7 @@ class BasicPattern
 		when Regexp
 			object.is_a?(String) and pattern.match(object)
 			
-		when DestructuringPattern, MatchBinding
+		when ClassPattern, MatchBinding
 			pattern.match?(object, env)
 			 
 		else
@@ -131,17 +136,25 @@ class BasicPattern
 	private :match_prime
 end
 
-class DestructuringPattern < BasicPattern
-	attr_reader :klass
+class ClassPattern < BasicPattern
+	extend AbstractClass
 	
 	def initialize(klass, pattern)
 		super(pattern)
 		
 		@klass = klass
 	end
-	
+end
+
+class InstancePattern < ClassPattern
 	def match?(object, env)
-		object.is_a?(@klass) and object.class.is_a?(Destructurable) and super(object.destructure(@pattern.length), env)
+		object.is_a?(@klass) and super([object], env)
+	end
+end
+
+class DestructuringPattern < ClassPattern
+	def match?(object, env)
+		object.is_a?(@klass) and super(object.destructure(@pattern.length), env)
 	end
 end
 
@@ -173,8 +186,8 @@ class MatchBinding
 	attr_accessor :pattern
 	
 	def initialize(name, pattern = nil)
-		@name	= name
-		@pattern	= pattern
+		@name    = name
+		@pattern = pattern
 	end
 	
 	def match?(object, env)
