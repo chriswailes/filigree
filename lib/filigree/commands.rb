@@ -46,7 +46,10 @@ module Filigree::Commands
 	
 	module CalssMethods
 		def command(str, &block)
-		
+			tokens = str.split.map(:to_sym)
+			@commands << Command.new(@help_string, @param_docs block)
+			@help_string = ''
+			@param_docs  = Array.new
 		end
 		
 		def help(str)
@@ -54,27 +57,22 @@ module Filigree::Commands
 		end
 		
 		def install_icvars
-			@commands		= Array.new
-			@help_string	= ''
+			@commands    = Hash.new
+			@help_string = ''
+			@param_docs  = Array.new
 		end
 		
-		def param
-			
+		def param(name, description)
+			@param_docs << [name, description]
 		end
-		
-		def subcommand
-		
-		end
-		
-		#############
-		# Callbacks #
-		#############
-		
-		class << self
-			def extended(klass)
-				klass.install_icvars
-			end
-		end
+	end
+	
+	#############
+	# Callbacks #
+	#############
+	
+	def self.extended(klass)
+		klass.install_icvars
 	end
 	
 	#################
@@ -90,26 +88,14 @@ module Filigree::Commands
 			end
 		end
 		
-		def initialize(name, help, action)
-			@name	= name
-			@help	= help
-			@action	= action
+		def initialize(tokens, help, action)
+			@tokens = tokens
+			@help   = help
+			@action = action
 		end
 		
 		def match?(line)
 			
-		end
-	end
-	
-	class Subcommand < Command
-		def call(*args)
-			@parent.call(*args, &@action)
-		end
-		
-		def initialize(name, help, action, parent)
-			super
-			
-			@parent = parent
 		end
 	end
 end
