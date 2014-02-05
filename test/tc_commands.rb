@@ -40,6 +40,10 @@ class CommandTester < Minitest::Test
 		command 'hello2' do
 			"hello #{subject}"
 		end
+		
+		command 'add' do |x, y|
+			x.to_i + y.to_i
+		end
 	end
 	
 	def setup
@@ -50,8 +54,9 @@ class CommandTester < Minitest::Test
 		assert_raises(CommandNotFoundError) { @commander.('bar') }
 	end
 	
-	def test_command_with_arg
+	def test_command_args
 		assert_equal 'hello world', @commander.('hello1 world')
+		assert_equal 42, @commander.('add 27 15')
 	end
 	
 	def test_command_with_wrong_args
