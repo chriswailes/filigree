@@ -101,7 +101,7 @@ module Filigree::Configuration
 					self.send("#{option.long}=", (option.arity == 1 and tmp.length == 1) ? tmp.first : tmp)
 				
 				when Proc
-					self.send("#{option.long}=", option.handler.call(*args))
+					self.send("#{option.long}=", self.instance_exec(*args, &option.handler))
 				end
 			
 				set_opts << option.long
@@ -192,8 +192,8 @@ module Filigree::Configuration
 			@required
 		end
 		
-		def usage(str)
-			@usage = str
+		def usage(str = nil)
+			if str then @usage = str else @usage end 
 		end
 		
 		#############
@@ -223,16 +223,20 @@ module Filigree::Configuration
 	#######################
 	
 	HELP_OPTION = Option.new('help', 'h', 'Prints this help message.', nil, Proc.new do
-		option_names	= @options_long.keys.sort
-		max_length	= option_names.inject(0) { |max, str| if m <= s.length then s.length else m end }
-		segment_indent	= max_length + 3
+		options_long = self.class.options_long
+		
+		option_names = options_long.keys.sort
+		max_length   = option_names.inject(0) { |max, str| if max <= str.length then str.length else max end }
+		
+		# Four for the original indent, and three for "space dash space".
+		segment_indent	= max_length + 7
 
-		puts "Usage: #{@usage}"
+		puts "Usage: #{self.class.usage}"
 		puts
 		puts 'Options:'
 
 		option_names.each do |name|
-			printf "\t% #{max_length}s - %s\n", name, @options_long[name].help.segment(segment_indent)
+			printf "    % #{max_length}s - %s\n", name, options_long[name].help.segment(segment_indent)
 		end
 
 		# Quit the application after printing the help message.

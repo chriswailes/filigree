@@ -27,7 +27,7 @@ class ConfigurationTester < Minitest::Test
 			s
 		end
 		
-		help 'This is a longer help message to test and see how the string segmentation works.  I hope it is long enough.'
+		help 'This is a longer help message to test and see how the string segmentation works. I hope it is long enough.'
 		default 42
 		option 'bar', 'b', :to_i
 		
