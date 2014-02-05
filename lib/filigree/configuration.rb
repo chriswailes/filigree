@@ -138,6 +138,11 @@ module Filigree::Configuration
 		attr_reader :options_long
 		attr_reader :options_short
 		
+		def add_option(opt)
+			@options_long[opt.long] = opt
+			@options_short[opt.short] = opt unless opt.short.nil?
+		end
+		
 		def auto(name, &block)
 			define_method(name, &block)
 		end
@@ -164,9 +169,8 @@ module Filigree::Configuration
 			
 			attr_accessor long.to_sym
 			
-			@options_long[long] = @options_short[short] =
-				Option.new(long, short, @help_string, @next_default,
-					if not conversions.empty? then conversions else block end)
+			add_option Option.new(long, short, @help_string, @next_default,
+			                      if not conversions.empty? then conversions else block end)
 			
 			@required << long.to_sym if @next_required
 			
@@ -196,34 +200,8 @@ module Filigree::Configuration
 		# Callbacks #
 		#############
 		
-		class << self
-			def extended(klass)
-				klass.install_icvars
-				
-				#######################
-				# Pre-defined Options #
-				#######################
-		
-				klass.instance_exec do
-					help 'Prints this help message.'
-					option 'help', 'h' do
-						option_names	= @options_long.keys.sort
-						max_length	= option_names.inject(0) { |max, str| if m <= s.length then s.length else m end }
-						segment_indent	= max_length + 3
-			
-						puts "Usage: #{@usage}"
-						puts
-						puts 'Options:'
-			
-						option_names.each do |name|
-							printf "\t% #{max_length}s - %s\n", name, @options_long[name].help.segment(segment_indent)
-						end
-			
-						# Quit the application after printing the help message.
-						exit
-					end
-				end
-			end
+		def self.extended(klass)
+			klass.install_icvars
 		end
 	end
 	
@@ -231,9 +209,7 @@ module Filigree::Configuration
 	# Inner Classes #
 	#################
 	
-	Option = Struct.new(:long, :short, :help, :default, :handler)
-	
-	class Option
+	class Option < Struct.new(:long, :short, :help, :default, :handler)
 		def arity
 			case self.handler
 			when Array	then self.handler.length
@@ -242,7 +218,24 @@ module Filigree::Configuration
 		end
 	end
 	
-	#############
-	# Callbacks #
-	#############
+	#######################
+	# Pre-defined Options #
+	#######################
+	
+	HELP_OPTION = Option.new('help', 'h', 'Prints this help message.', nil, Proc.new do
+		option_names	= @options_long.keys.sort
+		max_length	= option_names.inject(0) { |max, str| if m <= s.length then s.length else m end }
+		segment_indent	= max_length + 3
+
+		puts "Usage: #{@usage}"
+		puts
+		puts 'Options:'
+
+		option_names.each do |name|
+			printf "\t% #{max_length}s - %s\n", name, @options_long[name].help.segment(segment_indent)
+		end
+
+		# Quit the application after printing the help message.
+		exit
+	end)
 end
