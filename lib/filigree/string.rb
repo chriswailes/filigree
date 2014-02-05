@@ -18,23 +18,29 @@
 class String
 	def segment(indent, max_length = 80)
 		lines = Array.new
-		line  = ''
 		
-		self.split(/\s/).each do |word|
-			new_length  = line.length + word.length + indent + 1
+		words = self.split(/\s/)
+		line  = words.shift
+		
+		line_length = indent + line.length
+		
+		words.each do |word|
+			new_length = line_length + 1 + word.length
 			
 			if new_length < max_length
-				line += ' ' if line.length != 0
-				line += word
+				line       += " #{word}"
+				line_length = new_length
 				
 			else
 				lines << line
-				line = word
+				
+				line        = word
+				line_length = indent + word.length
 			end
 		end
 		
-		lines << line if not line.empty?
+		lines << line unless line.empty?
 		
-		lines.join("\n\t" + (' ' * indent))
+		lines.join("\n" + (' ' * indent))
 	end
 end
