@@ -228,6 +228,34 @@ module Filigree::Configuration
 			when Proc		then self.handler.arity 
 			end
 		end
+		
+		# Layout:
+		# |       ||--`long`,|| ||-`short`|| - |
+		# |_______||_________||_||________||___|
+		#   indent    max_l+3  1   max_s+1   3
+		def to_s(max_long, max_short, indent = 0)
+			segment_indent	= indent + max_long + max_short + 8
+			segmented_help = self.help.segment(segment_indent)
+			
+			if self.short
+				sprintf "#{' ' * indent}%-#{max_long + 3}s %-#{max_short + 1}s - %s", "--#{self.long},", '-' + self.short, segmented_help
+			else
+				sprintf "#{' ' * indent}%-#{max_long + max_short + 5}s - %s", '--' + self.long, segmented_help
+			end
+		end
+		
+		def self.to_s(options, indent = 0)
+			lines = []
+			
+			max_long  = options.inject(0) { |max, opt| max <= opt.long.length  ? opt.long.length  : max }
+			max_short = options.inject(0) { |max, opt| !opt.short.nil? && max <= opt.short.length ? opt.short.length : max }
+		
+			options.each do |opt|
+				lines << opt.to_s(max_long, max_short, indent)
+			end
+			
+			lines.join("\n")
+		end
 	end
 	
 	#######################
@@ -235,28 +263,12 @@ module Filigree::Configuration
 	#######################
 	
 	HELP_OPTION = Option.new('help', 'h', 'Prints this help message.', nil, Proc.new do
-		
-		sorted_options = self.class.options_long.values.sort { |a, b| a.long <=> b.long }
-		
-		max_long  = sorted_options.inject(0) { |max, opt| max <= opt.long.length  ? opt.long.length  : max }
-		max_short = sorted_options.inject(0) { |max, opt| !opt.short.nil? && max <= opt.short.length ? opt.short.length : max }
-		
-		# Two for the original indent, two for the comma and space, and three for "space dash space".
-		segment_indent	= max_long + max_short + 9
-
 		puts "Usage: #{self.class.usage}"
 		puts
 		puts 'Options:'
-
-		sorted_options.each do |opt|
-			segmented_help = opt.help.segment(segment_indent)
-			
-			if opt.short
-				printf "  %-#{max_long + 3}s %-#{max_short + 1}s - %s\n", "--#{opt.long},", '-' + opt.short, segmented_help
-			else
-				printf "  %-#{max_long + max_short + 5}s - %s\n", '--' + opt.long, segmented_help
-			end
-		end
+		
+		options = self.class.options_long.values.sort { |a, b| a.long <=> b.long }
+		puts Option.to_s(options, 2)
 
 		# Quit the application after printing the help message.
 		exit

@@ -10,6 +10,7 @@
 # Standard Library
 
 # Filigree
+require 'filigree/array'
 require 'filigree/class_methods_module'
 require 'filigree/configuration'
 
@@ -75,7 +76,7 @@ module Filigree::Commands
 		
 		def add_command(command_obj)
 			@command_list << command_obj
-			namespace = reify_namespace(command_obj.name_as_syms)
+			namespace = reify_namespace(command_obj.name.split.map(:to_sym))
 			namespace[:nil] = command_obj
 		end
 		
@@ -149,11 +150,7 @@ module Filigree::Commands
 	# Inner Classes #
 	#################
 	
-	class Command < Struct.new(:name, :help, :param_help, :config, :action)
-		def name_as_syms
-			self.name.split.map {|str| str.to_sym}
-		end
-	end
+	Command = Struct.new(:name, :help, :param_help, :config, :action)
 	
 	########################
 	# Pre-defined Commands #
@@ -164,6 +161,39 @@ module Filigree::Commands
 		puts
 		puts 'Commands:'
 		
-		self.class.command_list.map {|com| com.name} .each { |com| puts com.name }
+		comm_list = self.class.command_list
+		
+		sorted_comm_list = comm_list.sort { |a, b| a.name <=> b.name }
+		max_length       = comm_list.map(:name).inject(0) { |max, str| max <= str.length ? str.length : max }
+		
+		
+		sorted_comm_list.each do |comm|
+			printf "  % #{max_length}s", comm.name
+			
+			if comm.config
+				print ' [options]'
+			end
+			
+			puts comm.param_help.inject('') { |str, pair| str << " <#{pair.first}>" }
+			
+			if comm.config
+				options = comm.config.options_long.values.sort { |a, b| a.long <=> b.long }
+				puts Filigree::Configuration::Option.to_s(options, max_length + 4)
+			end
+			
+			puts
+			
+			if !comm.param_help.empty?
+				max_param_len = comm.param_help.inject(0) do |max, pair|
+					param_len = pair.first.to_s.length
+					max <=  param_len ? param_len : max
+				end
+				
+				segment_indent	= max_param_len + 8
+				comm.param_help.each do |name, help|
+					printf "     %-#{max_param_len}s - %s\n", name, help.segment(segment_indent)
+				end
+			end
+		end
 	end)
 end

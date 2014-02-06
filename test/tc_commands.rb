@@ -35,7 +35,7 @@ class CommandTester < Minitest::Test
 		
 		config do
 			default 'world'
-			option 'subject', 's', :to_s
+			option 'subject', 's', conversions: [:to_s]
 		end
 		command 'hello2' do
 			"hello #{subject}"
