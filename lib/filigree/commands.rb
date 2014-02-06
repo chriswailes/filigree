@@ -46,7 +46,23 @@ module Filigree::Commands
 			raise CommandNotFoundError, line
 		end
 		
-		namespace[:nil].(rest)
+		command = namespace[:nil]
+		
+		action = 
+		if command.config
+			conf_obj = command.config.new(rest)
+			rest     = conf_obj.rest
+			
+			-> (*args) { conf_obj.instance_exec(*args, &command.action) }
+		else
+			command.action
+		end
+		
+		if command.action.arity < 0 or command.action.arity == rest.length
+			self.instance_exec(*rest, &action)
+		else
+			raise ArgumentError, "Wrong number of arguments for command: #{command.name}."
+		end
 	end
 	
 	#################
@@ -55,13 +71,16 @@ module Filigree::Commands
 	
 	module ClassMethods
 		attr_accessor :commands
+		attr_accessor :command_list
 		
-		def add_command(str, command_obj)
-			reify_namespace(str.split.map {|str| str.to_sym})[:nil] = command_obj
+		def add_command(command_obj)
+			@command_list << command_obj
+			namespace = reify_namespace(command_obj.name_as_syms)
+			namespace[:nil] = command_obj
 		end
 		
 		def command(str, &block)
-			add_command(str, Command.new(str, @help_string, @param_docs, @config, block))
+			add_command Command.new(str, @help_string, @param_docs, @config, block)
 			
 			@help_string = ''
 			@param_docs  = Array.new
@@ -78,10 +97,11 @@ module Filigree::Commands
 		end
 		
 		def install_icvars
-			@commands    = Hash.new
-			@config      = nil
-			@help_string = ''
-			@param_docs  = Array.new
+			@commands     = Hash.new
+			@command_list = Array.new
+			@config       = nil
+			@help_string  = ''
+			@param_docs   = Array.new
 		end
 		
 		def get_namespace(tokens, root: @commands)
@@ -130,27 +150,9 @@ module Filigree::Commands
 	#################
 	
 	class Command < Struct.new(:name, :help, :param_help, :config, :action)
-		def call(args)
-			if self.config
-				conf_obj = self.config.new(args)
-				call_prime(conf_obj.rest, conf_obj)
-			else
-				call_prime(args)
-			end
+		def name_as_syms
+			self.name.split.map {|str| str.to_sym}
 		end
-		
-		def call_prime(args, context = nil)
-			if self.action.arity < 0 or self.action.arity == args.length
-				if context
-					context.instance_exec(*args, &self.action)
-				else
-					self.action.call(*args)
-				end
-			else
-				raise ArgumentError, "Wrong number of arguments for command: #{self.name}."
-			end
-		end
-		private :call_prime
 	end
 	
 	########################
@@ -158,6 +160,10 @@ module Filigree::Commands
 	########################
 	
 	HELP_COMMAND = Command.new('help', 'Prints this help message.', [], nil, Proc.new do
-		puts "HELP!"
+		puts 'Usage: <command> [options] <args>'
+		puts
+		puts 'Commands:'
+		
+		self.class.command_list.map {|com| com.name} .each { |com| puts com.name }
 	end)
 end
