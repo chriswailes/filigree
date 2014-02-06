@@ -235,20 +235,27 @@ module Filigree::Configuration
 	#######################
 	
 	HELP_OPTION = Option.new('help', 'h', 'Prints this help message.', nil, Proc.new do
-		options_long = self.class.options_long
 		
-		option_names = options_long.keys.sort
-		max_length   = option_names.inject(0) { |max, str| max <= str.length ? str.length : max }
+		sorted_options = self.class.options_long.values.sort { |a, b| a.long <=> b.long }
 		
-		# Four for the original indent, and three for "space dash space".
-		segment_indent	= max_length + 7
+		max_long  = sorted_options.inject(0) { |max, opt| max <= opt.long.length  ? opt.long.length  : max }
+		max_short = sorted_options.inject(0) { |max, opt| !opt.short.nil? && max <= opt.short.length ? opt.short.length : max }
+		
+		# Two for the original indent, two for the comma and space, and three for "space dash space".
+		segment_indent	= max_long + max_short + 9
 
 		puts "Usage: #{self.class.usage}"
 		puts
 		puts 'Options:'
 
-		option_names.each do |name|
-			printf "    % #{max_length}s - %s\n", name, options_long[name].help.segment(segment_indent)
+		sorted_options.each do |opt|
+			segmented_help = opt.help.segment(segment_indent)
+			
+			if opt.short
+				printf "  %-#{max_long + 3}s %-#{max_short + 1}s - %s\n", "--#{opt.long},", '-' + opt.short, segmented_help
+			else
+				printf "  %-#{max_long + max_short + 5}s - %s\n", '--' + opt.long, segmented_help
+			end
 		end
 
 		# Quit the application after printing the help message.

@@ -13,19 +13,17 @@ class TestConfig
 	
 	help 'Does foo.'
 	default { moo.to_s }
-	option 'foo', 'f' do |s|
-		s
-	end
+	string_option 'foo'
 	
 	help 'This is a longer help message to test and see how the string segmentation works. I hope it is long enough.'
 	default 42
-	option 'bar', 'b', :to_i
+	option 'bar', 'b', conversions: [:to_i]
 	
 	help 'Does baz.'
-	option 'baz', 'z', :to_sym, :to_sym
+	option 'baz', 'z', conversions: [:to_sym, :to_sym]
 	
 	help 'Does moo.'
-	option 'moo', 'm' do |i|
+	option 'moo', 'mo' do |i|
 		i.to_i * 6
 	end
 	
