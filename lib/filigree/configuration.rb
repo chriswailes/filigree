@@ -91,7 +91,7 @@ module Filigree::Configuration
 		while str = argv.shift
 		
 			break if str == '--'
-		
+			
 			if option = find_option(str)
 				args = argv.shift(option.arity == -1 ? argv.index { |str| str[0,1] == '-' } : option.arity)
 			
@@ -139,7 +139,7 @@ module Filigree::Configuration
 		attr_reader :options_short
 		
 		def add_option(opt)
-			@options_long[opt.long] = opt
+			@options_long[opt.long]   = opt
 			@options_short[opt.short] = opt unless opt.short.nil?
 		end
 		
@@ -147,8 +147,13 @@ module Filigree::Configuration
 			define_method(name, &block)
 		end
 		
+		def bool_option(long, short = nil)
+			@next_default = false
+			option(long, short) { true }
+		end
+		
 		def default(val = nil, &block)
-			@next_default = if block then block else val end
+			@next_default = block ? block : val
 		end
 		
 		def help(str)
@@ -165,12 +170,15 @@ module Filigree::Configuration
 			@usage		= ''
 		end
 		
-		def option(long, short, *conversions, &block)
+		def option(long, short = nil, conversions: nil, &block)
 			
 			attr_accessor long.to_sym
 			
+			long  = long.to_s
+			short = short.to_s if short
+			
 			add_option Option.new(long, short, @help_string, @next_default,
-			                      if not conversions.empty? then conversions else block end)
+			                      conversions.nil? ? block : conversions)
 			
 			@required << long.to_sym if @next_required
 			
@@ -190,6 +198,10 @@ module Filigree::Configuration
 
 		def required_options
 			@required
+		end
+		
+		def string_option(long, short = nil)
+			option(long, short) { |str| str }
 		end
 		
 		def usage(str = nil)
@@ -226,7 +238,7 @@ module Filigree::Configuration
 		options_long = self.class.options_long
 		
 		option_names = options_long.keys.sort
-		max_length   = option_names.inject(0) { |max, str| if max <= str.length then str.length else max end }
+		max_length   = option_names.inject(0) { |max, str| max <= str.length ? str.length : max }
 		
 		# Four for the original indent, and three for "space dash space".
 		segment_indent	= max_length + 7

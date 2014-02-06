@@ -23,16 +23,14 @@ class ConfigurationTester < Minitest::Test
 		
 		help 'Does foo.'
 		default { moo.to_s }
-		option 'foo', 'f' do |s|
-			s
-		end
+		string_option 'foo', 'f'
 		
 		help 'This is a longer help message to test and see how the string segmentation works. I hope it is long enough.'
 		default 42
-		option 'bar', 'b', :to_i
+		option 'bar', 'b', conversions: [:to_i]
 		
 		help 'Does baz.'
-		option 'baz', 'z', :to_sym, :to_sym
+		option 'baz', 'z', conversions: [:to_sym, :to_sym]
 		
 		help 'Does moo.'
 		required
@@ -40,10 +38,12 @@ class ConfigurationTester < Minitest::Test
 			i.to_i * 6
 		end
 		
-		help 'This does zoom'
+		help 'This does daf'
 		option 'daf', 'd' do |*syms|
 			syms.map { |syms| syms.to_sym }
 		end
+		
+		bool_option :bool
 		
 		auto :cow do
 			self.moo / 3
@@ -58,6 +58,14 @@ class ConfigurationTester < Minitest::Test
 		conf = TestConfig.new @defaults
 		
 		assert_equal 20, conf.cow
+	end
+	
+	def test_bool_option
+		conf = TestConfig.new @defaults.clone
+		assert !conf.bool, 'Boolean flag set in config object'
+				
+		conf = TestConfig.new(@defaults.clone << '--bool')
+		assert conf.bool, 'Boolean flag not set in config object'
 	end
 	
 	def test_defaults
