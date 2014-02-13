@@ -56,6 +56,13 @@ class MatchTester < Minitest::Test
 	# Helpers #
 	###########
 	
+	def match_tester_array_destructure(o)
+		match o do
+			with(Array.(x, [])) {       x }
+			with(Array.(x, xs)) { [x, xs] }
+		end
+	end
+	
 	def match_tester_destructure(o)
 		match o do
 			with(Foo.( 1))           { :one }
@@ -154,6 +161,11 @@ class MatchTester < Minitest::Test
 	#########
 	# Tests #
 	#########
+	
+	def test_array_destructure
+		assert_equal             42, match_tester_array_destructure([42])
+		assert_equal [1, [2, 3, 4]], match_tester_array_destructure([1, 2, 3, 4])
+	end
 	
 	def test_as
 		v0 = Foo.new(:dog)
