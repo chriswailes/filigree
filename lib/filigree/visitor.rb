@@ -27,7 +27,7 @@ module Visitor
 	
 	def call(*objects)
 		self.class.patterns.each do |pattern|
-			@matchBindings = OpenStruct.new
+			@match_bindings = OpenStruct.new
 		
 			return pattern.(self, objects) if pattern.match?(objects, self)
 		end
@@ -41,10 +41,10 @@ module Visitor
 	#############
 	
 	def method_missing(name, *args)
-		if args.empty? and @matchBindings.respond_to?(name)
-			@matchBindings.send(name)
+		if args.empty? and @match_bindings.respond_to?(name)
+			@match_bindings.send(name)
 		elsif name.to_s[-1] == '=' and args.length == 1
-			@matchBindings.send(name, *args)
+			@match_bindings.send(name, *args)
 		else
 			super(name, *args)
 		end
@@ -59,11 +59,11 @@ module Visitor
 		attr_reader :patterns
 		
 		def Bind(name)
-			MatchBinding.new(name)
+			BindingPattern.new(name)
 		end
 	
-		def Instance(klass, pattern = Wildcard.instance)
-			InstancePattern.new(klass, [pattern])
+		def Literal(obj)
+			LiteralPattern.new(obj)
 		end
 		
 		def install_icvars
@@ -91,7 +91,7 @@ module Visitor
 		
 		def method_missing(name, *args)
 			if args.empty?
-				if name == :_ then Wildcard.instance else MatchBinding.new(name) end
+				if name == :_ then Wildcard.instance else BindingPattern.new(name) end
 			else
 				super(name, *args)
 			end

@@ -95,11 +95,19 @@ class MatchTester < Minitest::Test
 		end
 	end
 	
-	def match_tester_instance_pattern(o)
+	def match_tester_class_pattern(o)
 		match o do
-			with(Instance(Fixnum, a)) { [:Fixnum, a] }
-			with(Instance(Float, a))  { [:Float,  a] }
-			with(Instance(String, a)) { [:String, a] }
+			with(Fixnum.as a) { [:Fixnum, a] }
+			with(Float.as a)  { [:Float,  a] }
+			with(String.as a) { [:String, a] }
+		end
+	end
+	
+	def match_tester_literal(o)
+		match o do
+			with(Literal(Fixnum)) { :Fixnum }
+			with(Literal(Float))  { :Float  }
+			with(Literal(/a/))    { :Regexp }
 		end
 	end
 	
@@ -212,9 +220,15 @@ class MatchTester < Minitest::Test
 	end
 	
 	def test_instance_pattern
-		assert_equal [:Fixnum, 42],    match_tester_instance_pattern(42)
-		assert_equal [:Float, 42.0],   match_tester_instance_pattern(42.0)
-		assert_equal [:String, 'foo'], match_tester_instance_pattern('foo')
+		assert_equal [:Fixnum, 42],    match_tester_class_pattern(42)
+		assert_equal [:Float, 42.0],   match_tester_class_pattern(42.0)
+		assert_equal [:String, 'foo'], match_tester_class_pattern('foo')
+	end
+	
+	def test_literals
+		assert_equal :Fixnum, match_tester_literal(Fixnum)
+		assert_equal :Float,  match_tester_literal(Float)
+		assert_equal :Regexp, match_tester_literal(/a/)
 	end
 	
 	def test_manual_bind

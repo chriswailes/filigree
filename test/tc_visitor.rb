@@ -95,7 +95,7 @@ class MatchTester < Minitest::Test
 			@total = 0
 		end
 		
-		on Foo.(Instance(Fixnum, n)) do
+		on(Foo.(Fixnum.as n)) do
 			@total += n
 		end
 	end
@@ -103,16 +103,16 @@ class MatchTester < Minitest::Test
 	def setup
 	end
 	
-	def test_simple_visitor
-		sv = SimpleVisitor.new
-		
-		assert_equal :one,   sv.(1)
-		assert_equal :two,   sv.(:two)
-		assert_equal :three, sv.('three')
-		assert_equal :four,  sv.(Foo.new(4))
-		assert_equal :five,  sv.(Foo.new(5))
-		assert_equal :six,   sv.(Foo.new('six'))
-	end
+#	def test_simple_visitor
+#		sv = SimpleVisitor.new
+#		
+#		assert_equal :one,   sv.(1)
+#		assert_equal :two,   sv.(:two)
+#		assert_equal :three, sv.('three')
+#		assert_equal :four,  sv.(Foo.new(4))
+#		assert_equal :five,  sv.(Foo.new(5))
+#		assert_equal :six,   sv.(Foo.new('six'))
+#	end
 	
 	def test_stateful_visitor
 		av = AdditiveVisitor.new
@@ -122,9 +122,9 @@ class MatchTester < Minitest::Test
 		assert_equal 42, av.(Foo.new(39))
 	end
 	
-	def test_visibility
-		hmv = HelperMethodVisitor.new
-		
-		assert_equal :foo, hmv.(Foo.new(42))
-	end
+#	def test_visibility
+#		hmv = HelperMethodVisitor.new
+#		
+#		assert_equal :foo, hmv.(Foo.new(42))
+#	end
 end

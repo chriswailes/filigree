@@ -29,7 +29,7 @@ def match(*objects, &block)
 	
 	me.instance_exec &block
 	
-	me.find_match objects
+	me.find_match(objects)
 end
 
 #######################
@@ -38,17 +38,17 @@ end
 
 module Destructurable
 	def call(*pattern)
-		DestructuringPattern.new(self, pattern)
+		DestructuringPattern.new(self, *pattern)
 	end
 end
 
 class MatchEnvironment
 	def Bind(name)
-		MatchBinding.new(name)
+		BindingPattern.new(name)
 	end
 	
-	def Instance(klass, pattern = Wildcard.instance)
-		InstancePattern.new(klass, [pattern])
+	def Literal(obj)
+		LiteralPattern.new(obj)
 	end
 
 	def initialize
@@ -88,19 +88,25 @@ class MatchEnvironment
 	
 	def method_missing(name, *args)
 		if args.empty?
-			if name == :_ then Wildcard.instance else MatchBinding.new(name) end
+			if name == :_ then Wildcard.instance else BindingPattern.new(name) end
 		else
 			super(name, *args)
 		end
 	end
 end
 
+class Wildcard
+	include Singleton
+end
+
 class BasicPattern
-	def as(binding)
-		binding.tap { binding.pattern = self }
+	extend AbstractClass
+	
+	def as(binding_pattern)
+		binding_pattern.tap { |bp| bp.pattern = self }
 	end
 	
-	def initialize(pattern)
+	def initialize(*pattern)
 		@pattern = pattern
 	end
 	
@@ -122,10 +128,13 @@ class BasicPattern
 		when Wildcard
 			true
 			
+		when Class
+			object.is_a?(pattern)
+			
 		when Regexp
 			object.is_a?(String) and pattern.match(object)
 			
-		when ClassPattern, MatchBinding
+		when BasicPattern
 			pattern.match?(object, env)
 			 
 		else
@@ -135,25 +144,40 @@ class BasicPattern
 	private :match_prime
 end
 
-class ClassPattern < BasicPattern
-	extend AbstractClass
+class BindingPattern < BasicPattern
+	attr_accessor :pattern
 	
-	def initialize(klass, pattern)
-		super(pattern)
+	def initialize(name, pattern = nil)
+		@name    = name
+		@pattern = pattern
+	end
+	
+	def match?(object, env)
+		(@pattern.nil? or match_prime(@pattern, object, env)).tap do |match|
+			env.send("#{@name}=", object) if match
+		end
+	end
+end
+
+class DestructuringPattern < BasicPattern
+	def initialize(klass, *pattern)
+		super(*pattern)
 		
 		@klass = klass
 	end
-end
-
-class InstancePattern < ClassPattern
+	
 	def match?(object, env)
-		object.is_a?(@klass) and super([object], env)
+		object.is_a?(@klass) and super(object.destructure(@pattern.length), env)
 	end
 end
 
-class DestructuringPattern < ClassPattern
-	def match?(object, env)
-		object.is_a?(@klass) and super(object.destructure(@pattern.length), env)
+class LiteralPattern < BasicPattern
+	def initialize(pattern)
+		@pattern = pattern
+	end
+	
+	def match?(object, _)
+		object == @pattern
 	end
 end
 
@@ -161,7 +185,7 @@ class MatchPattern < BasicPattern
 	attr_writer :block
 	
 	def initialize(pattern, guard, block)
-		super(pattern)
+		super(*pattern)
 		
 		@guard = guard
 		@block = block
@@ -176,26 +200,6 @@ class MatchPattern < BasicPattern
 	end
 end
 
-class Wildcard
-	include Singleton
-end
-
-class MatchBinding
-	attr_accessor :name
-	attr_accessor :pattern
-	
-	def initialize(name, pattern = nil)
-		@name    = name
-		@pattern = pattern
-	end
-	
-	def match?(object, env)
-		(@pattern.nil? or @pattern.match?(object, env)).tap do |match|
-			env.send("#{@name}=", object) if match
-		end
-	end
-end
-
 ###################################
 # Standard Library Deconstructors #
 ###################################
@@ -205,6 +209,12 @@ class Array
 	
 	def destructure(num_names)
 		[*self.first(num_names - 1), self[(num_names - 1)..-1]]
+	end
+end
+
+class Class
+	def as(binding_pattern)
+		binding_pattern.tap { |bp| bp.pattern = self }
 	end
 end
 
