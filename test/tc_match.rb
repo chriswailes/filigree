@@ -1,7 +1,7 @@
 # Author:		Chris Wailes <chris.wailes@gmail.com>
 # Project: 	Filigree
 # Date:		2013/05/04
-# Description:	Test cases for the Object extensions.
+# Description:	Test cases for the match method.
 
 ############
 # Requires #
@@ -25,6 +25,8 @@ class MatchTester < Minitest::Test
 	
 	class Foo
 		extend Destructurable
+		
+		attr_reader :a
 		
 		def initialize(a)
 			@a = a
@@ -65,9 +67,9 @@ class MatchTester < Minitest::Test
 	
 	def match_tester_destructure(o)
 		match o do
-			with(Foo.( 1))           { :one }
-			with(Foo.(:a))           { :a   }
-			with(Foo.(Foo.(:b)))     { :b   }
+			with(Foo.( 1))           {    :one }
+			with(Foo.(:a))           { |a| a.a }
+			with(Foo.(Foo.(:b)))     {      :b }
 			
 			with(Foo.(Foo.(a).as b)) { [a, b] }
 			

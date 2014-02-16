@@ -58,7 +58,6 @@ class MatchEnvironment
 	
 	def find_match(objects)
 		@patterns.each do |pattern|
-			
 			env = OpenStruct.new 
 			
 			return pattern.(env, objects) if pattern.match?(objects, env)
@@ -168,8 +167,8 @@ class MatchPattern < BasicPattern
 		@block = block
 	end
 	
-	def call(env, _)
-		if @block then env.instance_exec(&@block) else nil end
+	def call(env, objects = [])
+		if @block then env.instance_exec(*objects, &@block) else nil end
 	end
 	
 	def match?(objects, env)
