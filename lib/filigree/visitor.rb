@@ -102,3 +102,35 @@ module Visitor
 		end
 	end
 end
+
+class TourGuide
+	def call(*objects)
+		@visitors.each { |visitor| visitor.(*objects) }
+	end
+	
+	def initialize(*visitors)
+		@visitors = visitors
+	end
+end
+
+module Visitable
+	def visit(visitor, method = :preorder)
+		case method
+		when :preorder
+			visitor.(self)
+			
+			children.each { |child| child.visit(visitor, :preorder) }
+			
+		when :levelorder
+			nodes = [self]
+			
+			while node = nodes.shift
+				nodes += node.children
+				visitor.(node)
+			end
+			
+		when :postorder
+			children.each { |child| child.visit(visitor, :postorder) }
+		end
+	end
+end
