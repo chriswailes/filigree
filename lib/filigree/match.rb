@@ -70,7 +70,7 @@ class MatchEnvironment
 	def with(*pattern, &block)
 		guard = if pattern.last.is_a?(Proc) then pattern.pop end 
 		
-		@patterns << (mp = MatchPattern.new(pattern, guard, block))
+		@patterns << (mp = OuterPattern.new(pattern, guard, block))
 		
 		if block
 			@deferred.each { |pattern| pattern.block = block }
@@ -88,105 +88,104 @@ class MatchEnvironment
 	
 	def method_missing(name, *args)
 		if args.empty?
-			if name == :_ then Wildcard.instance else BindingPattern.new(name) end
+			if name == :_ then WildcardPattern.instance else BindingPattern.new(name) end
 		else
 			super(name, *args)
 		end
 	end
 end
 
-class Wildcard
-	include Singleton
-end
-
 class BasicPattern
 	extend AbstractClass
 	
 	def as(binding_pattern)
-		binding_pattern.tap { |bp| bp.pattern = self }
+		binding_pattern.tap { |bp| bp.pattern_elem = self }
 	end
 	
-	def initialize(*pattern)
-		@pattern = pattern
-	end
-	
-	def match?(objects, env)
-		if objects.length == @pattern.length
-			@pattern.zip(objects).each do |pattern, object|
-				return false unless match_prime(pattern, object, env)
-			end
-			
-			true
-			
-		else
-			(@pattern.length == 1 and @pattern.first == Wildcard.instance)
-		end
-	end
-	
-	def match_prime(pattern, object, env)
-		case pattern
-		when Wildcard
-			true
-			
+	def match_pattern_element(pattern_elem, object, env)
+		case pattern_elem
 		when Class
-			object.is_a?(pattern)
+			object.is_a?(pattern_elem)
 			
 		when Regexp
-			object.is_a?(String) and pattern.match(object)
+			object.is_a?(String) and pattern_elem.match(object)
 			
 		when BasicPattern
-			pattern.match?(object, env)
+			pattern_elem.match?(object, env)
 			 
 		else
-			object == pattern
+			object == pattern_elem
 		end
 	end
-	private :match_prime
 end
 
-class BindingPattern < BasicPattern
-	attr_accessor :pattern
+class WildcardPattern < BasicPattern
+	include Singleton
 	
-	def initialize(name, pattern = nil)
-		@name    = name
-		@pattern = pattern
+	def match?(_, _)
+		true
+	end
+end
+
+class SingleObjectPattern < BasicPattern
+	extend AbstractClass
+	
+	def initialize(pattern_elem)
+		@pattern_elem = pattern_elem
 	end
 	
 	def match?(object, env)
-		(@pattern.nil? or match_prime(@pattern, object, env)).tap do |match|
+		match_pattern_element(@pattern_elem, object, env)
+	end
+end
+
+class LiteralPattern < SingleObjectPattern
+	def match?(object, _)
+		object == @pattern_elem
+	end
+end
+
+class BindingPattern < SingleObjectPattern
+	attr_accessor :pattern_elem
+	
+	def initialize(name, pattern_elem = nil)
+		@name = name
+		super(pattern_elem)
+	end
+	
+	def match?(object, env)
+		(@pattern_elem.nil? or super).tap do |match|
 			env.send("#{@name}=", object) if match
 		end
 	end
 end
 
-class DestructuringPattern < BasicPattern
-	def initialize(klass, *pattern)
-		super(*pattern)
-		
-		@klass = klass
-	end
+class MultipleObjectPattern < BasicPattern
+	extend AbstractClass
 	
-	def match?(object, env)
-		object.is_a?(@klass) and super(object.destructure(@pattern.length), env)
-	end
-end
-
-class LiteralPattern < BasicPattern
 	def initialize(pattern)
 		@pattern = pattern
 	end
 	
-	def match?(object, _)
-		object == @pattern
+	def match?(objects, env)
+		if objects.length == @pattern.length
+			@pattern.zip(objects).each do |pattern_elem, object|
+				return false unless match_pattern_element(pattern_elem, object, env)
+			end
+			
+			true
+			
+		else
+			(@pattern.length == 1 and @pattern.first == WildcardPattern.instance)
+		end
 	end
 end
 
-class MatchPattern < BasicPattern
+class OuterPattern < MultipleObjectPattern
 	attr_writer :block
 	
 	def initialize(pattern, guard, block)
-		super(*pattern)
-		
+		super(pattern)
 		@guard = guard
 		@block = block
 	end
@@ -196,7 +195,18 @@ class MatchPattern < BasicPattern
 	end
 	
 	def match?(objects, env)
-		super(objects, env) and (@guard.nil? or env.instance_exec(&@guard))
+		super && (@guard.nil? or env.instance_exec(&@guard))
+	end
+end
+
+class DestructuringPattern < MultipleObjectPattern
+	def initialize(klass, *pattern)
+		@klass = klass
+		super(pattern)
+	end
+	
+	def match?(object, env)
+		object.is_a?(@klass) and super(object.destructure(@pattern.length), env)
 	end
 end
 
@@ -214,7 +224,7 @@ end
 
 class Class
 	def as(binding_pattern)
-		binding_pattern.tap { |bp| bp.pattern = self }
+		binding_pattern.tap { |bp| bp.pattern_elem = self }
 	end
 end
 

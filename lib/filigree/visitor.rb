@@ -74,7 +74,7 @@ module Visitor
 		def on(*pattern, &block)
 			guard = if pattern.last.is_a?(Proc) then pattern.pop end 
 		
-			@patterns << (mp = MatchPattern.new(pattern, guard, block))
+			@patterns << (mp = OuterPattern.new(pattern, guard, block))
 		
 			if block
 				@deferred.each { |pattern| pattern.block = block }

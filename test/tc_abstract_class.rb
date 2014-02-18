@@ -32,8 +32,13 @@ class AbstractClassTester < Minitest::Test
 		end
 	end
 	
-	def setup
+	class Baf < Foo
+		extend AbstractClass
+	end
 	
+	class Zap < Baf; end
+	
+	def setup
 	end
 	
 	def test_abstract_method
@@ -48,6 +53,12 @@ class AbstractClassTester < Minitest::Test
 	
 	def test_instantiate_subclass
 		Bar.new 
+	end
+	
+	def test_multi_level_abstract_hierarchy
+		assert_raises(AbstractClassError) { Baf.new }
+		
+		Zap.new
 	end
 	
 	def test_multiple_hierarchies

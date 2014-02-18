@@ -184,6 +184,12 @@ class MatchTester < Minitest::Test
 		assert_equal([:dog, v0], match_tester_destructure(v1))
 	end
 	
+	def test_class_pattern
+		assert_equal [:Fixnum, 42],    match_tester_class_pattern(42)
+		assert_equal [:Float, 42.0],   match_tester_class_pattern(42.0)
+		assert_equal [:String, 'foo'], match_tester_class_pattern('foo')
+	end
+	
 	def test_constants
 		assert_equal :one,   match_tester_simple(1)
 		assert_equal :two,   match_tester_simple(2)
@@ -217,12 +223,6 @@ class MatchTester < Minitest::Test
 		assert_equal :NEG,  match_tester_guard(-5)
 		assert_equal :ZERO, match_tester_guard(0)
 		assert_equal :POS,  match_tester_guard(6)
-	end
-	
-	def test_instance_pattern
-		assert_equal [:Fixnum, 42],    match_tester_class_pattern(42)
-		assert_equal [:Float, 42.0],   match_tester_class_pattern(42.0)
-		assert_equal [:String, 'foo'], match_tester_class_pattern('foo')
 	end
 	
 	def test_literals
