@@ -26,5 +26,4 @@ require 'filigree/types'
 require 'filigree/version'
 require 'filigree/visitor'
 
-module Filigree
-end
+module Filigree; end

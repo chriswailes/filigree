@@ -7,12 +7,9 @@
 ############
 
 * Switch to using refinements once Ruby 2.1 is more common.
-* Pull visitor.rb from RLTK, make it feature complete, and implement the traditional visitor pattern.
-	* Allow blocks to be passed to the `on` clauses of the Visitor class. (visitor.rb)
 * Complete documentation.
 * Move help option and command testing to unit tests.
 * Put everything in the Filigree namespace.
-* Identify redundency and code duplication between visitor.rb and match.rb and see if these can be reduced.
 
 ###############
 # Crazy Ideas #

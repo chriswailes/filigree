@@ -23,6 +23,10 @@
 # Classes and Modules #
 #######################
 
+# Including this in a module will cause any class that includes the client
+# module to also extend itself with the <client module>::ClassMethods module.
+# If this module is not defined a NameError will be thrown when the client
+# module is included.
 module ClassMethodsModule
 	def self.included(mod)
 		mod.instance_exec do

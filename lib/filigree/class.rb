@@ -10,6 +10,7 @@
 # Standard Library
 
 # Filigree
+require 'filigree/types'
 
 #######################
 # Classes and Modules #
@@ -32,7 +33,7 @@ class Class
 	#
 	# @param [Class] klass Class we are checking if this is a subclass of.
 	def subclass_of?(klass)
-		raise 'The klass parameter must be an instance of Class.' if not klass.is_a?(Class)
+		check_type(klass, Class, 'klass')
 		
 		if (superklass = self.superclass)
 			superklass == klass or superklass.subclass_of?(klass)

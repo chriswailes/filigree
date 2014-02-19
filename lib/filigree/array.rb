@@ -18,6 +18,8 @@
 class Array
 	alias :aliased_map :map
 	
+	# Map now takes an optional symbol argument.  If a symbol is provided the
+	# specified method is invoked on each of the objects in the array.
 	def map(method = nil, &block)
 		if method
 			self.aliased_map { |obj| obj.send(method) }

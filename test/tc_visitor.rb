@@ -48,6 +48,25 @@ class MatchTester < Minitest::Test
 		end
 	end
 	
+	class Node
+		extend Destructurable
+		include Visitable
+		
+		def initialize(val, left = nil, right = nil)
+			@val   = val
+			@left  = left
+			@right = right
+		end
+		
+		def children
+			[ @left, @right ]
+		end
+		
+		def destructure(_)
+			[ @val, @left, @right ]
+		end
+	end
+	
 	class SimpleVisitor
 		include Visitor
 		
@@ -91,6 +110,8 @@ class MatchTester < Minitest::Test
 	class AdditiveVisitor
 		include Visitor
 		
+		attr_reader :total
+		
 		def initialize
 			@total = 0
 		end
@@ -100,19 +121,47 @@ class MatchTester < Minitest::Test
 		end
 	end
 	
+	class MultiplicativeVisitor
+		include Visitor
+		
+		attr_reader :total
+		
+		def initialize
+			@total = 1
+		end
+		
+		on(Foo.(Fixnum.as n)) do
+			@total *= n
+		end
+	end
+	
+	class NodeVisitor
+		include Visitor
+		
+		attr_reader :vals
+		
+		def initialize
+			@vals = []
+		end
+		
+		on(Node.(val, _, _)) do
+			@vals << val
+		end
+	end
+	
 	def setup
 	end
 	
-#	def test_simple_visitor
-#		sv = SimpleVisitor.new
-#		
-#		assert_equal :one,   sv.(1)
-#		assert_equal :two,   sv.(:two)
-#		assert_equal :three, sv.('three')
-#		assert_equal :four,  sv.(Foo.new(4))
-#		assert_equal :five,  sv.(Foo.new(5))
-#		assert_equal :six,   sv.(Foo.new('six'))
-#	end
+	def test_simple_visitor
+		sv = SimpleVisitor.new
+		
+		assert_equal :one,   sv.(1)
+		assert_equal :two,   sv.(:two)
+		assert_equal :three, sv.('three')
+		assert_equal :four,  sv.(Foo.new(4))
+		assert_equal :five,  sv.(Foo.new(5))
+		assert_equal :six,   sv.(Foo.new('six'))
+	end
 	
 	def test_stateful_visitor
 		av = AdditiveVisitor.new
@@ -122,9 +171,58 @@ class MatchTester < Minitest::Test
 		assert_equal 42, av.(Foo.new(39))
 	end
 	
-#	def test_visibility
-#		hmv = HelperMethodVisitor.new
-#		
-#		assert_equal :foo, hmv.(Foo.new(42))
-#	end
+	def test_tour_guide
+		tg = TourGuide.new(AdditiveVisitor.new, MultiplicativeVisitor.new)
+		
+		tg.(Foo.new(1))
+		tg.(Foo.new(2))
+		tg.(Foo.new(39))
+		
+		assert_equal 42, tg.visitors[0].total
+		assert_equal 78, tg.visitors[1].total
+	end
+	
+	def test_visibility
+		hmv = HelperMethodVisitor.new
+		
+		assert_equal :foo, hmv.(Foo.new(42))
+	end
+	
+	def test_visitable
+		tree = Node.new('F',
+		                Node.new('B',
+		                         Node.new('A'),
+		                         Node.new('D',
+		                                  Node.new('C'),
+		                                  Node.new('E')
+		                                 ),
+		                        ),
+		                Node.new('G',
+		                         Node.new('I',
+		                                  Node.new('H')
+		                                 )
+		                        )
+		               )
+		
+		# Test pre-order
+		nv       = NodeVisitor.new
+		expected = ['F', 'B', 'A', 'D', 'C', 'E', 'G', 'I', 'H']
+		tree.visit(nv, :preorder)
+		
+		assert_equal expected, nv.vals
+		
+		# Test level-order
+		nv       = NodeVisitor.new
+		expected = ['F', 'B', 'G', 'A', 'D', 'I', 'C', 'E', 'H']
+		tree.visit(nv, :levelorder)
+		
+		assert_equal expected, nv.vals
+		
+		# Test post-order
+		nv       = NodeVisitor.new
+		expected = ['A', 'C', 'E', 'D', 'B', 'H', 'I', 'G', 'F']
+		tree.visit(nv, :postorder)
+		
+		assert_equal expected, nv.vals
+	end
 end

@@ -27,6 +27,8 @@ require 'filigree/configuration'
 
 module Filigree; end
 
+# The beginnings of a general purpose application module.  The aim is to provide
+# the basic framework for larger desktop and command line applications.
 module Filigree::Application
 	include ClassMethodsModule
 	

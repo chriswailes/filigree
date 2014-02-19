@@ -91,7 +91,7 @@ module Visitor
 		
 		def method_missing(name, *args)
 			if args.empty?
-				if name == :_ then Wildcard.instance else BindingPattern.new(name) end
+				if name == :_ then WildcardPattern.instance else BindingPattern.new(name) end
 			else
 				super(name, *args)
 			end
@@ -104,6 +104,8 @@ module Visitor
 end
 
 class TourGuide
+	attr_reader :visitors
+	
 	def call(*objects)
 		@visitors.each { |visitor| visitor.(*objects) }
 	end
@@ -118,19 +120,19 @@ module Visitable
 		case method
 		when :preorder
 			visitor.(self)
-			
-			children.each { |child| child.visit(visitor, :preorder) }
+			children.compact.each { |child| child.visit(visitor, :preorder) }
 			
 		when :levelorder
 			nodes = [self]
 			
 			while node = nodes.shift
-				nodes += node.children
+				nodes += node.children.compact
 				visitor.(node)
 			end
 			
 		when :postorder
-			children.each { |child| child.visit(visitor, :postorder) }
+			children.compact.each { |child| child.visit(visitor, :postorder) }
+			visitor.(self)
 		end
 	end
 end

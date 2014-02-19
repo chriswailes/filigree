@@ -40,6 +40,6 @@ class ClassTester < Minitest::Test
 		
 		assert  Baz.subclass_of?(Bar)
 		assert !Baz.subclass_of?(Fixnum)
-		assert_raises(RuntimeError) { Baz.subclass_of?(1) }
+		assert_raises(TypeError) { Baz.subclass_of?(1) }
 	end
 end
