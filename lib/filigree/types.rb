@@ -72,54 +72,55 @@ end
 # Classes and Modules #
 #######################
 
-module TypedClass
-	include ClassMethodsModule
+module Filigree
+	module TypedClass
+		include ClassMethodsModule
 	
-	def set_typed_ivars(vals)
-		self.class.typed_ivars.zip(vals).each do |name, val|
-			self.send("#{name}=", val)
+		def set_typed_ivars(vals)
+			self.class.typed_ivars.zip(vals).each do |name, val|
+				self.send("#{name}=", val)
+			end
 		end
-	end
 	
-	module ClassMethods
-		def default_constructor(strict = false)
-			class_eval do
-				if strict
-					def initialize(*vals)
-						if self.class.typed_ivars.length != vals.length
-							raise ArgumentError, "#{self.class.typed_ivars.length} arguments expected, #{vals.length} given."
-						end
+		module ClassMethods
+			def default_constructor(strict = false)
+				class_eval do
+					if strict
+						def initialize(*vals)
+							if self.class.typed_ivars.length != vals.length
+								raise ArgumentError, "#{self.class.typed_ivars.length} arguments expected, #{vals.length} given."
+							end
 				
-						self.set_typed_ivars(vals)
-					end
-				else
-					def initialize(*vals)
-						self.set_typed_ivars(vals)
+							self.set_typed_ivars(vals)
+						end
+					else
+						def initialize(*vals)
+							self.set_typed_ivars(vals)
+						end
 					end
 				end
 			end
-		end
 		
-		def define_typed_accessor(name, nillable, strict, type, checker)
-			define_method "#{name}=" do |obj|
-				self.instance_variable_set("@#{name}", checker.call(obj, type, name, nillable, strict))
+			def define_typed_accessor(name, nillable, strict, type, checker)
+				define_method "#{name}=" do |obj|
+					self.instance_variable_set("@#{name}", checker.call(obj, type, name, nillable, strict))
+				end
 			end
-		end
-		private :define_typed_accessor
+			private :define_typed_accessor
 		
-		def typed_ivar(name, type, nillable = false, strict = false)
-			typed_ivars << name
+			def typed_ivar(name, type, nillable = false, strict = false)
+				typed_ivars << name
 			
-			define_typed_accessor(name, nillable, strict, *
-				type.is_a?(Array) ? [type.first, method(:check_array_type)] : [type, method(:check_type)]
-			)
+				define_typed_accessor(name, nillable, strict, *
+					type.is_a?(Array) ? [type.first, method(:check_array_type)] : [type, method(:check_type)]
+				)
 		
-			attr_reader name
-		end
+				attr_reader name
+			end
 	
-		def typed_ivars
-			@typed_ivars ||= Array.new
+			def typed_ivars
+				@typed_ivars ||= Array.new
+			end
 		end
 	end
 end
-

@@ -17,14 +17,14 @@ require 'filigree/visitor'
 # Classes and Modules #
 #######################
 
-class MatchTester < Minitest::Test
+class VisitorTester < Minitest::Test
 	
 	####################
 	# Internal Classes #
 	####################
 	
 	class Foo
-		extend Destructurable
+		extend Filigree::Destructurable
 		
 		def initialize(a)
 			@a = a
@@ -33,10 +33,14 @@ class MatchTester < Minitest::Test
 		def destructure(_)
 			[@a]
 		end
+		
+		def visit(visitor)
+			visitor.(self)
+		end
 	end
 	
 	class Bar
-		extend Destructurable
+		extend Filigree::Destructurable
 		
 		def initialize(a, b)
 			@a = a
@@ -46,11 +50,15 @@ class MatchTester < Minitest::Test
 		def destructure(_)
 			[@a, @b]
 		end
+		
+		def visit(visitor)
+			visitor(self)
+		end
 	end
 	
 	class Node
-		extend Destructurable
-		include Visitable
+		extend Filigree::Destructurable
+		include Filigree::Visitable
 		
 		def initialize(val, left = nil, right = nil)
 			@val   = val
@@ -68,7 +76,7 @@ class MatchTester < Minitest::Test
 	end
 	
 	class SimpleVisitor
-		include Visitor
+		include Filigree::Visitor
 		
 		on 1 do
 			:one
@@ -96,7 +104,7 @@ class MatchTester < Minitest::Test
 	end
 	
 	class HelperMethodVisitor
-		include Visitor
+		include Filigree::Visitor
 		
 		def helper(_)
 			true
@@ -108,7 +116,7 @@ class MatchTester < Minitest::Test
 	end
 	
 	class AdditiveVisitor
-		include Visitor
+		include Filigree::Visitor
 		
 		attr_reader :total
 		
@@ -122,7 +130,7 @@ class MatchTester < Minitest::Test
 	end
 	
 	class MultiplicativeVisitor
-		include Visitor
+		include Filigree::Visitor
 		
 		attr_reader :total
 		
@@ -136,7 +144,7 @@ class MatchTester < Minitest::Test
 	end
 	
 	class NodeVisitor
-		include Visitor
+		include Filigree::Visitor
 		
 		attr_reader :vals
 		
@@ -166,17 +174,17 @@ class MatchTester < Minitest::Test
 	def test_stateful_visitor
 		av = AdditiveVisitor.new
 		
-		assert_equal  1, av.(Foo.new(1))
-		assert_equal  3, av.(Foo.new(2))
-		assert_equal 42, av.(Foo.new(39))
+		assert_equal  1, Foo.new(1).visit(av)
+		assert_equal  3, Foo.new(2).visit(av)
+		assert_equal 42, Foo.new(39).visit(av)
 	end
 	
 	def test_tour_guide
-		tg = TourGuide.new(AdditiveVisitor.new, MultiplicativeVisitor.new)
+		tg = Filigree::TourGuide.new(AdditiveVisitor.new, MultiplicativeVisitor.new)
 		
-		tg.(Foo.new(1))
-		tg.(Foo.new(2))
-		tg.(Foo.new(39))
+		Foo.new(1).visit(tg)
+		Foo.new(2).visit(tg)
+		Foo.new(39).visit(tg)
 		
 		assert_equal 42, tg.visitors[0].total
 		assert_equal 78, tg.visitors[1].total

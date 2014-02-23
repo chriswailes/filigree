@@ -25,73 +25,73 @@ require 'filigree/configuration'
 # Classes and Modules #
 #######################
 
-module Filigree; end
+module Filigree
+	# The beginnings of a general purpose application module.  The aim is to provide
+	# the basic framework for larger desktop and command line applications.
+	module Application
+		include ClassMethodsModule
+	
+		#############
+		# Constants #
+		#############
+	
+		REQUIRED_METHODS = [
+			:kill,
+			:pause,
+			:resume,
+			:run,
+			:stop
+		]
 
-# The beginnings of a general purpose application module.  The aim is to provide
-# the basic framework for larger desktop and command line applications.
-module Filigree::Application
-	include ClassMethodsModule
+		####################
+		# Instance Methods #
+		####################
 	
-	#############
-	# Constants #
-	#############
+		attr_accessor :configuration
+		alias :config :configuration
 	
-	REQUIRED_METHODS = [
-		:kill,
-		:pause,
-		:resume,
-		:run,
-		:stop
-	]
-
-	####################
-	# Instance Methods #
-	####################
-	
-	attr_accessor :configuration
-	alias :config :configuration
-	
-	def initialize
-		@configuration = self.class::Configuration.new
+		def initialize
+			@configuration = self.class::Configuration.new
 		
-		# Set up signal handlers.
-		Signal.trap('ABRT') { self.stop }
-		Signal.trap('INT')  { self.stop }
-		Signal.trap('QUIT') { self.stop }
-		Signal.trap('TERM') { self.stop }
+			# Set up signal handlers.
+			Signal.trap('ABRT') { self.stop }
+			Signal.trap('INT')  { self.stop }
+			Signal.trap('QUIT') { self.stop }
+			Signal.trap('TERM') { self.stop }
 		
-		Signal.trap('KILL') { self.kill }
+			Signal.trap('KILL') { self.kill }
 		
-		Signal.trap('CONT') { self.resume }
-		Signal.trap('STOP') { self.pause  }
-	end
+			Signal.trap('CONT') { self.resume }
+			Signal.trap('STOP') { self.pause  }
+		end
 	
-	#################
-	# Class Methods #
-	#################
+		#################
+		# Class Methods #
+		#################
 	
-	module ClassMethods
-		def finalize
-			REQUIRED_METHODS.each do |method|
-				raise(NoMethodError, "Application #{self.name} missing method: #{method}") if not self.instance_methods.include?(method)
+		module ClassMethods
+			def finalize
+				REQUIRED_METHODS.each do |method|
+					raise(NoMethodError, "Application #{self.name} missing method: #{method}") if not self.instance_methods.include?(method)
+				end
+			end
+		
+			def run
+				self.new.run
 			end
 		end
-		
-		def run
-			self.new.run
-		end
-	end
 	
-	#############
-	# Callbacks #
-	#############
-   
-	class << self
-		alias :old_included :included
+		#############
+		# Callbacks #
+		#############
+	   
+		class << self
+			alias :old_included :included
 
-		def included(klass)
-			old_included(klass)
-			klass.const_set(:Configuration, Class.new { include Filigree::Configuration })
+			def included(klass)
+				old_included(klass)
+				klass.const_set(:Configuration, Class.new { include Filigree::Configuration })
+			end
 		end
 	end
 end

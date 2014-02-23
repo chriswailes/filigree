@@ -20,7 +20,7 @@ require 'filigree/types'
 class TypeTester < Minitest::Test
 	
 	class Foo
-		include TypedClass
+		include Filigree::TypedClass
 		
 		typed_ivar :foo, Integer
 		typed_ivar :bar, String
@@ -28,7 +28,7 @@ class TypeTester < Minitest::Test
 	end
 	
 	class Bar
-		include TypedClass
+		include Filigree::TypedClass
 		
 		typed_ivar :foo, Integer
 		typed_ivar :bar, String
@@ -37,7 +37,7 @@ class TypeTester < Minitest::Test
 	end
 	
 	class Baf
-		include TypedClass
+		include Filigree::TypedClass
 		
 		typed_ivar :foo, Integer
 		typed_ivar :bar, String, true
@@ -46,7 +46,7 @@ class TypeTester < Minitest::Test
 	end
 	
 	class Baz
-		include TypedClass
+		include Filigree::TypedClass
 		
 		typed_ivar :foo, Integer
 		typed_ivar :bar, String

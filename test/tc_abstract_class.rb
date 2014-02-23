@@ -19,7 +19,7 @@ require 'filigree/abstract_class'
 
 class AbstractClassTester < Minitest::Test
 	class Foo
-		extend AbstractClass
+		extend Filigree::AbstractClass
 		
 		abstract_method :foo
 	end
@@ -33,7 +33,7 @@ class AbstractClassTester < Minitest::Test
 	end
 	
 	class Baf < Foo
-		extend AbstractClass
+		extend Filigree::AbstractClass
 	end
 	
 	class Zap < Baf; end
@@ -62,7 +62,7 @@ class AbstractClassTester < Minitest::Test
 	end
 	
 	def test_multiple_hierarchies
-		baf = Class.new { extend AbstractClass }
+		baf = Class.new { extend Filigree::AbstractClass }
 		baz = Class.new(baf)
 		
 		assert_raises(AbstractClassError) { Foo.new }

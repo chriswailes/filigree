@@ -24,7 +24,7 @@ class MatchTester < Minitest::Test
 	####################
 	
 	class Foo
-		extend Destructurable
+		extend Filigree::Destructurable
 		
 		attr_reader :a
 		
@@ -38,7 +38,7 @@ class MatchTester < Minitest::Test
 	end
 	
 	class Bar
-		extend Destructurable
+		extend Filigree::Destructurable
 		
 		def initialize(a, b)
 			@a = a

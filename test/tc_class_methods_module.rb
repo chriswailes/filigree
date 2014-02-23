@@ -19,7 +19,7 @@ require 'filigree/class_methods_module'
 
 class ClassMethodsModuleTester < Minitest::Test
 	module Foo
-		include ClassMethodsModule
+		include Filigree::ClassMethodsModule
 		
 		def foo
 			:foo
@@ -33,7 +33,7 @@ class ClassMethodsModuleTester < Minitest::Test
 	end
 	
 	module Baz
-		include ClassMethodsModule
+		include Filigree::ClassMethodsModule
 		
 		def baz
 			:baz
