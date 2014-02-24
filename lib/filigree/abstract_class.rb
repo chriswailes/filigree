@@ -44,7 +44,9 @@ module Filigree
 		# Declares a method with the given name.  If it is called it will raise
 		# an AbstractMethodError.
 		#
-		# @param [Symbol] name The name of the abstract method you with to declare.
+		# @param [Symbol]  name  The name of the abstract method you with to declare
+		#
+		# @return [void]
 		def abstract_method(name)
 			abstract_class_name = @abstract_class.name
 		
@@ -54,6 +56,8 @@ module Filigree
 		end
 	
 		# Install instance class variables in the extended class.
+		#
+		# @return [void]
 		def install_icvars
 			@abstract_class = self
 		end
@@ -61,9 +65,9 @@ module Filigree
 		# Raise an AbstractClassError if someone attempts to instantiate an
 		# abstract class.
 		#
-		# @param [Object] args The arguments to initialize.
+		# @param [Object]  args  The arguments to initialize.
 		#
-		# @raises [AbstractClassError]
+		# @raise [AbstractClassError]
 		def new(*args)
 			if @abstract_class == self
 				raise AbstractClassError, self.name
@@ -77,6 +81,8 @@ module Filigree
 		#############
 	
 		# Tell the extended class to install its instance class variables.
+		#
+		# @return [void]
 		def self.extended(klass)
 			klass.install_icvars
 		end

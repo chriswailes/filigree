@@ -19,19 +19,23 @@ require 'filigree/types'
 class Class
 	# Checks for module inclusion.
 	#
-	# @param [Module] mod Module to check the inclusion of.
+	# @param [Module]  mod  Module to check the inclusion of.
+	#
+	# @return [Boolean]  If the module was included
 	def includes_module?(mod)
 		self.included_modules.include?(mod)
 	end
 	
-	# @return [String] Name of class without the namespace.
+	# @return [String]  Name of class without the namespace.
 	def short_name
 		self.name.split('::').last
 	end
 	
 	# Checks to see if a Class object is a subclass of the given class.
 	#
-	# @param [Class] klass Class we are checking if this is a subclass of.
+	# @param [Class]  klass  Class we are checking if this is a subclass of.
+	#
+	# @return [Boolean]  If self is a subclass of klass
 	def subclass_of?(klass)
 		check_type(klass, Class, 'klass')
 		

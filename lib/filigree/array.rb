@@ -20,6 +20,11 @@ class Array
 	
 	# Map now takes an optional symbol argument.  If a symbol is provided the
 	# specified method is invoked on each of the objects in the array.
+	#
+	# @param [Symbol]  method  Method to be invoked on the array elements.
+	# @param [Proc]    block   Normal Array#each block.
+	#
+	# @return [Array<Object>]
 	def map(method = nil, &block)
 		if method
 			self.aliased_map { |obj| obj.send(method) }

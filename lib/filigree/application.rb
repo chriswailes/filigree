@@ -70,12 +70,22 @@ module Filigree
 		#################
 	
 		module ClassMethods
+			# Check to make sure all of the required methods are defined.
+			#
+			# @raise [NoMethodError]
+			#
+			# @return [void]
 			def finalize
 				REQUIRED_METHODS.each do |method|
-					raise(NoMethodError, "Application #{self.name} missing method: #{method}") if not self.instance_methods.include?(method)
+					if not self.instance_methods.include?(method)
+						raise(NoMethodError, "Application #{self.name} missing method: #{method}")
+					end
 				end
 			end
-		
+			
+			# Create a new instance of this application and run it.
+			#
+			# @return [Object]
 			def run
 				self.new.run
 			end

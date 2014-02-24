@@ -15,6 +15,10 @@
 # Methods #
 ###########
 
+# Require a file, but fail gracefully if it isn't found.
+#
+# @param [String]   file           File to be requested
+# @param [Boolean]  print_failure  To print a message on failure or not
 def request_file(file, print_failure = false)
 	begin
 		require file

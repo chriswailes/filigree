@@ -36,7 +36,11 @@ module Filigree
 		# Instance Methods #
 		####################
 	
-		# Process a command.
+		# This will find the appropriate command and execute it.
+		#
+		# @param [String]  line  String containing the command to be processed and its arguments
+		#
+		# @return [Object]  Result of invoking the command's block
 		def call(line)
 			namespace, rest = self.class.get_namespace(line.split)
 		
@@ -68,15 +72,30 @@ module Filigree
 		#################
 	
 		module ClassMethods
+			# @return [Hash<String, Hash>]
 			attr_accessor :commands
+			
+			# @return [Array<Command>]
 			attr_accessor :command_list
-		
+			
+			# Add a command to the necessary internal data structures.
+			#
+			# @param [Command]  command_obj  Command to add
+			#
+			# @return [void]
 			def add_command(command_obj)
 				@command_list << command_obj
 				namespace = reify_namespace(command_obj.name.split.map(:to_sym))
 				namespace[:nil] = command_obj
 			end
-		
+			
+			# Add a new command to the class.  All command code is executed
+			# in the context of the Commands object.
+			#
+			# @param [String]  str    Name of the command
+			# @param [Proc]    block  Code to be executed when the command is run
+			#
+			# @return [void]
 			def command(str, &block)
 				add_command Command.new(str, @help_string, @param_docs, @config, block)
 			
@@ -84,16 +103,37 @@ module Filigree
 				@param_docs  = Array.new
 				@config      = nil
 			end
-		
+			
+			# This will generate an anonymous {Configuration} class for this
+			# command.  After a string resolves to the next command defined
+			# the remainder of the command line will be passed to an
+			# instance of this Configuration class.  Any remaining text is
+			# then provided to the command as usual.
+			#
+			# The variables defined in the configuration class are available
+			# in the command's block.
+			#
+			# @param [Proc]  block  Body of the {Configuration} class
+			#
+			# @return [void]
 			def config(&block)
 				@config = Class.new { include Filigree::Configuration }
 				@config.instance_exec &block
 			end
-		
+			
+			# Attaches the provided help string to the command that is
+			# defined next.
+			#
+			# @param [String]  str  Help string for the next command
+			#
+			# @return [void]
 			def help(str)
 				@help_string = str
 			end
-		
+			
+			# Install the instance class variables in the including class.
+			#
+			# @return [void]
 			def install_icvars
 				@commands     = Hash.new
 				@command_list = Array.new
@@ -101,7 +141,15 @@ module Filigree
 				@help_string  = ''
 				@param_docs   = Array.new
 			end
-		
+			
+			# Given a root namespace, find the namespace indicated by the
+			# provided tokens.
+			#
+			# @param  [Array<String>]       tokens  String tokens specifying the namespace
+			# @param  [Hash<Symbol, Hash>]  root    Root namespace
+			#
+			# @return  [Array<(Hash<Symbol, Hash>, Array<String>)>]
+			#   The requested namespace and the remainder of the tokens.
 			def get_namespace(tokens, root: @commands)
 				if tokens.empty?
 					[root, tokens]
@@ -116,11 +164,24 @@ module Filigree
 					end
 				end
 			end
-		
+			
+			# Add a description for a command's parameter.
+			#
+			# @param  [String]  name         Name of the parameter
+			# @param  [String]  description  Description of the parameter.
+			#
+			# @return [void] 
 			def param(name, description)
 				@param_docs << [name, description]
 			end
-		
+			
+			# Find or create the namespace specified by tokens.
+			#
+			# @param  [Array<String>]       tokens  Tokens specifying the namespace.
+			# @param  [Hash<Symbol, Hash>]  root    Root namespace
+			#
+			# @return  [Array<(Hash<Symbol, Hash>, Array<String>)>]
+			#   The requested namespace and the remainder of the tokens.
 			def reify_namespace(tokens, root: @commands)
 				if tokens.empty?
 					root
@@ -137,7 +198,7 @@ module Filigree
 			#############
 			# Callbacks #
 			#############
-	
+			
 			def self.extended(klass)
 				klass.install_icvars
 			end
@@ -146,13 +207,16 @@ module Filigree
 		#################
 		# Inner Classes #
 		#################
-	
+		
+		# The POD representing a command.
 		Command = Struct.new(:name, :help, :param_help, :config, :action)
 	
 		########################
 		# Pre-defined Commands #
 		########################
-	
+		
+		# The default help command.  This can be added to your class via
+		# add_command.
 		HELP_COMMAND = Command.new('help', 'Prints this help message.', [], nil, Proc.new do
 			puts 'Usage: <command> [options] <args>'
 			puts

@@ -73,9 +73,17 @@ end
 #######################
 
 module Filigree
+	# Allows the including class to define typed type checked instance
+	# variables.  This also provides a default constructor.
 	module TypedClass
 		include ClassMethodsModule
-	
+		
+		# Set each of the typed instance variables to its corresponding
+		# value.
+		#
+		# @param [Array<Object>]  vals  Values to set typed variables to
+		#
+		# @return [void]
 		def set_typed_ivars(vals)
 			self.class.typed_ivars.zip(vals).each do |name, val|
 				self.send("#{name}=", val)
@@ -83,6 +91,11 @@ module Filigree
 		end
 	
 		module ClassMethods
+			# Define the default constructor for the including class.
+			#
+			# @param [Boolean]  strict  To use strict checking or not
+			#
+			# @return [void]
 			def default_constructor(strict = false)
 				class_eval do
 					if strict
@@ -100,14 +113,31 @@ module Filigree
 					end
 				end
 			end
-		
+			
+			# Define a new typed accessor.
+			#
+			# @param [Symbol]   name      Name of the accessor
+			# @param [Boolean]  nillable  If the value can be nil or not
+			# @param [Boolean]  strict    To use strict checking or not
+			# @param [Class]    type      Type of the accessor
+			# @param [Proc]     checker   Method used to check the type
+			#
+			# @return [void]
 			def define_typed_accessor(name, nillable, strict, type, checker)
 				define_method "#{name}=" do |obj|
 					self.instance_variable_set("@#{name}", checker.call(obj, type, name, nillable, strict))
 				end
 			end
 			private :define_typed_accessor
-		
+			
+			# Define a typed instance variable.
+			#
+			# @param [Symbol]   name      Name of the accessor
+			# @param [Class]    type      Type of the accessor
+			# @param [Boolean]  nillable  If the value can be nil or not
+			# @param [Boolean]  strict    To use strict checking or not
+			#
+			# @return [void]
 			def typed_ivar(name, type, nillable = false, strict = false)
 				typed_ivars << name
 			
@@ -117,7 +147,10 @@ module Filigree
 		
 				attr_reader name
 			end
-	
+			
+			# Return the typed instance variables for an object.
+			#
+			# @return [Array<Symbol>]  Array of defined typed instance variables
 			def typed_ivars
 				@typed_ivars ||= Array.new
 			end

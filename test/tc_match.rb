@@ -113,9 +113,9 @@ class MatchTester < Minitest::Test
 	
 	def match_tester_manual_bind(o)
 		match o do
-			with(Fixnum.(Bind(:a))) { [:Fixnum, a] }
-			with(Float.(Bind(:a)))  { [:Float,  a] }
-			with(String.(Bind(:a))) { [:String, a] }
+			with(Fixnum.as(Bind(:a))) { [:Fixnum, a] }
+			with(Float.as(Bind(:a)))  { [:Float,  a] }
+			with(String.as(Bind(:a))) { [:String, a] }
 		end
 	end
 	
@@ -251,6 +251,13 @@ class MatchTester < Minitest::Test
 		assert_equal :b, match_tester_regexp('acba')
 		
 		assert_raises(MatchError) { match_tester_regexp('def') }
+		
+		actual =
+		match 'a42' do
+			with(/a([0-9]+)/) { match_data[1].to_i }
+		end
+		
+		assert_equal 42, actual
 	end
 	
 	def test_tuple_wildcard

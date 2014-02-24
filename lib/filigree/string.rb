@@ -16,6 +16,12 @@
 #######################
 
 class String
+	# Chop up the string into multiple lines so that no line is longer than
+	# the specified number of characters.
+	#
+	# @param [Fixnum]  indent      Indentation to put before each line; it is
+	#   assumed that this indentation is already present for the first line
+	# @param [Fixnum]  max_length  Maximum length per line
 	def segment(indent, max_length = 80)
 		lines = Array.new
 		
