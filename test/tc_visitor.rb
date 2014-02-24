@@ -222,7 +222,7 @@ class VisitorTester < Minitest::Test
 		# Test level-order
 		nv       = NodeVisitor.new
 		expected = ['F', 'B', 'G', 'A', 'D', 'I', 'C', 'E', 'H']
-		tree.visit(nv, :levelorder)
+		tree.visit(nv, :inorder)
 		
 		assert_equal expected, nv.vals
 		
