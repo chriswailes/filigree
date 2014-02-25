@@ -18,23 +18,23 @@ Abstract Classes and Methods
 
 Abstract classes as methods can be defined as follows:
 
-    ```Ruby
-    class Foo
-      extend Filigree::AbstractClass
-      
-      abstract_method :must_implement
-    end
-    
-    class Bar < Foo;
-    
-    # Raises an AbstractClassError
-    Foo.new
-    
-    # Returns a new instance of Bar
-    Bar.new
-    
-    # Raieses an AbstractMethodError
-    Bar.new.must_implement
-    ```
+		```Ruby
+		class Foo
+		  extend Filigree::AbstractClass
+
+		  abstract_method :must_implement
+		end
+
+		class Bar < Foo;
+
+		# Raises an AbstractClassError
+		Foo.new
+
+		# Returns a new instance of Bar
+		Bar.new
+
+		# Raieses an AbstractMethodError
+		Bar.new.must_implement
+		```
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/chriswailes/filigree/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
