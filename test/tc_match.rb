@@ -281,6 +281,18 @@ class MatchTester < Minitest::Test
 		assert_raises(MatchError) { match_tester_tuple(6)		}
 	end
 	
+	def test_variable_comparison
+		var = 42
+		
+		actual =
+		match 42 do
+			with(var) { :hoopy }
+			with(_)   { :other }
+		end
+		
+		assert_equal :hoopy, actual
+	end
+	
 	def test_wildcard_pattern
 		result =
 		match 42 do
