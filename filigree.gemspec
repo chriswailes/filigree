@@ -8,11 +8,11 @@ require File.expand_path("../lib/filigree/version", __FILE__)
 Gem::Specification.new do |s|
 	s.platform = Gem::Platform::RUBY
 	
-	s.name		= 'Filigree'
+	s.name		= 'filigree'
 	s.version		= Filigree::VERSION
 	s.summary		= 'Extra functionality for Ruby.'
 	s.description	= 'Filigree provides new classes and extensions to core library classes ' +
-				  'that add functionality to the Ruby.'
+				  'that add functionality to Ruby.'
 	
 	s.files = [
 			'LICENSE',
