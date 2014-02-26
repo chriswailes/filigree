@@ -31,7 +31,327 @@
         <hr>
 
         <section id="main_content">
-          <p>Extra functionality for Ruby.</p>
+          <h1>
+<a name="filigree-for-more-beautiful-ruby" class="anchor" href="#filigree-for-more-beautiful-ruby"><span class="octicon octicon-link"></span></a>Filigree: For more beautiful Ruby</h1>
+
+<p>Filigree is a collection of classes, modules, and functions that I found myself re-writing in each of my projects.  In addition, I have thrown in a couple of other features that I've always wanted.  Here are some of Filigree's features:</p>
+
+<ul>
+<li>Abstract classes and methods</li>
+<li>An implementation of pattern matching</li>
+<li>An implementation of the visitor pattern</li>
+<li>Module for defining class methods in a mixin</li>
+<li>Modules for configuration and command handling</li>
+<li>Easy dynamic type checking</li>
+<li>Small extensions to standard library classes</li>
+</ul><p>I'm going to go over some of the more important features below, but I won't be able to cover everything.  Explore the rest of the documentation to discover additional features.</p>
+
+<h2>
+<a name="abstract-classes-and-methods" class="anchor" href="#abstract-classes-and-methods"><span class="octicon octicon-link"></span></a>Abstract Classes and Methods</h2>
+
+<p>Abstract classes as methods can be defined as follows:</p>
+
+<div class="highlight highlight-Ruby"><pre><span class="k">class</span> <span class="nc">Foo</span>
+  <span class="kp">extend</span> <span class="no">Filigree</span><span class="o">::</span><span class="no">AbstractClass</span>
+
+  <span class="n">abstract_method</span> <span class="ss">:must_implement</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Bar</span> <span class="o">&lt;</span> <span class="no">Foo</span><span class="p">;</span>
+
+<span class="c1"># Raises an AbstractClassError</span>
+<span class="no">Foo</span><span class="o">.</span><span class="n">new</span>
+
+<span class="c1"># Returns a new instance of Bar</span>
+<span class="no">Bar</span><span class="o">.</span><span class="n">new</span>
+
+<span class="c1"># Raieses an AbstractMethodError</span>
+<span class="no">Bar</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">must_implement</span>
+</pre></div>
+
+<h2>
+<a name="pattern-matching" class="anchor" href="#pattern-matching"><span class="octicon octicon-link"></span></a>Pattern Matching</h2>
+
+<p>Filigree provides an implementation of pattern matching.  When performing a match objects are tested against patterns defined inside the <em>match block</em>:</p>
+
+<div class="highlight highlight-Ruby"><pre><span class="k">def</span> <span class="nf">fib</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+  <span class="n">match</span> <span class="n">n</span> <span class="k">do</span>
+    <span class="n">with</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">with</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">{</span> <span class="mi">1</span> <span class="p">}</span>
+    <span class="n">with</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="p">{</span> <span class="n">fib</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">fib</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+<p>The most basic pattern is the literal.  Here, the object or objects being matched will be tested for equality with the value passed to <code>with</code>.  Another simple pattern is the wildcard pattern.  It will match any value; you can think of it as the default case.</p>
+
+<div class="highlight highlight-Ruby"><pre>  <span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">match</span> <span class="n">n</span> <span class="k">do</span>
+      <span class="n">with</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span> <span class="ss">:one</span>   <span class="p">}</span>
+      <span class="n">with</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">{</span> <span class="ss">:two</span>   <span class="p">}</span>
+      <span class="n">with</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="p">{</span> <span class="ss">:other</span> <span class="p">}</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="n">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># =&gt; :one</span>
+  <span class="n">foo</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span> <span class="c1"># =&gt; :other</span>
+</pre></div>
+
+<p>You may also match against variables.  This can sometimes conflict with the next kind of pattern, which is a binding pattern.  Here, the pattern will match any object, and then make the object it matched available to the <em>with block</em> via an attribute reader.  This is accomplished using the method_missing callback, so if there is a variable or function with that name you might accidentally compare against a variable or returned value.  To bind to a name that is already in scope you can use the {Filigree::MatchEnvironment#Bind} method.  In addition, class and destructuring pattern results (see bellow) can be bound to a variable by using the {Filigree::BasicPattern#as} method. </p>
+
+<div class="highlight highlight-Ruby"><pre><span class="n">var</span> <span class="o">=</span> <span class="mi">42</span>
+
+<span class="c1"># Returns :hoopy</span>
+<span class="n">match</span> <span class="mi">42</span> <span class="k">do</span>
+  <span class="n">with</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="p">{</span> <span class="ss">:hoopy</span> <span class="p">}</span>
+  <span class="n">with</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>   <span class="p">{</span> <span class="ss">:zero</span>  <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Returns 42</span>
+<span class="n">match</span> <span class="mi">42</span> <span class="k">do</span>
+  <span class="n">with</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="n">x</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="c1"># Returns 42</span>
+<span class="n">match</span> <span class="mi">42</span> <span class="k">do</span>
+  <span class="n">with</span><span class="p">(</span><span class="no">Bind</span><span class="p">(</span><span class="ss">:x</span><span class="p">))</span> <span class="p">{</span> <span class="n">x</span>      <span class="p">}</span>
+  <span class="n">with</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>       <span class="p">{</span> <span class="ss">:hoopy</span> <span class="p">}</span>
+<span class="k">end</span>
+</pre></div>
+
+<p>If you wish to match string patterns you can use regular expressions.  Any object that isn't a string will fail to match against a regular expression. If the object being matched is a string then the regular expressions <code>match?</code> method is used.  The result of the regular expression match is available inside the <em>with block</em> via the match_data accessor.</p>
+
+<div class="highlight highlight-Ruby"><pre><span class="k">def</span> <span class="nf">matcher</span><span class="p">(</span><span class="n">object</span><span class="p">)</span>
+ <span class="n">match</span> <span class="n">object</span> <span class="k">do</span>
+   <span class="n">with</span><span class="p">(</span><span class="sr">/hoopy/</span><span class="p">)</span> <span class="p">{</span> <span class="mi">42</span>      <span class="p">}</span>
+   <span class="n">with</span><span class="p">(</span><span class="nb">Integer</span><span class="p">)</span> <span class="p">{</span> <span class="s1">'hoopy'</span> <span class="p">}</span>
+ <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">matcher</span><span class="p">(</span><span class="s1">'hoopy'</span><span class="p">)</span> <span class="c1"># =&gt; 42</span>
+<span class="n">matcher</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>      <span class="c1"># =&gt; 'hoopy'</span>
+</pre></div>
+
+<p>When a class is used in a pattern it will match any object that is an instance of that class.  If you wish to compare one regular expression to
+another, or one class to another, you can force the comparison using the {Filigree::MatchEnvironment#Literal} method.</p>
+
+<p>Destructuring patterns allow you to match against an instance of a class, while simultaneously binding values stored inside the object to variables in the context of the <em>with block</em>.  A class that is destructurable must include the {Filigree::Destructurable} module.  You can then destructure an object like this:</p>
+
+<div class="highlight highlight-Ruby"><pre><span class="k">class</span> <span class="nc">Foo</span>
+  <span class="kp">include</span> <span class="no">Filigree</span><span class="o">::</span><span class="no">Destructurable</span>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="vi">@a</span> <span class="o">=</span> <span class="n">a</span>
+    <span class="vi">@b</span> <span class="o">=</span> <span class="n">b</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">destructure</span><span class="p">(</span><span class="n">_</span><span class="p">)</span>
+    <span class="o">[</span><span class="vi">@a</span><span class="p">,</span> <span class="vi">@b</span><span class="o">]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1"># Returns true</span>
+<span class="n">match</span> <span class="no">Foo</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">with</span><span class="p">(</span><span class="no">Foo</span><span class="o">.</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="p">{</span> <span class="kp">true</span>  <span class="p">}</span>
+  <span class="n">with</span><span class="p">(</span><span class="n">_</span><span class="p">)</span>          <span class="p">{</span> <span class="kp">false</span> <span class="p">}</span>
+<span class="k">end</span>
+</pre></div>
+
+<p>Of particular note is the destructuring of arrays.  When an array is destructured like so, <code>Array.(xs)</code>, the array is bound to <code>xs</code>.  If an additional pattern is added, <code>Array.(x, xs)</code>, then <code>x</code> will hold the first element of the array and <code>xs</code> will hold the remailing characters.  As more patterns are added more elements will be pulled off of the front of the array.  You can match an array with a specific number of elements by using an empty array litteral: <code>Array.(x, [])</code></p>
+
+<p>Both <code>match</code> and <code>with</code> can take multiple arguments.  When this happens, each object is paired up with the corresponding pattern.  If they all match, then the <code>with</code> clause matches.  In this way you can match against tuples.</p>
+
+<p>Any with clause can be given a guard clause by passing a lambda as the last argument to <code>with</code>.  These are evaluated after the pattern is matched, and any bindings made in the pattern are available to the guard clause.</p>
+
+<div class="highlight highlight-Ruby"><pre><span class="n">match</span> <span class="n">o</span> <span class="k">do</span>
+  <span class="n">with</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="p">})</span> <span class="p">{</span> <span class="ss">:NEG</span>  <span class="p">}</span>
+  <span class="n">with</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>               <span class="p">{</span> <span class="ss">:ZERO</span> <span class="p">}</span>
+  <span class="n">with</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">})</span> <span class="p">{</span> <span class="ss">:POS</span>  <span class="p">}</span>
+<span class="k">end</span>
+</pre></div>
+
+<p>If you wish to evaluate the same body on matching any of several patterns you may list them in order and then specify the body for the last pattern in the group.</p>
+
+<p>Patterns are evaluated in the order in which they are defined and the first pattern to match is the one chosen.  You may define helper methods inside the match block.  They will be re-defined every time the match statement is evaluated, so you should move any definitions outside any match calls that are being evaluated often.</p>
+
+<h2>
+<a name="a-visitor-pattern" class="anchor" href="#a-visitor-pattern"><span class="octicon octicon-link"></span></a>A Visitor Pattern</h2>
+
+<p>Filigree's implementation of the visitor pattern is built on the pattern matching functionality described above.  It's usage is pretty simple:</p>
+
+<div class="highlight highlight-Ruby"><pre><span class="k">class</span> <span class="nc">Binary</span> <span class="o">&lt;</span> <span class="no">Struct</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:x</span><span class="p">,</span> <span class="ss">:y</span><span class="p">)</span>
+  <span class="kp">extend</span>  <span class="no">Filigree</span><span class="o">::</span><span class="no">Destructurable</span>
+  <span class="kp">include</span> <span class="no">Filigree</span><span class="o">::</span><span class="no">Visitor</span>
+
+  <span class="k">def</span> <span class="nf">destructure</span><span class="p">(</span><span class="n">_</span><span class="p">)</span>
+    <span class="o">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Add</span> <span class="o">&lt;</span> <span class="no">Binary</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">class</span> <span class="nc">Mul</span> <span class="o">&lt;</span> <span class="no">Binary</span><span class="p">;</span> <span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">MathVisitor</span>
+  <span class="kp">include</span> <span class="no">Filigree</span><span class="o">::</span><span class="no">Visitor</span>
+
+  <span class="n">on</span><span class="p">(</span><span class="no">Add</span><span class="o">.</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span> <span class="k">do</span>
+    <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+  <span class="k">end</span>
+
+  <span class="n">on</span><span class="p">(</span><span class="no">Mul</span><span class="o">.</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span> <span class="k">do</span>
+    <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">mv</span> <span class="o">=</span> <span class="no">MathVisitor</span><span class="o">.</span><span class="n">new</span>
+
+<span class="n">mv</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="no">Add</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span> <span class="c1"># =&gt; 14</span>
+<span class="n">mv</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="no">Mul</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span> <span class="c1"># =&gt; 42</span>
+</pre></div>
+
+<h2>
+<a name="class-methods" class="anchor" href="#class-methods"><span class="octicon octicon-link"></span></a>Class Methods</h2>
+
+<p>{Filigree::ClassMethodsModule} makes it easy to add class methods to mixins:</p>
+
+<div class="highlight highlight-Ruby"><pre><span class="k">module</span> <span class="nn">Foo</span>
+  <span class="kp">include</span> <span class="no">Filigree</span><span class="o">::</span><span class="no">ClassMethodsModule</span>
+
+  <span class="k">def</span> <span class="nf">foo</span>
+      <span class="ss">:foo</span>
+  <span class="k">end</span>
+
+  <span class="k">module</span> <span class="nn">ClassMethods</span>
+      <span class="k">def</span> <span class="nf">bar</span>
+          <span class="ss">:bar</span>
+      <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Baz</span>
+  <span class="kp">include</span> <span class="no">Foo</span>
+<span class="k">end</span>
+
+<span class="no">Baz</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># =&gt; :foo</span>
+<span class="no">Ba</span><span class="o">.</span><span class="n">bar</span>      <span class="c1"># =&gt; :bar</span>
+</pre></div>
+
+<h2>
+<a name="configuration-handling" class="anchor" href="#configuration-handling"><span class="octicon octicon-link"></span></a>Configuration Handling</h2>
+
+<p>{Filigree::Configuration} will help you parse command line options:</p>
+
+<div class="highlight highlight-Ruby"><pre><span class="k">class</span> <span class="nc">MyConfig</span>
+  <span class="kp">include</span> <span class="no">Filigree</span><span class="o">::</span><span class="no">Configuration</span>
+
+  <span class="n">add_option</span> <span class="no">Filigree</span><span class="o">::</span><span class="no">Configuration</span><span class="o">::</span><span class="no">HELP_OPTION</span>
+
+  <span class="n">help</span> <span class="s1">'Sets the target'</span>
+  <span class="n">required</span>
+  <span class="n">string_option</span> <span class="s1">'target'</span><span class="p">,</span> <span class="s1">'t'</span>
+
+  <span class="n">help</span> <span class="s1">'Set the port for the target'</span>
+  <span class="n">default</span> <span class="mi">1025</span>
+  <span class="n">option</span> <span class="s1">'port'</span><span class="p">,</span> <span class="s1">'p'</span><span class="p">,</span> <span class="ss">conversions</span><span class="p">:</span> <span class="o">[</span><span class="ss">:to_i</span><span class="o">]</span>
+
+  <span class="n">help</span> <span class="s1">'Set credentials'</span>
+  <span class="n">default</span> <span class="o">[</span><span class="s1">'user'</span><span class="p">,</span> <span class="s1">'password'</span><span class="o">]</span>
+  <span class="n">option</span> <span class="s1">'credentials'</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">,</span> <span class="ss">conversions</span><span class="p">:</span> <span class="o">[</span><span class="ss">:to_s</span><span class="p">,</span> <span class="ss">:to_s</span><span class="o">]</span>
+
+  <span class="n">help</span> <span class="s1">'Be verbose'</span>
+  <span class="n">bool_option</span> <span class="s1">'verbose'</span><span class="p">,</span> <span class="s1">'v'</span>
+
+  <span class="n">auto</span> <span class="s1">'next_port'</span> <span class="p">{</span> <span class="nb">self</span><span class="o">.</span><span class="n">port</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">}</span>
+
+  <span class="n">help</span> <span class="s1">'load data from file'</span>
+  <span class="n">option</span> <span class="s1">'file'</span><span class="p">,</span> <span class="s1">'f'</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span>
+    <span class="n">process_file</span> <span class="n">f</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1"># Defaults to parsing ARGV</span>
+<span class="n">conf</span> <span class="o">=</span> <span class="no">MyConfig</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">[</span><span class="s1">'-t'</span><span class="p">,</span> <span class="s1">'localhost'</span><span class="p">,</span> <span class="s1">'-v'</span><span class="o">]</span><span class="p">)</span>
+
+<span class="n">conf</span><span class="o">.</span><span class="n">target</span>    <span class="c1"># =&gt; 'localhost'</span>
+<span class="n">conf</span><span class="o">.</span><span class="n">next_port</span> <span class="c1"># =&gt; 1026</span>
+
+<span class="c1"># You can searialize configurations to a strings, file, or IO objects</span>
+<span class="n">serialized_config</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">dump</span>
+<span class="c1"># And then load the configuration from the serialized version</span>
+<span class="n">conf</span> <span class="o">=</span> <span class="no">MyConfig</span><span class="o">.</span><span class="n">new</span> <span class="n">serialized_config</span>
+</pre></div>
+
+<h2>
+<a name="command-handling" class="anchor" href="#command-handling"><span class="octicon octicon-link"></span></a>Command Handling</h2>
+
+<p>Now that we can parse configuration options, how about we handle commands?</p>
+
+<div class="highlight highlight-Ruby"><pre><span class="k">class</span> <span class="nc">MyCommands</span>
+  <span class="kp">include</span> <span class="no">Filigree</span><span class="o">::</span><span class="no">Commands</span>
+
+  <span class="n">help</span> <span class="s1">'Adds two numbers together'</span>
+  <span class="n">param</span> <span class="s1">'x'</span><span class="p">,</span> <span class="s1">'The first number to add'</span>
+  <span class="n">param</span> <span class="s1">'y'</span><span class="p">,</span> <span class="s1">'The second number to add'</span>
+  <span class="n">command</span> <span class="s1">'add'</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">|</span>
+    <span class="n">x</span><span class="o">.</span><span class="n">to_i</span> <span class="o">+</span> <span class="n">y</span><span class="o">.</span><span class="n">to_i</span>
+  <span class="k">end</span>
+
+  <span class="n">help</span> <span class="s1">'Say hello from the command handler'</span>
+  <span class="n">config</span> <span class="k">do</span>
+    <span class="n">default</span> <span class="s1">'world'</span>
+    <span class="n">string_option</span> <span class="s1">'subject'</span><span class="p">,</span> <span class="s1">'s'</span> 
+  <span class="k">end</span>
+  <span class="n">command</span> <span class="s1">'hello'</span> <span class="k">do</span>
+    <span class="s2">"hello </span><span class="si">#{</span><span class="n">subject</span><span class="si">}</span><span class="s2">"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">mc</span> <span class="o">=</span> <span class="no">MyCommands</span><span class="o">.</span><span class="n">new</span>
+
+<span class="n">mc</span><span class="o">.</span><span class="p">(</span><span class="s1">'add 35 7'</span><span class="p">)</span>       <span class="c1"># =&gt; 42</span>
+<span class="n">mc</span><span class="o">.</span><span class="p">(</span><span class="s1">'hello'</span><span class="p">)</span>          <span class="c1"># =&gt; 'hello world'</span>
+<span class="n">mc</span><span class="o">.</span><span class="p">(</span><span class="s1">'hello -s chris'</span><span class="p">)</span> <span class="c1"># =&gt; 'hello chris'</span>
+</pre></div>
+
+<h2>
+<a name="type-checking" class="anchor" href="#type-checking"><span class="octicon octicon-link"></span></a>Type Checking</h2>
+
+<p>Filigree provides two ways to perform basic type checking at run time:</p>
+
+<ol>
+<li>{check_type} and {check_array_type}</li>
+<li>{Filigree::TypedClass}</li>
+</ol><p>The first option will simply check the type of an object or an array of objects.  Optionally, you can assign blame to a named variable, allow the value to be nil, or perform strict checking.  Strict checking uses the <code>instance_of?</code> method while non-strict checking uses <code>is_a?</code>.</p>
+
+<p>The second option works like so:</p>
+
+<div class="highlight highlight-Ruby"><pre><span class="k">class</span> <span class="nc">Foo</span>
+    <span class="kp">include</span> <span class="no">Filigree</span><span class="o">::</span><span class="no">TypedClass</span>
+
+    <span class="n">typed_ivar</span> <span class="ss">:bar</span><span class="p">,</span> <span class="nb">Integer</span>
+    <span class="n">typed_ivar</span> <span class="ss">:baz</span><span class="p">,</span> <span class="nb">String</span>
+
+    <span class="n">default_constructor</span>
+<span class="k">end</span>
+
+<span class="n">var</span> <span class="o">=</span> <span class="no">Foo</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="s1">'42'</span><span class="p">)</span>
+<span class="n">var</span><span class="o">.</span><span class="n">bar</span> <span class="o">=</span> <span class="s1">'42'</span> <span class="c1"># Raises a TypeError</span>
+</pre></div>
+
+<h2>
+<a name="arraymap" class="anchor" href="#arraymap"><span class="octicon octicon-link"></span></a>Array#map</h2>
+
+<p>The Array class has been monkey patched so that it takes an optional symbol argument.  If it is provided, the symbol is sent to each of the objects in the array and the result is used for the new array.</p>
+
+<div class="highlight highlight-Ruby"><pre><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="o">].</span><span class="n">map</span> <span class="ss">:to_sym</span> <span class="c1"># =&gt; [:1, :2, :3, :4]</span>
+</pre></div>
+
+<h2>
+<a name="contributing" class="anchor" href="#contributing"><span class="octicon octicon-link"></span></a>Contributing</h2>
+
+<p>Do you have bits of code that you use in all of your projects but arn't big enough for theirn own gem?  Well, maybe your code could find a home in Filigree!  Send me a patch that includes the useful bits and some tests and I'll se about adding it.</p>
+
+<p>Other than that, what Filigree really needs is uses.  Add it to your project and let me know what features you use and which you don't; where you would like to see improvements, and what pieces you really liked.  Above all, submit issues if you encountere any bugs!</p>
 
 <p><a href="https://bitdeli.com/free" title="Bitdeli Badge"><img src="https://d2weczhvl823v0.cloudfront.net/chriswailes/filigree/trend.png" alt="Bitdeli Badge"></a></p>
         </section>
