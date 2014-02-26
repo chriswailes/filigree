@@ -101,13 +101,13 @@ class ConfigurationTester < Minitest::Test
 		
 		conf = TestConfig.new yaml_string
 		
-		assert_equal 60,			conf.moo
+		assert_equal 60,            conf.moo
 		assert_equal 'hello world',	conf.foo
-		assert_equal 32,			conf.bar
-		assert_equal [:a, :b],		conf.baz
+		assert_equal 32,            conf.bar
+		assert_equal [:a, :b],      conf.baz
 		
-		yaml_file		= Tempfile.new 'tc_configuration_serialization'
-		yaml_file_path	= yaml_file.path
+		yaml_file      = Tempfile.new 'tc_configuration_serialization'
+		yaml_file_path = yaml_file.path
 		yaml_file.close
 		
 		# Dump the file.
@@ -116,10 +116,10 @@ class ConfigurationTester < Minitest::Test
 		# Load the configuration from the file.
 		conf = File.open(yaml_file_path, 'r') { |f| TestConfig.new f }
 		
-		assert_equal 60,			conf.moo
-		assert_equal 'hello world',	conf.foo
-		assert_equal 32,			conf.bar
-		assert_equal [:a, :b],		conf.baz
+		assert_equal 60,            conf.moo
+		assert_equal 'hello world', conf.foo
+		assert_equal 32,            conf.bar
+		assert_equal [:a, :b],      conf.baz
 		
 		# Remove the file.
 		FileUtils.rm yaml_file_path
@@ -133,10 +133,10 @@ class ConfigurationTester < Minitest::Test
 		# Load the configuration again.
 		conf = TestConfig.new yaml_file_path
 		
-		assert_equal 60,			conf.moo
-		assert_equal 'hello world',	conf.foo
-		assert_equal 32,			conf.bar
-		assert_equal [:a, :b],		conf.baz
+		assert_equal 60,            conf.moo
+		assert_equal 'hello world', conf.foo
+		assert_equal 32,            conf.bar
+		assert_equal [:a, :b],      conf.baz
 		
 		#########################
 		# Partial Serialization #

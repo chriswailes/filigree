@@ -7,7 +7,6 @@
 ############
 
 * Switch to using refinements once Ruby 2.1 is more common.
-* Complete documentation.
 * Move help option and command testing to unit tests.
 
 ###############
