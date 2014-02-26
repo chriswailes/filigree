@@ -1,7 +1,7 @@
 Filigree: For more beautiful Ruby
 =================================
 
-Filigree is a collection of classes, modules, and functions that I found myself re-writing in each of my projects.  In addition, I have thrown in a couple of other features that I've always wanted.  Here are some of Filigree's features:
+Filigree is a collection of classes, modules, and functions that I found myself re-writing in each of my projects.  In addition, I have thrown in a couple of other features that I've always wanted.  Here are some of those features:
 
 * Abstract classes and methods
 * An implementation of pattern matching
