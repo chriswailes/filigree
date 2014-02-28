@@ -317,15 +317,6 @@ var = Foo.new(42, '42')
 var.bar = '42' # Raises a TypeError
 ```
 
-Array#map
----------
-
-The Array class has been monkey patched so that it takes an optional symbol argument.  If it is provided, the symbol is sent to each of the objects in the array and the result is used for the new array.
-
-```Ruby
-[1, 2, 3, 4].map :to_s # => ['1', '2', '3', '4']
-```
-
 Contributing
 ------------
 

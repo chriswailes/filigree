@@ -12,7 +12,6 @@
 # Filigree
 require 'filigree/abstract_class'
 require 'filigree/application'
-require 'filigree/array'
 require 'filigree/boolean'
 require 'filigree/class'
 require 'filigree/class_methods_module'
