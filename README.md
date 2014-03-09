@@ -1,8 +1,8 @@
 Filigree: For more beautiful Ruby
 =================================
 
-<div style="float: left">
-![Filigree: For more beautiful Ruby](https://github.com/chriswailes/filigree/raw/master/resources/filigree_logo_large.jpg)
+<div style="float: left; padding-right: 25px">
+<img src="https://raw.github.com/chriswailes/filigree/master/resources/filigree_logo_large.jpg" alt="Filigree: For more beautiful Ruby" height=256 width=256>
 </div>
 
 Filigree is a collection of classes, modules, and functions that I found myself re-writing in each of my projects.  In addition, I have thrown in a couple of other features that I've always wanted.  Most of these features can be used independently.  Bellow is a list of many of the files and the features that each file provides:
