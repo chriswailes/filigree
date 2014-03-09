@@ -224,7 +224,7 @@ module Filigree
 			comm_list = self.class.command_list
 		
 			sorted_comm_list = comm_list.sort { |a, b| a.name <=> b.name }
-			max_length       = comm_list.map(&:name).inject(0) { |max, str| max <= str.length ? str.length : max }
+			max_length       = comm_list.lazy.map { |opt| opt.name.length }.max
 		
 		
 			sorted_comm_list.each do |comm|

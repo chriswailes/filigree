@@ -378,9 +378,9 @@ module Filigree
 			# @return [String]
 			def self.to_s(options, indent = 0)
 				lines = []
-			
-				max_long  = options.inject(0) { |max, opt| max <= opt.long.length  ? opt.long.length  : max }
-				max_short = options.inject(0) { |max, opt| !opt.short.nil? && max <= opt.short.length ? opt.short.length : max }
+				
+				max_long  = options.lazy.map { |opt| opt.long.length }.max
+				max_short = options.lazy.map(&:short).reject { |opt| opt.nil? }.map(&:length).max
 		
 				options.each do |opt|
 					lines << opt.to_s(max_long, max_short, indent)
