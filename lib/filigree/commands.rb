@@ -10,7 +10,6 @@
 # Standard Library
 
 # Filigree
-require 'filigree/array'
 require 'filigree/class_methods_module'
 require 'filigree/configuration'
 
@@ -85,7 +84,7 @@ module Filigree
 			# @return [void]
 			def add_command(command_obj)
 				@command_list << command_obj
-				namespace = reify_namespace(command_obj.name.split.map(:to_sym))
+				namespace = reify_namespace(command_obj.name.split.map(&:to_sym))
 				namespace[:nil] = command_obj
 			end
 			
@@ -225,7 +224,7 @@ module Filigree
 			comm_list = self.class.command_list
 		
 			sorted_comm_list = comm_list.sort { |a, b| a.name <=> b.name }
-			max_length       = comm_list.map(:name).inject(0) { |max, str| max <= str.length ? str.length : max }
+			max_length       = comm_list.map(&:name).inject(0) { |max, str| max <= str.length ? str.length : max }
 		
 		
 			sorted_comm_list.each do |comm|
