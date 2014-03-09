@@ -7,15 +7,15 @@ Filigree: For more beautiful Ruby
 
 Filigree is a collection of classes, modules, and functions that I found myself re-writing in each of my projects.  In addition, I have thrown in a couple of other features that I've always wanted.  Most of these features can be used independently.  Bellow is a list of many of the files and the features that each file provides:
 
-* **filigree/abstract_class.rb** - Abstract class and method implementations
-* **filigree/application.rb** - A basic application framework
-* **filigree/class_methods_module.rb** - Easy way to include class methods in a mixin
-* **filigree/commands.rb** - Framework for defining and processing command lines
-* **filigree/configuration.rb** - Framework for parsing configuration strings
-* **filigree/match.rb** - An implementation of pattern matching for Ruby
-* **filigree/request_file.rb** - Conditionally do something if a file can be included; great for Rakefiles
-* **filigree/types.rb** - Helper functions/classes for type checking ruby code; great for FFI integration
-* **filigree/visitor.rb** - Implementation of the Visitor pattern based on pattern matching library
+* **filigree/abstract_class** - Abstract class and method implementations
+* **filigree/application** - A basic application framework
+* **filigree/class_methods_module** - Easy way to include class methods in a mixin
+* **filigree/commands** - Framework for defining and processing command lines
+* **filigree/configuration** - Framework for parsing configuration strings
+* **filigree/match** - An implementation of pattern matching for Ruby
+* **filigree/request_file** - Conditionally do something if a file can be included; great for Rakefiles
+* **filigree/types** - Helper functions/classes for type checking ruby code; great for FFI integration
+* **filigree/visitor** - Implementation of the Visitor pattern based on pattern matching library
 
 The above is not a complete list of files provided by this gem, and the documentation bellow only covers the most important features of the library.  Explore the rest of the documentation to discover additional features.
 
