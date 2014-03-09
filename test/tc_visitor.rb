@@ -157,7 +157,30 @@ class VisitorTester < Minitest::Test
 		end
 	end
 	
+	class NumericVisitor
+		include Filigree::Visitor
+		
+		on Numeric do |n|
+			"Numeric: #{n}"
+		end
+	end
+	
+	class SubclassVisitor < NumericVisitor
+		on Integer do |i|
+			"Integer: #{i}"
+		end
+	end
+	
 	def setup
+	end
+	
+	def test_inheritance
+		sv = SubclassVisitor.new
+		
+		assert_equal "Numeric: 3.1415296", sv.visit(3.1415296)
+		assert_equal "Integer: 42",        sv.visit(42)
+		
+		assert_raises(MatchError) { sv.visit(:hoopy) }
 	end
 	
 	def test_simple_visitor

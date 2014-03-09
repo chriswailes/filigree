@@ -88,11 +88,38 @@ module Filigree
 				LiteralPattern.new(obj)
 			end
 			
+			# Inserts a new pattern in the appropriate place in the patterns
+			# list.
+			#
+			# @param [OuterPattern]  new_pat  New pattern to add
+			#
+			# @return [void]
+			def add_pattern(new_pat)
+				@patterns.each_with_index do |old_pat, index|
+					if new_pat > old_pat
+						@patterns.insert(index, new_pat)
+						return
+					end
+				end
+				
+				@patterns << new_pat
+			end
+			
+			# A callback used to pass patterns declared in a parent class to
+			# a subclass.
+			#
+			# @param [Class]  klass  Subclass
+			#
+			# @return [void]
+			def inherited(klass)
+				klass.install_icvars(@patterns.clone)
+			end
+			
 			# Install the instance class variables in the including class.
 			#
 			# @return [void]
-			def install_icvars
-				@patterns = Array.new
+			def install_icvars(inherited_patterns = Array.new)
+				@patterns = inherited_patterns
 				@deferred = Array.new
 			end
 			
@@ -106,8 +133,9 @@ module Filigree
 			# @return [void]
 			def on(*pattern, &block)
 				guard = if pattern.last.is_a?(Proc) then pattern.pop end 
-		
-				@patterns << (mp = OuterPattern.new(pattern, guard, block))
+				
+				pattern = Filigree::wrap_pattern_elements(pattern)
+				add_pattern (mp = OuterPattern.new(pattern, guard, block))
 		
 				if block
 					@deferred.each { |pattern| pattern.block = block }
