@@ -9,6 +9,7 @@
 * Switch to using refinements once Ruby 2.1 is more common.
 * Move help option and command testing to unit tests.
 * Add more unit tests for the Visitor pattern ordering.
+* Add support for including one Visitor in another?
 
 ###############
 # Crazy Ideas #

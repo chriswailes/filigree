@@ -302,9 +302,7 @@ module Filigree
 		# @return [Integer]  Value corresponding to less than, equal to, or
 		#   greater than the right-hand side pattern.
 		def <=>(other)
-			PATTERN_WEIGHTS[self.class] - (other.class == BindingPattern ?
-			                                 PATTERN_WEIGHTS[other.pattern_elem.class] :
-			                                 PATTERN_WEIGHTS[other.class])
+			self.weight - other.weight
 		end
 		
 		# Wraps this pattern in a {BindingPattern}, causing the object that
@@ -325,6 +323,10 @@ module Filigree
 		# @return [true]
 		def match?(_, _)
 			true
+		end
+		
+		def weight
+			4
 		end
 	end
 	
@@ -372,6 +374,10 @@ module Filigree
 		def match?(object, _)
 			object.is_a?(@pattern_elem)
 		end
+		
+		def weight
+			3
+		end
 	end
 	
 	# A pattern that forces an equality comparison
@@ -383,6 +389,10 @@ module Filigree
 		# @return [Boolean]
 		def match?(object, _)
 			object == @pattern_elem
+		end
+		
+		def weight
+			0
 		end
 	end
 	
@@ -400,6 +410,10 @@ module Filigree
 				env.send("match_data=", md) if match
 			end
 		end
+		
+		def weight
+			2
+		end
 	end
 	
 	# A pattern that binds a sub-pattern's matching object to a name in the
@@ -407,17 +421,6 @@ module Filigree
 	class BindingPattern < SingleObjectPattern
 		
 		attr_writer :pattern_elem
-		
-		# Specialized version of the bi-directional comparison operator that
-		# unwraps the bound pattern.
-		#
-		# @param [BasicPattern]  other  Right-hand side of the comparison
-		#
-		# @return [Integer]  Value corresponding to less than, equal to, or
-		#   greater than the right-hand side pattern.
-		def <=>(other)
-			@pattern_elem <=> other
-		end
 		
 		# Create a new binding pattern.
 		#
@@ -443,6 +446,10 @@ module Filigree
 		def match?(object, env)
 			@pattern_elem.match?(object, env).tap { |match| env.send("#{@name}=", object) if match }
 		end
+		
+		def weight
+			@pattern_elem.weight
+		end
 	end
 	
 	# An abstract class that matches multiple objects to multiple patterns.
@@ -467,9 +474,11 @@ module Filigree
 		# @return [Integer]  Value corresponding to less than, equal to, or
 		#   greater than the right-hand side pattern.
 		def base_compare(other)
-			arity_comp = self.pattern.length <=> other.pattern.length
-			
-			arity_comp == 0 ? yield : arity_comp
+			if self.pattern.length == other.pattern.length
+				yield
+			else
+				self.pattern.length - other.pattern.length
+			end
 		end
 		
 		# Test multiple objects against multiple pattern elements.
@@ -583,14 +592,11 @@ module Filigree
 		def match?(object, env)
 			object.is_a?(@klass) and super(object.destructure(@pattern.length), env)
 		end
+		
+		def weight
+			1
+		end
 	end
-	
-	# Weights used when comparing two patterns.
-	PATTERN_WEIGHTS = { LiteralPattern       => 0,
-	                    DestructuringPattern => 1,
-	                    RegexpPattern        => 2,
-	                    InstancePattern      => 3,
-	                    WildcardPattern      => 4  }
 end
 
 ###################################
