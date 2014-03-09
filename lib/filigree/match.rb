@@ -503,6 +503,7 @@ module Filigree
 	# The class that contains all of the pattern elements passed to a with clause.
 	class OuterPattern < MultipleObjectPattern
 		attr_writer :block
+		attr_reader :guard
 		
 		# Specialized version of the bi-directional comparison operator.
 		#
@@ -512,9 +513,16 @@ module Filigree
 		#   greater than the right-hand side pattern.
 		def <=>(other)
 			base_compare(other) do
+				comp_res =
 				self.pattern.zip(other.pattern).inject(0) do |total, pair|
 					total + (pair.first <=> pair.last)
 				end <=> 0
+				
+				if comp_res == 0
+					self.guard ? (other.guard ? 0 : 1) : (other.guard ? -1 : comp_res)
+				else
+					comp_res
+				end
 			end
 		end
 		
@@ -553,6 +561,9 @@ module Filigree
 	# that the values contained by the object may be matched upon.
 	class DestructuringPattern < MultipleObjectPattern
 		
+		# @return [Class]
+		attr_reader :klass
+		
 		# Specialized version of the bi-directional comparison operator.
 		#
 		# @param [BasicPattern]  other  Right-hand side of the comparison
@@ -561,10 +572,15 @@ module Filigree
 		#   greater than the right-hand side pattern.
 		def <=>(other)
 			if other.is_a?(DestructuringPattern)
-				base_compare(other) do
-					self.pattern.zip(other.pattern).inject(0) do |total, pair|
-						total + (pair.first <=> pair.last)
-					end / self.pattern.length
+				if self.klass == other.klass
+					base_compare(other) do
+						self.pattern.zip(other.pattern).inject(0) do |total, pair|
+							total + (pair.first <=> pair.last)
+						end / self.pattern.length
+					end
+					
+				elsif self.klass.subclass_of?(other.klass) then  1
+				else                                            -1
 				end
 				
 			else
