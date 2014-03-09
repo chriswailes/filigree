@@ -1,17 +1,19 @@
 Filigree: For more beautiful Ruby
 =================================
 
-Filigree is a collection of classes, modules, and functions that I found myself re-writing in each of my projects.  In addition, I have thrown in a couple of other features that I've always wanted.  Here are some of those features:
+Filigree is a collection of classes, modules, and functions that I found myself re-writing in each of my projects.  In addition, I have thrown in a couple of other features that I've always wanted.  Most of these features can be used independently.  Bellow is a list of many of the files and the features that each file provides:
 
-* Abstract classes and methods
-* An implementation of pattern matching
-* An implementation of the visitor pattern
-* Module for defining class methods in a mixin
-* Modules for configuration and command handling
-* Easy dynamic type checking
-* Small extensions to standard library classes
+* **filigree/abstract_class.rb** - Abstract class and method implementations
+* **filigree/application.rb** - A basic application framework
+* **filigree/class_methods_module.rb** - Easy way to include class methods in a mixin
+* **filigree/commands.rb** - Framework for defining and processing command lines
+* **filigree/configuration.rb** - Framework for parsing configuration strings
+* **filigree/match.rb** - An implementation of pattern matching for Ruby
+* **filigree/request_file.rb** - Conditionally do something if a file can be included; great for Rakefiles
+* **filigree/types.rb** - Helper functions/classes for type checking ruby code; great for FFI integration
+* **filigree/visitor.rb** - Implementation of the Visitor pattern based on pattern matching library
 
-I'm going to go over some of the more important features below, but I won't be able to cover everything.  Explore the rest of the documentation to discover additional features.
+The above is not a complete list of files provided by this gem, and the documentation bellow only covers the most important features of the library.  Explore the rest of the documentation to discover additional features.
 
 Abstract Classes and Methods
 ----------------------------
@@ -130,7 +132,7 @@ match Foo.new(4, 2) do
 end
 ```
 
-Of particular note is the destructuring of arrays.  When an array is destructured like so, `Array.(xs)`, the array is bound to `xs`.  If an additional pattern is added, `Array.(x, xs)`, then `x` will hold the first element of the array and `xs` will hold the remailing characters.  As more patterns are added more elements will be pulled off of the front of the array.  You can match an array with a specific number of elements by using an empty array litteral: `Array.(x, [])`
+Of particular note is the destructuring of arrays.  When an array is destructured like so, `Array.(xs)`, the array is bound to `xs`.  If an additional pattern is added, `Array.(x, xs)`, then `x` will hold the first element of the array and `xs` will hold the remaining characters.  As more patterns are added more elements will be pulled off of the front of the array.  You can match an array with a specific number of elements by using an empty array literal: `Array.(x, [])`
 
 Both `match` and `with` can take multiple arguments.  When this happens, each object is paired up with the corresponding pattern.  If they all match, then the `with` clause matches.  In this way you can match against tuples.
 
@@ -183,6 +185,16 @@ mv = MathVisitor.new
 mv.visit(Add.new(6, 8)) # => 14
 mv.visit(Mul.new(7, 6)) # => 42
 ```
+
+The only complicated aspect of the Visitor mixin is the method used to select the order in which the patterns are tested.  If patterns were tested in order of definition then a subclass of a visitor would be unable to define a more specific pattern than one defined int he parent visitor.  To address this issue the most _specific_ patterns are tested first.  This gets a bit complicated when it gets to destructuring patterns, but most cases are fairly simple.  Pattern specificity is as follows:
+
+1. Literals
+2. Destructurings
+3. Regular expressions
+4. Instances
+5. Wildcard
+
+There are special rules for destructuring and instance patterns.  In both cases, a pattern for a subclass is preferred to a pattern for a superclass.  Destructuring patterns have the additional rule that longer, more specific destructurings are preferred to shorter, less specific destructurings.  Lastly, any pattern that has a guard expression is more specific than an otherwise equivalent expression that doesn't have a guard expression.
 
 Class Methods
 -------------
