@@ -34,17 +34,32 @@
           <h1>
 <a name="filigree-for-more-beautiful-ruby" class="anchor" href="#filigree-for-more-beautiful-ruby"><span class="octicon octicon-link"></span></a>Filigree: For more beautiful Ruby</h1>
 
-<p>Filigree is a collection of classes, modules, and functions that I found myself re-writing in each of my projects.  In addition, I have thrown in a couple of other features that I've always wanted.  Here are some of those features:</p>
+<div>
+<img src="https://raw.github.com/chriswailes/filigree/master/resources/filigree_logo_large.jpg" alt="Filigree: For more beautiful Ruby" height="256" width="256">
+</div>
+
+<p>Filigree is a collection of classes, modules, and functions that I found myself re-writing in each of my projects.  In addition, I have thrown in a couple of other features that I've always wanted.  Most of these features can be used independently.  Bellow is a list of many of the files and the features that each file provides:</p>
 
 <ul>
-<li>Abstract classes and methods</li>
-<li>An implementation of pattern matching</li>
-<li>An implementation of the visitor pattern</li>
-<li>Module for defining class methods in a mixin</li>
-<li>Modules for configuration and command handling</li>
-<li>Easy dynamic type checking</li>
-<li>Small extensions to standard library classes</li>
-</ul><p>I'm going to go over some of the more important features below, but I won't be able to cover everything.  Explore the rest of the documentation to discover additional features.</p>
+<li>
+<strong>filigree/abstract_class.rb</strong> - Abstract class and method implementations</li>
+<li>
+<strong>filigree/application.rb</strong> - A basic application framework</li>
+<li>
+<strong>filigree/class_methods_module.rb</strong> - Easy way to include class methods in a mixin</li>
+<li>
+<strong>filigree/commands.rb</strong> - Framework for defining and processing command lines</li>
+<li>
+<strong>filigree/configuration.rb</strong> - Framework for parsing configuration strings</li>
+<li>
+<strong>filigree/match.rb</strong> - An implementation of pattern matching for Ruby</li>
+<li>
+<strong>filigree/request_file.rb</strong> - Conditionally do something if a file can be included; great for Rakefiles</li>
+<li>
+<strong>filigree/types.rb</strong> - Helper functions/classes for type checking ruby code; great for FFI integration</li>
+<li>
+<strong>filigree/visitor.rb</strong> - Implementation of the Visitor pattern based on pattern matching library</li>
+</ul><p>The above is not a complete list of files provided by this gem, and the documentation bellow only covers the most important features of the library.  Explore the rest of the documentation to discover additional features.</p>
 
 <h2>
 <a name="abstract-classes-and-methods" class="anchor" href="#abstract-classes-and-methods"><span class="octicon octicon-link"></span></a>Abstract Classes and Methods</h2>
@@ -157,7 +172,7 @@ another, or one class to another, you can force the comparison using the {Filigr
 <span class="k">end</span>
 </pre></div>
 
-<p>Of particular note is the destructuring of arrays.  When an array is destructured like so, <code>Array.(xs)</code>, the array is bound to <code>xs</code>.  If an additional pattern is added, <code>Array.(x, xs)</code>, then <code>x</code> will hold the first element of the array and <code>xs</code> will hold the remailing characters.  As more patterns are added more elements will be pulled off of the front of the array.  You can match an array with a specific number of elements by using an empty array litteral: <code>Array.(x, [])</code></p>
+<p>Of particular note is the destructuring of arrays.  When an array is destructured like so, <code>Array.(xs)</code>, the array is bound to <code>xs</code>.  If an additional pattern is added, <code>Array.(x, xs)</code>, then <code>x</code> will hold the first element of the array and <code>xs</code> will hold the remaining characters.  As more patterns are added more elements will be pulled off of the front of the array.  You can match an array with a specific number of elements by using an empty array literal: <code>Array.(x, [])</code></p>
 
 <p>Both <code>match</code> and <code>with</code> can take multiple arguments.  When this happens, each object is paired up with the corresponding pattern.  If they all match, then the <code>with</code> clause matches.  In this way you can match against tuples.</p>
 
@@ -208,6 +223,16 @@ another, or one class to another, you can force the comparison using the {Filigr
 <span class="n">mv</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="no">Add</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span> <span class="c1"># =&gt; 14</span>
 <span class="n">mv</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="no">Mul</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span> <span class="c1"># =&gt; 42</span>
 </pre></div>
+
+<p>The only complicated aspect of the Visitor mixin is the method used to select the order in which the patterns are tested.  If patterns were tested in order of definition then a subclass of a visitor would be unable to define a more specific pattern than one defined int he parent visitor.  To address this issue the most <em>specific</em> patterns are tested first.  This gets a bit complicated when it gets to destructuring patterns, but most cases are fairly simple.  Pattern specificity is as follows:</p>
+
+<ol>
+<li>Literals</li>
+<li>Destructurings</li>
+<li>Regular expressions</li>
+<li>Instances</li>
+<li>Wildcard</li>
+</ol><p>There are special rules for destructuring and instance patterns.  In both cases, a pattern for a subclass is preferred to a pattern for a superclass.  Destructuring patterns have the additional rule that longer, more specific destructurings are preferred to shorter, less specific destructurings.  Lastly, any pattern that has a guard expression is more specific than an otherwise equivalent expression that doesn't have a guard expression.</p>
 
 <h2>
 <a name="class-methods" class="anchor" href="#class-methods"><span class="octicon octicon-link"></span></a>Class Methods</h2>
@@ -336,14 +361,6 @@ another, or one class to another, you can force the comparison using the {Filigr
 
 <span class="n">var</span> <span class="o">=</span> <span class="no">Foo</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="s1">'42'</span><span class="p">)</span>
 <span class="n">var</span><span class="o">.</span><span class="n">bar</span> <span class="o">=</span> <span class="s1">'42'</span> <span class="c1"># Raises a TypeError</span>
-</pre></div>
-
-<h2>
-<a name="arraymap" class="anchor" href="#arraymap"><span class="octicon octicon-link"></span></a>Array#map</h2>
-
-<p>The Array class has been monkey patched so that it takes an optional symbol argument.  If it is provided, the symbol is sent to each of the objects in the array and the result is used for the new array.</p>
-
-<div class="highlight highlight-Ruby"><pre><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="o">].</span><span class="n">map</span> <span class="ss">:to_sym</span> <span class="c1"># =&gt; [:1, :2, :3, :4]</span>
 </pre></div>
 
 <h2>
