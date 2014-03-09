@@ -1,6 +1,8 @@
 Filigree: For more beautiful Ruby
 =================================
 
+![Filigree: For more beautiful Ruby](https://github.com/chriswailes/filigree/raw/master/resources/filigree_logo_small.png)
+
 Filigree is a collection of classes, modules, and functions that I found myself re-writing in each of my projects.  In addition, I have thrown in a couple of other features that I've always wanted.  Most of these features can be used independently.  Bellow is a list of many of the files and the features that each file provides:
 
 * **filigree/abstract_class.rb** - Abstract class and method implementations
