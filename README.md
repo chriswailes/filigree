@@ -119,7 +119,7 @@ Destructuring patterns allow you to match against an instance of a class, while 
 ```Ruby
 class Foo
   include Filigree::Destructurable
-    def initialize(a, b)
+  def initialize(a, b)
     @a = a
     @b = b
   end
