@@ -119,7 +119,7 @@ Destructuring patterns allow you to match against an instance of a class, while 
 ```Ruby
 class Foo
   include Filigree::Destructurable
-    def initialize(a, b)
+  def initialize(a, b)
     @a = a
     @b = b
   end
@@ -336,6 +336,8 @@ var.bar = '42' # Raises a TypeError
 Contributing
 ------------
 
-Do you have bits of code that you use in all of your projects but arn't big enough for theirn own gem?  Well, maybe your code could find a home in Filigree!  Send me a patch that includes the useful bits and some tests and I'll se about adding it.
+Do you have bits of code that you use in all of your projects but arn't big enough for theirn own gem?  Well, maybe your code could find a home in Filigree!  Send me a patch that includes the useful bits and some tests and I'll see about adding it.
 
-Other than that, what Filigree really needs is uses.  Add it to your project and let me know what features you use and which you don't; where you would like to see improvements, and what pieces you really liked.  Above all, submit issues if you encountere any bugs!
+Other than that, what Filigree really needs is users.  Add it to your project and let me know what features you use and which you don't; where you would like to see improvements, and what pieces you really liked.  Above all, submit issues if you encountere any bugs!
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/chriswailes/filigree/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
