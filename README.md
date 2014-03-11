@@ -336,8 +336,6 @@ var.bar = '42' # Raises a TypeError
 Contributing
 ------------
 
-Do you have bits of code that you use in all of your projects but arn't big enough for theirn own gem?  Well, maybe your code could find a home in Filigree!  Send me a patch that includes the useful bits and some tests and I'll see about adding it.
+Do you have bits of code that you use in all of your projects but arn't big enough for their own gem?  Well, maybe your code could find a home in Filigree!  Send me a patch that includes the useful bits and some tests and I'll see about adding it.
 
-Other than that, what Filigree really needs is users.  Add it to your project and let me know what features you use and which you don't; where you would like to see improvements, and what pieces you really liked.  Above all, submit issues if you encountere any bugs!
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/chriswailes/filigree/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+Other than that, what Filigree really needs is users.  Add it to your project and let me know what features you use and which you don't; where you would like to see improvements, and what pieces you really liked.  Above all, submit issues if you encounter any bugs!
