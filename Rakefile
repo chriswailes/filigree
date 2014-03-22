@@ -88,14 +88,14 @@ end
 
 request_file('yard', 'Yard is not installed.') do
 	YARD::Rake::YardocTask.new do |t|
-		t.options	= [
-			'--title',	'Filigree',
-			'-m',		'markdown',
-			'-M',		'redcarpet',
-			'-c',		'.yardoc/cache',
+		t.options = [
+			'--title',  'Filigree',
+			'-m',       'markdown',
+			'-M',       'redcarpet',
+			'-c',       '.yardoc/cache',
 			'--private'
 		]
 		
-		t.files	= Dir['lib/**/*.rb']
+		t.files = Dir['lib/**/*.rb']
 	end
 end

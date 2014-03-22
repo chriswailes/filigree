@@ -28,7 +28,7 @@ require 'filigree/class_methods_module'
 #
 # @return [Object] The object passed as parameter o.
 def check_type(obj, type, blame = nil, nillable = false, strict = false)
-	type_ok = if strict then obj.instance_of?(type) else obj.is_a?(type) end || (obj.nil? and nillable)	
+	type_ok = (obj.nil? and nillable) || strict ? obj.instance_of?(type) : obj.is_a?(type)
 	
 	if type_ok
 		obj
@@ -56,7 +56,7 @@ end
 # @return [Object] The object passed in parameter o.
 def check_array_type(array, type, blame = nil, nillable = false, strict = false)
 	array.each do |obj|
-		type_ok = if strict then obj.instance_of?(type) else obj.is_a?(type) end || (obj.nil? and nillable)
+		type_ok = (obj.nil? and nillable) || strict ? obj.instance_of?(type) : obj.is_a?(type)
 		
 		if not type_ok
 			if blame
