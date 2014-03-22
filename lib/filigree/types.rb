@@ -18,17 +18,17 @@ require 'filigree/class_methods_module'
 
 # A method for type checking Ruby values.
 #
-# @param [Object]       obj       Object to type check.
-# @param [Class]        type      Class the object should be an instance of.
-# @param [String, nil]  blame     Variable name to blame for failed type checks.
+# @param [Object]       obj       Object to type check
+# @param [Class]        type      Class the object should be an instance of
+# @param [String, nil]  blame     Variable name to blame for failed type checks
 # @param [Boolean]      nillable  Object can be nil?
-# @param [Boolean]      strict    Strict or non-strict checking.  Uses `instance_of?` and `is_a?` respectively.
+# @param [Boolean]      strict    Strict or non-strict checking.  Uses `instance_of?` and `is_a?` respectively
 #
-# @raise [ArgumentError] An error is raise if the type checking fails.
+# @raise [ArgumentError]  An error is raise if the type checking fails.
 #
-# @return [Object] The object passed as parameter o.
+# @return [Object]  The object passed as parameter obj
 def check_type(obj, type, blame = nil, nillable = false, strict = false)
-	type_ok = (obj.nil? and nillable) || strict ? obj.instance_of?(type) : obj.is_a?(type)
+	type_ok = (obj.nil? && nillable) || (strict ? obj.instance_of?(type) : obj.is_a?(type))
 	
 	if type_ok
 		obj
@@ -51,12 +51,12 @@ end
 # @param [Boolean]        nillable  Object can be nil?
 # @param [Boolean]        strict    Strict or non-strict checking.  Uses `instance_of?` and `is_a?` respectively.
 #
-# @raise [ArgumentError] An error is raise if the type checking fails.
+# @raise [ArgumentError]  An error is raise if the type checking fails
 #
-# @return [Object] The object passed in parameter o.
+# @return [Object]  The object passed in parameter array
 def check_array_type(array, type, blame = nil, nillable = false, strict = false)
 	array.each do |obj|
-		type_ok = (obj.nil? and nillable) || strict ? obj.instance_of?(type) : obj.is_a?(type)
+		type_ok = (obj.nil? && nillable) || (strict ? obj.instance_of?(type) : obj.is_a?(type))
 		
 		if not type_ok
 			if blame
