@@ -21,18 +21,18 @@ Gem::Specification.new do |s|
 			'Rakefile',
 			] +
 			Dir.glob('lib/**/*.rb')
-			
+	
+	s.test_files = Dir.glob('test/tc_*.rb') +
+	               Dir.glob('test/ts_*.rb')
 			
 	s.require_path	= 'lib'
 	
 	s.author		= 'Chris Wailes'
-	s.email		= 'chris.wailes@gmail.com'
+	s.email		= 'chris.wailes+filigree@gmail.com'
 	s.homepage	= 'https://github.com/chriswailes/filigree'
 	s.license		= 'University of Illinois/NCSA Open Source License'
 	
 	s.required_ruby_version = '>= 2.0.0'
-	
-	s.test_files = Dir.glob('test/tc_*.rb') + Dir.glob('test/ts_*.rb')
 	
 	################
 	# Dependencies #
