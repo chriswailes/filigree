@@ -15,7 +15,8 @@
 # Methods #
 ###########
 
-# Require a file, but fail gracefully if it isn't found.
+# Require a file, but fail gracefully if it isn't found.  If a block is given
+# it will be called if the file is successfully required.
 #
 # @param [String]   file           File to be requested
 # @param [Boolean]  print_failure  To print a message on failure or not
