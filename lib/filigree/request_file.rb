@@ -24,7 +24,7 @@ def request_file(file, print_failure = false)
 		require file
 		yield if block_given?
 	rescue LoadError
-		if print_warning.is_a?(String)
+		if print_failure.is_a?(String)
 			puts print_failure
 		elsif print_failure
 			puts "Unable to require file: #{file}"
