@@ -92,7 +92,6 @@ request_file('yard', 'Yard is not installed.') do
 			'--title',  'Filigree',
 			'-m',       'markdown',
 			'-M',       'redcarpet',
-			'-c',       '.yardoc/cache',
 			'--private'
 		]
 		
