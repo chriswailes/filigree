@@ -4,5 +4,5 @@
 # Description:	This file specifies the version number of Filigree.
 
 module Filigree
-	VERSION = '0.2.1'
+	VERSION = '0.3.0'
 end

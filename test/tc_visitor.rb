@@ -35,7 +35,7 @@ class VisitorTester < Minitest::Test
 		end
 		
 		def visit(visitor)
-			visitor.(self)
+			visitor.visit(self)
 		end
 	end
 	
@@ -186,12 +186,12 @@ class VisitorTester < Minitest::Test
 	def test_simple_visitor
 		sv = SimpleVisitor.new
 		
-		assert_equal :one,   sv.(1)
-		assert_equal :two,   sv.(:two)
-		assert_equal :three, sv.('three')
-		assert_equal :four,  sv.(Foo.new(4))
-		assert_equal :five,  sv.(Foo.new(5))
-		assert_equal :six,   sv.(Foo.new('six'))
+		assert_equal :one,   sv.visit(1)
+		assert_equal :two,   sv.visit(:two)
+		assert_equal :three, sv.visit('three')
+		assert_equal :four,  sv.visit(Foo.new(4))
+		assert_equal :five,  sv.visit(Foo.new(5))
+		assert_equal :six,   sv.visit(Foo.new('six'))
 	end
 	
 	def test_stateful_visitor
@@ -216,7 +216,7 @@ class VisitorTester < Minitest::Test
 	def test_visibility
 		hmv = HelperMethodVisitor.new
 		
-		assert_equal :foo, hmv.(Foo.new(42))
+		assert_equal :foo, hmv.visit(Foo.new(42))
 	end
 	
 	def test_visitable

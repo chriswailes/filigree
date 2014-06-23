@@ -35,7 +35,7 @@ module Filigree
 		# @return [Object]  Result of calling the matched pattern's block
 		#
 		# @raise [MatchError]  Raised when no matching pattern is found
-		def call(*objects)
+		def visit(*objects)
 			self.class.patterns.each do |pattern|
 				@match_bindings = OpenStruct.new
 		
@@ -45,7 +45,6 @@ module Filigree
 			# If we didn't find anything we raise a MatchError.
 			raise MatchError
 		end
-		alias :visit :call
 	
 		#############
 		# Callbacks #
@@ -176,8 +175,8 @@ module Filigree
 		# @param [Object]  objects  Objects to be visited
 		#
 		# @return [Array<Visitor>]  The wrapped visitors
-		def call(*objects)
-			@visitors.each { |visitor| visitor.(*objects) }
+		def visit(*objects)
+			@visitors.each { |visitor| visitor.visit(*objects) }
 		end
 		
 		# Construct a tour guide for a list of visitors.
@@ -203,7 +202,7 @@ module Filigree
 		def visit(visitor, method = :preorder)
 			case method
 			when :preorder
-				visitor.(self)
+				visitor.visit(self)
 				children.compact.each { |child| child.visit(visitor, :preorder) }
 			
 			when :inorder
@@ -211,12 +210,12 @@ module Filigree
 			
 				while node = nodes.shift
 					nodes += node.children.compact
-					visitor.(node)
+					visitor.visit(node)
 				end
 			
 			when :postorder
 				children.compact.each { |child| child.visit(visitor, :postorder) }
-				visitor.(self)
+				visitor.visit(self)
 			end
 		end
 	end
