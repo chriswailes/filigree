@@ -19,19 +19,19 @@ require 'filigree/boolean'
 
 class BooleanTester < Minitest::Test
 	def setup
-		
+
 	end
-	
+
 	def test_integer
 		assert  1.to_bool
 		assert 10.to_bool
 		assert !0.to_bool
 	end
-	
+
 	def test_true
 		assert_equal 1, true.to_i
 	end
-	
+
 	def test_false
 		assert_equal 0, false.to_i
 	end

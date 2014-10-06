@@ -18,7 +18,7 @@ require 'filigree/string'
 #######################
 
 class ObjectTester < Minitest::Test
-	
+
 	ORIGINAL = 'Hello, I am a test string. I am really long so that the string segmentation code can be tested.'
 	SEGMENTED = <<eos
 Hello, I am a test string.
@@ -26,10 +26,10 @@ Hello, I am a test string.
   the string segmentation
   code can be tested.
 eos
-	
+
 	def setup
 	end
-	
+
 	def test_segmentation
 		assert_equal SEGMENTED.chomp, ORIGINAL.segment(2, 30)
 	end

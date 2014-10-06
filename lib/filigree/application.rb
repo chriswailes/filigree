@@ -30,11 +30,11 @@ module Filigree
 	# the basic framework for larger desktop and command line applications.
 	module Application
 		include ClassMethodsModule
-	
+
 		#############
 		# Constants #
 		#############
-	
+
 		REQUIRED_METHODS = [
 			:kill,
 			:pause,
@@ -46,29 +46,29 @@ module Filigree
 		####################
 		# Instance Methods #
 		####################
-	
+
 		attr_accessor :configuration
 		alias :config :configuration
-	
+
 		def initialize
 			@configuration = self.class::Configuration.new
-		
+
 			# Set up signal handlers.
 			Signal.trap('ABRT') { self.stop }
 			Signal.trap('INT')  { self.stop }
 			Signal.trap('QUIT') { self.stop }
 			Signal.trap('TERM') { self.stop }
-		
+
 			Signal.trap('KILL') { self.kill }
-		
+
 			Signal.trap('CONT') { self.resume }
 			Signal.trap('STOP') { self.pause  }
 		end
-	
+
 		#################
 		# Class Methods #
 		#################
-	
+
 		module ClassMethods
 			# Check to make sure all of the required methods are defined.
 			#
@@ -82,7 +82,7 @@ module Filigree
 					end
 				end
 			end
-			
+
 			# Create a new instance of this application and run it.
 			#
 			# @return [Object]
@@ -90,11 +90,11 @@ module Filigree
 				self.new.run
 			end
 		end
-	
+
 		#############
 		# Callbacks #
 		#############
-	   
+
 		class << self
 			alias :old_included :included
 

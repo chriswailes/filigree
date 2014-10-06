@@ -19,25 +19,25 @@ require 'filigree/class'
 
 class ClassTester < Minitest::Test
 	module Foo; end
-	
+
 	class Bar
 		include Foo
-	
+
 		class Baf; end
 	end
-	
+
 	class Baz < Bar; end
-	
+
 	def setup
-		
+
 	end
-	
+
 	def test_class
 		assert Bar.includes_module?(Foo)
-		
-		assert_equal 'ClassTester::Bar::Baf', Bar::Baf.name 
+
+		assert_equal 'ClassTester::Bar::Baf', Bar::Baf.name
 		assert_equal 'Baf', Bar::Baf.short_name
-		
+
 		assert  Baz.subclass_of?(Bar)
 		assert !Baz.subclass_of?(Fixnum)
 		assert_raises(TypeError) { Baz.subclass_of?(1) }

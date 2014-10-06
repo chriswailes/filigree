@@ -20,13 +20,13 @@ require 'filigree/match'
 module Filigree
 	# An implementation of the Visitor pattern.
 	module Visitor
-	
+
 		include ClassMethodsModule
-	
+
 		####################
 		# Instance Methods #
 		####################
-		
+
 		# Find the correct pattern and execute its block on the provided
 		# objects.
 		#
@@ -38,18 +38,18 @@ module Filigree
 		def visit(*objects)
 			self.class.patterns.each do |pattern|
 				@match_bindings = OpenStruct.new
-		
+
 				return pattern.(self, objects) if pattern.match?(objects, self)
 			end
-	
+
 			# If we didn't find anything we raise a MatchError.
 			raise MatchError
 		end
-	
+
 		#############
 		# Callbacks #
 		#############
-		
+
 		# This is used to get and set binding names
 		def method_missing(name, *args)
 			if args.empty? and @match_bindings.respond_to?(name)
@@ -60,15 +60,15 @@ module Filigree
 				super(name, *args)
 			end
 		end
-	
+
 		#################
 		# Class Methods #
 		#################
-	
+
 		module ClassMethods
-		
+
 			attr_reader :patterns
-			
+
 			# Force a name binding.
 			#
 			# @param [Symbol]  name  Name to bind to
@@ -77,7 +77,7 @@ module Filigree
 			def Bind(name)
 				BindingPattern.new(name)
 			end
-			
+
 			# Force a literal comparison.
 			#
 			# @param [Object]  obj  Object to be comapred against
@@ -86,7 +86,7 @@ module Filigree
 			def Literal(obj)
 				LiteralPattern.new(obj)
 			end
-			
+
 			# Inserts a new pattern in the appropriate place in the patterns
 			# list.
 			#
@@ -100,10 +100,10 @@ module Filigree
 						return
 					end
 				end
-				
+
 				@patterns << new_pat
 			end
-			
+
 			# A callback used to pass patterns declared in a parent class to
 			# a subclass.
 			#
@@ -113,7 +113,7 @@ module Filigree
 			def inherited(klass)
 				klass.install_icvars(@patterns.clone)
 			end
-			
+
 			# Install the instance class variables in the including class.
 			#
 			# @return [void]
@@ -121,7 +121,7 @@ module Filigree
 				@patterns = inherited_patterns
 				@deferred = Array.new
 			end
-			
+
 			# Define a pattern for this visitor.
 			#
 			# @see match  Pattern matching description
@@ -131,24 +131,24 @@ module Filigree
 			#
 			# @return [void]
 			def on(*pattern, &block)
-				guard = if pattern.last.is_a?(Proc) then pattern.pop end 
-				
+				guard = if pattern.last.is_a?(Proc) then pattern.pop end
+
 				pattern = Filigree::wrap_pattern_elements(pattern)
 				add_pattern (mp = OuterPattern.new(pattern, guard, block))
-		
+
 				if block
 					@deferred.each { |pattern| pattern.block = block }
 					@deferred.clear
-			
+
 				else
 					@deferred << mp
 				end
 			end
-		
+
 			#############
 			# Callbacks #
 			#############
-			
+
 			# Used to generate wildcard and binding patterns.
 			def method_missing(name, *args)
 				if args.empty?
@@ -157,19 +157,19 @@ module Filigree
 					super(name, *args)
 				end
 			end
-	
+
 			def self.extended(klass)
 				klass.install_icvars
 			end
 		end
 	end
-	
+
 	# This class can be used to call multiple visitors on an object at once.
 	# This could potentialy reduce the number of times data structures are
 	# traversed.
 	class TourGuide
 		attr_reader :visitors
-		
+
 		# Call each visitor on the specified objects.
 		#
 		# @param [Object]  objects  Objects to be visited
@@ -178,7 +178,7 @@ module Filigree
 		def visit(*objects)
 			@visitors.each { |visitor| visitor.visit(*objects) }
 		end
-		
+
 		# Construct a tour guide for a list of visitors.
 		#
 		# @param [Visitor]  visitors  List of visitors
@@ -186,12 +186,12 @@ module Filigree
 			@visitors = visitors
 		end
 	end
-	
+
 	# This module provides a default implementation of three common traversal
 	# patterns: pre-order, post-order, and in-order (level-order).  The
 	# including class must implement the `children` function.
 	module Visitable
-		
+
 		# Visit this object with the provided visitor in pre-, post-, or
 		# in-order traversal.
 		#
@@ -204,15 +204,15 @@ module Filigree
 			when :preorder
 				visitor.visit(self)
 				children.compact.each { |child| child.visit(visitor, :preorder) }
-			
+
 			when :inorder
 				nodes = [self]
-			
+
 				while node = nodes.shift
 					nodes += node.children.compact
 					visitor.visit(node)
 				end
-			
+
 			when :postorder
 				children.compact.each { |child| child.visit(visitor, :postorder) }
 				visitor.visit(self)

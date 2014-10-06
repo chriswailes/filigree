@@ -36,11 +36,11 @@ end
 module Filigree
 	# A module the implements the abstract class and abstract method patterns.
 	module AbstractClass
-	
+
 		####################
 		# Instance Methods #
 		####################
-	
+
 		# Declares a method with the given name.  If it is called it will raise
 		# an AbstractMethodError.
 		#
@@ -49,19 +49,19 @@ module Filigree
 		# @return [void]
 		def abstract_method(name)
 			abstract_class_name = @abstract_class.name
-		
+
 			define_method name do
 				raise AbstractMethodError.new name, abstract_class_name
 			end
 		end
-	
+
 		# Install instance class variables in the extended class.
 		#
 		# @return [void]
 		def install_icvars
 			@abstract_class = self
 		end
-	
+
 		# Raise an AbstractClassError if someone attempts to instantiate an
 		# abstract class.
 		#
@@ -75,11 +75,11 @@ module Filigree
 				super
 			end
 		end
-	
+
 		#############
 		# Callbacks #
 		#############
-	
+
 		# Tell the extended class to install its instance class variables.
 		#
 		# @return [void]

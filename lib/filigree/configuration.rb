@@ -20,7 +20,7 @@ require 'filigree/string'
 module Filigree
 	module Configuration
 		include ClassMethodsModule
-	
+
 		#############
 		# Constants #
 		#############
@@ -28,10 +28,10 @@ module Filigree
 		####################
 		# Instance Methods #
 		####################
-		
+
 		# @return [Array<String>]  Remaining strings that weren't used in configuration
 		attr_accessor :rest
-		
+
 		# Dump the state of the Configuration object.  This will dump the
 		# state, encoded in YAML, to different destinations depending on the
 		# io parameter.
@@ -54,25 +54,25 @@ module Filigree
 		# @return [void]
 		def dump(io = nil, *fields)
 			require 'yaml'
-		
+
 			vals =
 			if fields.empty? then self.class.options_long.keys else fields end.inject(Hash.new) do |hash, field|
 				hash.tap { hash[field.to_s] = self.send(field) }
 			end
-		
+
 			case io
 			when nil
 				YAML.dump vals
-			
+
 			when String
 				File.open(io, 'w') { |file| YAML.dump vals, file }
-			
+
 			when IO
 				YAML.dump vals, io
 			end
 		end
 		alias :serialize :dump
-		
+
 		# Configures the object based on the overloaded parameter.
 		#
 		# @overload initialize(args)
@@ -89,28 +89,28 @@ module Filigree
 		# @return [void]
 		def initialize(overloaded = ARGV.clone)
 			set_opts = Array.new
-		
+
 			case overloaded
 			when Array
 				handle_array_options(overloaded, set_opts)
-			
+
 			when String, IO
 				handle_serialized_options(overloaded, set_opts)
 			end
-		
+
 			(self.class.options_long.keys - set_opts).each do |opt_name|
 				default = self.class.options_long[opt_name].default
 				default = self.instance_exec(&default) if default.is_a? Proc
-			
+
 				self.send("#{opt_name}=", default)
 			end
-		
+
 			# Check to make sure all the required options are set.
 			self.class.required_options.each do |option|
 				raise ArgumentError, "Option #{option} not set." if self.send(option).nil?
 			end
 		end
-		
+
 		# Find the appropriate option object given a string.
 		#
 		# @param [String]  str  Search string
@@ -119,49 +119,49 @@ module Filigree
 		def find_option(str)
 			if str[0,2] == '--'
 				self.class.options_long[str[2..-1]]
-			
+
 			elsif str[0,1] == '-'
 				self.class.options_short[str[1..-1]]
 			end
 		end
-		
+
 		# Configure the object from an array of strings.
 		#
 		# @param [Array<String>]  argv      String options
 		# @param [Array<String>]  set_opts  List of names of options already added
 		#
-		# @return [void] 
+		# @return [void]
 		def handle_array_options(argv, set_opts)
 			while str = argv.shift
-		
+
 				break if str == '--'
-			
+
 				if option = find_option(str)
 					args = argv.shift(option.arity == -1 ? argv.index { |str| str[0,1] == '-' } : option.arity)
-			
+
 					case option.handler
 					when Array
 						tmp = args.zip(option.handler).map { |arg, sym| arg.send sym }
 						self.send("#{option.long}=", (option.arity == 1 and tmp.length == 1) ? tmp.first : tmp)
-				
+
 					when Proc
 						self.send("#{option.long}=", self.instance_exec(*args, &option.handler))
 					end
-			
+
 					set_opts << option.long
 				end
 			end
-		
+
 			# Save the rest of the command line for later.
 			self.rest = argv
 		end
-		
+
 		# Configure the object from a serialization source.
 		#
 		# @param [String, IO]     overloaded  Serialization source
 		# @param [Array<String>]  set_opts    List of names of options already added
 		#
-		# @return [void] 
+		# @return [void]
 		def handle_serialized_options(overloaded, set_opts)
 			options =
 			if overloaded.is_a? String
@@ -173,23 +173,23 @@ module Filigree
 			else
 				YAML.load overloaded
 			end
-		
+
 			options.each do |option, val|
 				set_opts << option
 				self.send "#{option}=", val
 			end
 		end
-	
+
 		#################
 		# Class Methods #
 		#################
-	
+
 		module ClassMethods
 			# @return [Hash<String, Option>]  Hash of options with long names used as keys
 			attr_reader :options_long
 			# @return [Hash<String, Option>]  hash of options with short name used as keys
 			attr_reader :options_short
-			
+
 			# Add an option to the necessary data structures.
 			#
 			# @param [Option]  opt  Option to add
@@ -199,7 +199,7 @@ module Filigree
 				@options_long[opt.long]   = opt
 				@options_short[opt.short] = opt unless opt.short.nil?
 			end
-			
+
 			# Define an automatic configuration variable.
 			#
 			# @param [Symbol]  name   Name of the configuration variable
@@ -209,7 +209,7 @@ module Filigree
 			def auto(name, &block)
 				define_method(name, &block)
 			end
-			
+
 			# Define a boolean option.  The variable will be set to true if
 			# the flag is seen and be false otherwise.
 			#
@@ -221,7 +221,7 @@ module Filigree
 				@next_default = false
 				option(long, short) { true }
 			end
-			
+
 			# Sets the default value for the next command.  If a block is
 			# provided it will be used.  If not, the val parameter will be.
 			#
@@ -232,7 +232,7 @@ module Filigree
 			def default(val = nil, &block)
 				@next_default = block ? block : val
 			end
-			
+
 			# Sets the help string for the next command.
 			#
 			# @param [String]  str  Command help string
@@ -241,7 +241,7 @@ module Filigree
 			def help(str)
 				@help_string = str
 			end
-			
+
 			# Install the instance class variables in the including class.
 			#
 			# @return [void]
@@ -254,7 +254,7 @@ module Filigree
 				@required		= Array.new
 				@usage		= ''
 			end
-			
+
 			# Define a new option.
 			#
 			# @param [String]         long         Long option name
@@ -264,23 +264,23 @@ module Filigree
 			#
 			# @return [void]
 			def option(long, short = nil, conversions: nil, &block)
-			
+
 				attr_accessor long.to_sym
-			
+
 				long  = long.to_s
 				short = short.to_s if short
-			
+
 				add_option Option.new(long, short, @help_string, @next_default,
 					                 conversions.nil? ? block : conversions)
-			
+
 				@required << long.to_sym if @next_required
-			
+
 				# Reset state between option declarations.
 				@help_string	= ''
 				@next_default	= nil
 				@next_required = false
 			end
-			
+
 			# Mark some options as required.  If no names are provided then
 			# the next option to be defined is required; if names are
 			# provided they are all marked as required.
@@ -295,12 +295,12 @@ module Filigree
 					@required += names
 				end
 			end
-			
+
 			# @return [Array<Symbol>]  Options that need to be marked as required
 			def required_options
 				@required
 			end
-			
+
 			# Define an option that takes a single string argument.
 			#
 			# @param [String]  long   Long option name
@@ -310,7 +310,7 @@ module Filigree
 			def string_option(long, short = nil)
 				option(long, short) { |str| str }
 			end
-			
+
 			# Add's a usage string to the entire configuration object.  If
 			# no string is provided the current usage string is returned.
 			#
@@ -318,22 +318,22 @@ module Filigree
 			#
 			# @return [String]  Current or new usage string
 			def usage(str = nil)
-				if str then @usage = str else @usage end 
+				if str then @usage = str else @usage end
 			end
-		
+
 			#############
 			# Callbacks #
 			#############
-		
+
 			def self.extended(klass)
 				klass.install_icvars
 			end
 		end
-	
+
 		#################
 		# Inner Classes #
 		#################
-		
+
 		# This class represents an option that can appear in the
 		# configuration.
 		class Option < Struct.new(:long, :short, :help, :default, :handler)
@@ -343,10 +343,10 @@ module Filigree
 			def arity
 				case self.handler
 				when Array	then self.handler.length
-				when Proc		then self.handler.arity 
+				when Proc		then self.handler.arity
 				end
 			end
-			
+
 			# Print the option information out as a string.
 			#
 			# Layout:
@@ -362,14 +362,14 @@ module Filigree
 			def to_s(max_long, max_short, indent = 0)
 				segment_indent	= indent + max_long + max_short + 8
 				segmented_help = self.help.segment(segment_indent)
-			
+
 				if self.short
 					sprintf "#{' ' * indent}%-#{max_long + 3}s %-#{max_short + 1}s - %s", "--#{self.long},", '-' + self.short, segmented_help
 				else
 					sprintf "#{' ' * indent}%-#{max_long + max_short + 5}s - %s", '--' + self.long, segmented_help
 				end
 			end
-			
+
 			# Helper method used to print out information on a set of options.
 			#
 			# @param [Array<Option>]  options  Options to be printed
@@ -378,29 +378,29 @@ module Filigree
 			# @return [String]
 			def self.to_s(options, indent = 0)
 				lines = []
-				
+
 				max_long  = options.lazy.map { |opt| opt.long.length }.max
 				max_short = options.lazy.map(&:short).reject { |opt| opt.nil? }.map(&:length).max
-		
+
 				options.each do |opt|
 					lines << opt.to_s(max_long, max_short, indent)
 				end
-			
+
 				lines.join("\n")
 			end
 		end
-	
+
 		#######################
 		# Pre-defined Options #
 		#######################
-		
+
 		# The default help option.  This can be added to your class via
 		# add_option.
 		HELP_OPTION = Option.new('help', 'h', 'Prints this help message.', nil, Proc.new do
 			puts "Usage: #{self.class.usage}"
 			puts
 			puts 'Options:'
-		
+
 			options = self.class.options_long.values.sort { |a, b| a.long <=> b.long }
 			puts Option.to_s(options, 2)
 

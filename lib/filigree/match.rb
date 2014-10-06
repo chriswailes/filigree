@@ -43,7 +43,7 @@ class MatchError < RuntimeError; end
 # accidentally compare against a variable.  To bind to a name that is already
 # in scope you can use the {Filigree::MatchEnvironment#Bind} method.  In
 # addition, class and destructuring pattern results (see bellow) can be bound
-# to a variable by using the {Filigree::BasicPattern#as} method. 
+# to a variable by using the {Filigree::BasicPattern#as} method.
 
 # If you wish to match string patterns you may use regular expressions.  Any
 # object that isn't a string will fail to match against a regular expression.
@@ -55,7 +55,7 @@ class MatchError < RuntimeError; end
 # instance of that class.  If you wish to compare one regular expression to
 # another, or one class to another, you can force the comparison using the
 # {Filigree::MatchEnvironment#Literal} method.
-# 
+#
 # Destructuring patterns allow you to match against an instance of a class,
 # while simultaneously binding values stored inside the object to variables
 # in the context of the with block.  A class that is destructurable must
@@ -131,7 +131,7 @@ class MatchError < RuntimeError; end
 #        @a = a
 #        @b = b
 #      end
-#      
+#
 #      def destructure(_)
 #         [@a, @b]
 #      end
@@ -156,9 +156,9 @@ class MatchError < RuntimeError; end
 # @return [Object]  Result of evaluating the matched pattern's block
 def match(*objects, &block)
 	me = Filigree::MatchEnvironment.new
-	
+
 	me.instance_exec &block
-	
+
 	me.find_match(objects)
 end
 
@@ -167,11 +167,11 @@ end
 #######################
 
 module Filigree
-	
+
 	###########
 	# Methods #
 	###########
-	
+
 	# Wrap non-pattern objects in pattern objects so they can all be treated
 	# in the same way during pattern sorting and matching.
 	#
@@ -188,11 +188,11 @@ module Filigree
 			end
 		end
 	end
-	
+
 	#######################
 	# Modules and Classes #
 	#######################
-	
+
 	# A module indicating that an object may be destructured.  The including
 	# class must define the `destructure` instance method, which takes one
 	# argument specifying the number of pattern elements it is being matched
@@ -207,7 +207,7 @@ module Filigree
 			DestructuringPattern.new(self, Filigree::wrap_pattern_elements(pattern))
 		end
 	end
-	
+
 	# Match blocks are evaluated inside an instance of MatchEnvironment.
 	class MatchEnvironment
 		# Force binding to the given name
@@ -218,21 +218,21 @@ module Filigree
 		def Bind(name)
 			BindingPattern.new(name)
 		end
-		
+
 		# Force a literal comparison
 		#
 		# @param [Object]  obj  Object to test equality with
 		#
-		# @return [LiteralPattern] 
+		# @return [LiteralPattern]
 		def Literal(obj)
 			LiteralPattern.new(obj)
 		end
-		
+
 		def initialize
 			@patterns = Array.new
 			@deferred = Array.new
 		end
-		
+
 		# Find a match for the given objects among the defined patterns.
 		#
 		# @param [Array<Object>]  objects  Objects to be matched
@@ -242,15 +242,15 @@ module Filigree
 		# @raise [MatchError]  Raised if no pattern matches the objects
 		def find_match(objects)
 			@patterns.each do |pattern|
-				env = OpenStruct.new 
-			
+				env = OpenStruct.new
+
 				return pattern.(env, objects) if pattern.match?(objects, env)
 			end
-		
+
 			# If we didn't find anything we raise a MatchError.
 			raise MatchError
 		end
-		
+
 		# Define a pattern in this match call.
 		#
 		# @see match  Documentation on pattern matching
@@ -260,26 +260,26 @@ module Filigree
 		#
 		# @return [void]
 		def with(*pattern, &block)
-			guard = if pattern.last.is_a?(Proc) then pattern.pop end 
-			
+			guard = if pattern.last.is_a?(Proc) then pattern.pop end
+
 			pattern = Filigree::wrap_pattern_elements(pattern)
-			
+
 			@patterns << (mp = OuterPattern.new(pattern, guard, block))
-		
+
 			if block
 				@deferred.each { |pattern| pattern.block = block }
 				@deferred.clear
-			
+
 			else
 				@deferred << mp
 			end
 		end
 		alias :w :with
-	
+
 		#############
 		# Callbacks #
 		#############
-		
+
 		# Callback used to generate wildcard and binding patterns
 		def method_missing(name, *args)
 			if args.empty?
@@ -289,12 +289,12 @@ module Filigree
 			end
 		end
 	end
-	
+
 	# This class provides the basis for all match patterns.
 	class BasicPattern
 		extend  AbstractClass
 		include Comparable
-		
+
 		# Base implementation of bi-directional comparison for patterns.
 		#
 		# @param [BasicPattern]  other  Right-hand side of the comparison
@@ -304,7 +304,7 @@ module Filigree
 		def <=>(other)
 			self.weight - other.weight
 		end
-		
+
 		# Wraps this pattern in a {BindingPattern}, causing the object that
 		# this pattern matches to be bound to this name in the with block.
 		#
@@ -313,30 +313,30 @@ module Filigree
 			binding_pattern.tap { |bp| bp.pattern_elem = self }
 		end
 	end
-	
+
 	# A pattern that matches any object
 	class WildcardPattern < BasicPattern
 		include Singleton
-		
+
 		# Return true for any object and don't create any bindings.
 		#
 		# @return [true]
 		def match?(_, _)
 			true
 		end
-		
+
 		def weight
 			4
 		end
 	end
-	
+
 	# An abstract class that matches only a single object to a single pattern.
 	class SingleObjectPattern < BasicPattern
 		extend AbstractClass
-		
+
 		# @return [BasicPattern]
 		attr_reader :pattern_elem
-		
+
 		# Create a new pattern with a single element.
 		#
 		# @param [Object]  pattern_elem  Object representing the pattern
@@ -344,7 +344,7 @@ module Filigree
 			@pattern_elem = pattern_elem
 		end
 	end
-	
+
 	# A pattern for checking to see if an object is an instance of a given
 	# class.
 	class InstancePattern < SingleObjectPattern
@@ -364,7 +364,7 @@ module Filigree
 				super
 			end
 		end
-		
+
 		# Test the object to see if the object is an instance of the given
 		# class.
 		#
@@ -374,12 +374,12 @@ module Filigree
 		def match?(object, _)
 			object.is_a?(@pattern_elem)
 		end
-		
+
 		def weight
 			3
 		end
 	end
-	
+
 	# A pattern that forces an equality comparison
 	class LiteralPattern < SingleObjectPattern
 		# Test the object for equality to the pattern element.
@@ -390,12 +390,12 @@ module Filigree
 		def match?(object, _)
 			object == @pattern_elem
 		end
-		
+
 		def weight
 			0
 		end
 	end
-	
+
 	# A pattern that tests a string against a regular expression.
 	class RegexpPattern < SingleObjectPattern
 		# Test the object to see if it matches the wrapped regular
@@ -410,18 +410,18 @@ module Filigree
 				env.send("match_data=", md) if match
 			end
 		end
-		
+
 		def weight
 			2
 		end
 	end
-	
+
 	# A pattern that binds a sub-pattern's matching object to a name in the
 	# binding environment.
 	class BindingPattern < SingleObjectPattern
-		
+
 		attr_writer :pattern_elem
-		
+
 		# Create a new binding pattern.
 		#
 		# @param  [Symbol]  name          Name to bind to
@@ -430,12 +430,12 @@ module Filigree
 			@name = name
 			super(pattern_elem)
 		end
-		
+
 		# Overridden method to prevent binding BindingPattern objects.
 		def as(_, _)
 			raise 'Binding a BindingPattern is not allowed.'
 		end
-		
+
 		# Test the object for equality to the pattern element.  Binds the
 		# object to the binding pattern's name if it does match.
 		#
@@ -446,26 +446,26 @@ module Filigree
 		def match?(object, env)
 			@pattern_elem.match?(object, env).tap { |match| env.send("#{@name}=", object) if match }
 		end
-		
+
 		def weight
 			@pattern_elem.weight
 		end
 	end
-	
+
 	# An abstract class that matches multiple objects to multiple patterns.
 	class MultipleObjectPattern < BasicPattern
 		extend AbstractClass
-		
+
 		# @return [Array<BasicPattern>]
 		attr_reader :pattern
-		
+
 		# Create a new pattern with multiple elements.
 		#
 		# @param [Array<Object>]  pattern  Array of pattern elements
 		def initialize(pattern)
 			@pattern = pattern
 		end
-		
+
 		# A wrapper method to sort MultipleObjectPattern objects by their
 		# arity.
 		#
@@ -480,7 +480,7 @@ module Filigree
 				self.pattern.length - other.pattern.length
 			end
 		end
-		
+
 		# Test multiple objects against multiple pattern elements.
 		#
 		# @param [Object]  objects  Object to test pattern against
@@ -491,20 +491,20 @@ module Filigree
 				@pattern.zip(objects).each do |pattern_elem, object|
 					return false unless pattern_elem.match?(object, env)
 				end
-			
+
 				true
-			
+
 			else
 				(@pattern.length == 1 and @pattern.first == WildcardPattern.instance)
 			end
 		end
 	end
-	
+
 	# The class that contains all of the pattern elements passed to a with clause.
 	class OuterPattern < MultipleObjectPattern
 		attr_writer :block
 		attr_reader :guard
-		
+
 		# Specialized version of the bi-directional comparison operator.
 		#
 		# @param [BasicPattern]  other  Right-hand side of the comparison
@@ -517,7 +517,7 @@ module Filigree
 				self.pattern.zip(other.pattern).inject(0) do |total, pair|
 					total + (pair.first <=> pair.last)
 				end <=> 0
-				
+
 				if comp_res == 0
 					self.guard ? (other.guard ? 0 : 1) : (other.guard ? -1 : comp_res)
 				else
@@ -525,7 +525,7 @@ module Filigree
 				end
 			end
 		end
-		
+
 		# Create a new outer pattern with the given pattern elements, guard,
 		# and block.
 		#
@@ -537,7 +537,7 @@ module Filigree
 			@guard = guard
 			@block = block
 		end
-		
+
 		# Call the pattern's block, passing the given objects to the block.
 		#
 		# @param [Object]         env      Environment in which to evaluate the block
@@ -545,7 +545,7 @@ module Filigree
 		def call(env, objects = [])
 			if @block then env.instance_exec(*objects, &@block) else nil end
 		end
-		
+
 		# Test the objects for equality to the pattern elements.
 		#
 		# @param [Object]  objects  Objects to test pattern elements against
@@ -556,14 +556,14 @@ module Filigree
 			super && (@guard.nil? or env.instance_exec(&@guard))
 		end
 	end
-	
+
 	# A pattern that matches an instance of a class and destructures it so
 	# that the values contained by the object may be matched upon.
 	class DestructuringPattern < MultipleObjectPattern
-		
+
 		# @return [Class]
 		attr_reader :klass
-		
+
 		# Specialized version of the bi-directional comparison operator.
 		#
 		# @param [BasicPattern]  other  Right-hand side of the comparison
@@ -578,16 +578,16 @@ module Filigree
 							total + (pair.first <=> pair.last)
 						end / self.pattern.length
 					end
-					
+
 				elsif self.klass.subclass_of?(other.klass) then  1
 				else                                            -1
 				end
-				
+
 			else
 				super
 			end
 		end
-		
+
 		# Create a new destructuring pattern.
 		#
 		# @param [Class]   klass    Class to match instances of.  It must be destructurable.
@@ -596,7 +596,7 @@ module Filigree
 			@klass = klass
 			super(pattern)
 		end
-		
+
 		# Test to see if the object is an instance of the appropriate class,
 		# and if so destructure it and test it's values against the
 		# sub-pattern elements.
@@ -608,7 +608,7 @@ module Filigree
 		def match?(object, env)
 			object.is_a?(@klass) and super(object.destructure(@pattern.length), env)
 		end
-		
+
 		def weight
 			1
 		end
@@ -621,7 +621,7 @@ end
 
 class Array
 	extend Filigree::Destructurable
-	
+
 	# Destructuring for the array class.  If the array is being matched
 	# against two patterns the destructuring of the array will be the first
 	# element and then an array containing the rest of the values.  If there

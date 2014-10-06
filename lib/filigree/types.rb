@@ -29,7 +29,7 @@ require 'filigree/class_methods_module'
 # @return [Object]  The object passed as parameter obj
 def check_type(obj, type, blame = nil, nillable = false, strict = false)
 	type_ok = (obj.nil? && nillable) || (strict ? obj.instance_of?(type) : obj.is_a?(type))
-	
+
 	if type_ok
 		obj
 	else
@@ -57,7 +57,7 @@ end
 def check_array_type(array, type, blame = nil, nillable = false, strict = false)
 	array.each do |obj|
 		type_ok = (obj.nil? && nillable) || (strict ? obj.instance_of?(type) : obj.is_a?(type))
-		
+
 		if not type_ok
 			if blame
 				raise TypeError, "Parameter #{blame} must contain instances of the #{type.name} class."
@@ -77,7 +77,7 @@ module Filigree
 	# variables.  This also provides a default constructor.
 	module TypedClass
 		include ClassMethodsModule
-		
+
 		# Set each of the typed instance variables to its corresponding
 		# value.
 		#
@@ -89,7 +89,7 @@ module Filigree
 				self.send("#{name}=", val)
 			end
 		end
-	
+
 		module ClassMethods
 			# Define the default constructor for the including class.
 			#
@@ -103,7 +103,7 @@ module Filigree
 							if self.class.typed_ivars.length != vals.length
 								raise ArgumentError, "#{self.class.typed_ivars.length} arguments expected, #{vals.length} given."
 							end
-				
+
 							self.set_typed_ivars(vals)
 						end
 					else
@@ -113,7 +113,7 @@ module Filigree
 					end
 				end
 			end
-			
+
 			# Define a new typed accessor.
 			#
 			# @param [Symbol]   name      Name of the accessor
@@ -129,7 +129,7 @@ module Filigree
 				end
 			end
 			private :define_typed_accessor
-			
+
 			# Define a typed instance variable.
 			#
 			# @param [Symbol]   name      Name of the accessor
@@ -140,14 +140,14 @@ module Filigree
 			# @return [void]
 			def typed_ivar(name, type, nillable = false, strict = false)
 				typed_ivars << name
-			
+
 				define_typed_accessor(name, nillable, strict, *
 					type.is_a?(Array) ? [type.first, method(:check_array_type)] : [type, method(:check_type)]
 				)
-		
+
 				attr_reader name
 			end
-			
+
 			# Return the typed instance variables for an object.
 			#
 			# @return [Array<Symbol>]  Array of defined typed instance variables
