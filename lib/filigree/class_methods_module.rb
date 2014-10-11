@@ -32,7 +32,11 @@ module Filigree
 		def self.included(mod)
 			mod.instance_exec do
 				def included(mod)
-					mod.extend self::ClassMethods
+					mod.extend(self::ClassMethods) if self.const_defined?(:ClassMethods)
+
+					if self.method_defined?(:ClassVariables)
+						mod.instance_exec(self.method(:ClassVariables))
+					end
 				end
 			end
 		end

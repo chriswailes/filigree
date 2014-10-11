@@ -27,6 +27,11 @@ module Filigree
 		# Instance Methods #
 		####################
 
+#		def initialize(*args)
+#			super(*args)
+#			@match_bindings = Array.new
+#		end
+
 		# Find the correct pattern and execute its block on the provided
 		# objects.
 		#
@@ -36,12 +41,23 @@ module Filigree
 		#
 		# @raise [MatchError]  Raised when no matching pattern is found
 		def visit(*objects)
-			self.class.patterns.each do |pattern|
-				@match_bindings = OpenStruct.new
+			@match_bindings ||= Array.new
 
-				return pattern.(self, objects) if pattern.match?(objects, self)
+			@match_bindings.push OpenStruct.new
+
+			self.class.patterns.each do |pattern|
+
+				# FIXME: Make these take their arguments in the same order
+				if pattern.match?(objects, self)
+					result = pattern.(self, objects)
+					@match_bindings.pop
+					return result
+				end
 			end
 
+			@match_bindings.pop
+
+			# TODO: Make this optional
 			# If we didn't find anything we raise a MatchError.
 			raise MatchError
 		end
@@ -52,10 +68,10 @@ module Filigree
 
 		# This is used to get and set binding names
 		def method_missing(name, *args)
-			if args.empty? and @match_bindings.respond_to?(name)
-				@match_bindings.send(name)
+			if args.empty? and @match_bindings.last.respond_to?(name)
+				@match_bindings.last.send(name)
 			elsif name.to_s[-1] == '=' and args.length == 1
-				@match_bindings.send(name, *args)
+				@match_bindings.last.send(name, *args)
 			else
 				super(name, *args)
 			end
