@@ -27,11 +27,6 @@ module Filigree
 		# Instance Methods #
 		####################
 
-#		def initialize(*args)
-#			super(*args)
-#			@match_bindings = Array.new
-#		end
-
 		# Find the correct pattern and execute its block on the provided
 		# objects.
 		#
@@ -41,6 +36,7 @@ module Filigree
 		#
 		# @raise [MatchError]  Raised when no matching pattern is found
 		def visit(*objects)
+			# FIXME: A dirty hack.  Find a better place to initialize this.
 			@match_bindings ||= Array.new
 
 			@match_bindings.push OpenStruct.new
@@ -57,9 +53,12 @@ module Filigree
 
 			@match_bindings.pop
 
-			# TODO: Make this optional
-			# If we didn't find anything we raise a MatchError.
-			raise MatchError
+			if self.class.strict_match?
+				# If we didn't find anything we raise a MatchError.
+				raise MatchError
+			else
+				nil
+			end
 		end
 
 		#############
@@ -134,8 +133,9 @@ module Filigree
 			#
 			# @return [void]
 			def install_icvars(inherited_patterns = Array.new)
-				@patterns = inherited_patterns
-				@deferred = Array.new
+				@patterns     = inherited_patterns
+				@deferred     = Array.new
+				@strict_match = false
 			end
 
 			# Define a pattern for this visitor.
@@ -159,6 +159,24 @@ module Filigree
 				else
 					@deferred << mp
 				end
+			end
+
+			# Tell the visitor that it must raise an exception if no match is
+			# found.
+			#
+			# @param [Boolean]  bool  Raise an exception or not.
+			#
+			# @return [void]
+			def strict_match(bool)
+				@strict_match = bool
+			end
+
+			# Accessor for the strict match member.
+			#
+			# @return [Boolean] The value of the class's @strict_match
+			#                   instance variable.
+			def strict_match?
+				@strict_match
 			end
 
 			#############

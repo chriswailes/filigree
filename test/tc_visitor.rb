@@ -166,8 +166,18 @@ class VisitorTester < Minitest::Test
 	end
 
 	class SubclassVisitor < NumericVisitor
+		strict_match true
+
 		on Integer do |i|
 			"Integer: #{i}"
+		end
+	end
+
+	class NonStrictMatchVisitor
+		include Filigree::Visitor
+
+		on 42 do
+			'hoopy frood'
 		end
 	end
 
@@ -181,6 +191,12 @@ class VisitorTester < Minitest::Test
 		assert_equal "Integer: 42",        sv.visit(42)
 
 		assert_raises(MatchError) { sv.visit(:hoopy) }
+	end
+
+	def test_nonstrict_matching
+		nsmv = NonStrictMatchVisitor.new
+
+		assert_nil(nsmv.visit 0)
 	end
 
 	def test_simple_visitor

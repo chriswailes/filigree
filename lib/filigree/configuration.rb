@@ -246,13 +246,13 @@ module Filigree
 			#
 			# @return [void]
 			def install_icvars
-				@help_string	= ''
-				@next_default	= nil
-				@next_required	= false
-				@options_long	= Hash.new
-				@options_short	= Hash.new
-				@required		= Array.new
-				@usage		= ''
+				@help_string   = ''
+				@next_default  = nil
+				@next_required = false
+				@options_long  = Hash.new
+				@options_short = Hash.new
+				@required      = Array.new
+				@usage         = ''
 			end
 
 			# Define a new option.
