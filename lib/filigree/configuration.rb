@@ -196,6 +196,8 @@ module Filigree
 			#
 			# @return [void]
 			def add_option(opt)
+				attr_accessor opt.long
+
 				@options_long[opt.long]   = opt
 				@options_short[opt.short] = opt unless opt.short.nil?
 			end
@@ -271,13 +273,13 @@ module Filigree
 				short = short.to_s if short
 
 				add_option Option.new(long, short, @help_string, @next_default,
-					                 conversions.nil? ? block : conversions)
+					                  conversions.nil? ? block : conversions)
 
 				@required << long.to_sym if @next_required
 
 				# Reset state between option declarations.
-				@help_string	= ''
-				@next_default	= nil
+				@help_string   = ''
+				@next_default  = nil
 				@next_required = false
 			end
 
@@ -342,8 +344,8 @@ module Filigree
 			# @return [Fixnum]  Number of arguments the option takes
 			def arity
 				case self.handler
-				when Array	then self.handler.length
-				when Proc		then self.handler.arity
+				when Array then self.handler.length
+				when Proc  then self.handler.arity
 				end
 			end
 
