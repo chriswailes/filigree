@@ -34,7 +34,8 @@ module Filigree
 		#
 		# @return [Object]  Result of calling the matched pattern's block
 		#
-		# @raise [MatchError]  Raised when no matching pattern is found
+		# @raise [MatchError]  Raised when no matching pattern is found and
+		#                      strict matching is enabled.
 		def visit(*objects)
 			# FIXME: A dirty hack.  Find a better place to initialize this.
 			@match_bindings ||= Array.new
