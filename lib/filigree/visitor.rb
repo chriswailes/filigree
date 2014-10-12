@@ -238,18 +238,18 @@ module Filigree
 			case method
 			when :preorder
 				visitor.visit(self)
-				children.compact.each { |child| child.visit(visitor, :preorder) }
+				children.flatten.compact.each { |child| child.visit(visitor, :preorder) }
 
 			when :inorder
 				nodes = [self]
 
 				while node = nodes.shift
-					nodes += node.children.compact
+					nodes += node.children.flatten.compact
 					visitor.visit(node)
 				end
 
 			when :postorder
-				children.compact.each { |child| child.visit(visitor, :postorder) }
+				children.flatten.compact.each { |child| child.visit(visitor, :postorder) }
 				visitor.visit(self)
 			end
 		end
