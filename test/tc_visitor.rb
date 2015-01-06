@@ -181,7 +181,41 @@ class VisitorTester < Minitest::Test
 		end
 	end
 
+	class OrderingVisitor0
+		include Filigree::Visitor
+
+		on Foo.(a) do
+			"Foo: #{a}"
+		end
+
+		on Object do |obj|
+			"Object: #{obj}"
+		end
+
+		on _ do |w|
+			"Wildcard: #{w}"
+		end
+	end
+
+	class OrderingVisitor1
+		include Filigree::Visitor
+
+		on Foo.(a) do
+			"Foo: #{a}"
+		end
+
+		on _ do |w|
+			"Wildcard: #{w}"
+		end
+	end
+
 	def setup
+	end
+
+	def test_ordering
+		assert_equal "Foo: 42", OrderingVisitor0.new.visit(Foo.new(42))
+		assert_equal "Foo: 42", OrderingVisitor1.new.visit(Foo.new(42))
+		assert_equal "Wildcard: 42", OrderingVisitor1.new.visit(42)
 	end
 
 	def test_inheritance

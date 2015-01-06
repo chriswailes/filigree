@@ -68,12 +68,12 @@ The most basic pattern is the literal.  Here, the object or objects being matche
       with(_) { :other }
     end
   end
-  
+
   foo(1)  # => :one
   foo(42) # => :other
 ```
 
-You may also match against variables.  This can sometimes conflict with the next kind of pattern, which is a binding pattern.  Here, the pattern will match any object, and then make the object it matched available to the *with block* via an attribute reader.  This is accomplished using the method_missing callback, so if there is a variable or function with that name you might accidentally compare against a variable or returned value.  To bind to a name that is already in scope you can use the {Filigree::MatchEnvironment#Bind} method.  In addition, class and destructuring pattern results (see bellow) can be bound to a variable by using the {Filigree::BasicPattern#as} method. 
+You may also match against variables.  This can sometimes conflict with the next kind of pattern, which is a binding pattern.  Here, the pattern will match any object, and then make the object it matched available to the *with block* via an attribute reader.  This is accomplished using the method_missing callback, so if there is a variable or function with that name you might accidentally compare against a variable or returned value.  To bind to a name that is already in scope you can use the {Filigree::MatchEnvironment#Bind} method.  In addition, class and destructuring pattern results (see bellow) can be bound to a variable by using the {Filigree::BasicPattern#as} method.
 
 ```Ruby
 var = 42
@@ -163,7 +163,7 @@ Filigree's implementation of the visitor pattern is built on the pattern matchin
 class Binary < Struct.new(:x, :y)
   extend  Filigree::Destructurable
   include Filigree::Visitor
-  
+
   def destructure(_)
     [x, y]
   end
@@ -174,11 +174,11 @@ class Mul < Binary; end
 
 class MathVisitor
   include Filigree::Visitor
-  
+
   on(Add.(x, y)) do
     x + y
   end
-  
+
   on(Mul.(x, y)) do
     x * y
   end
@@ -236,26 +236,26 @@ Configuration Handling
 ```Ruby
 class MyConfig
   include Filigree::Configuration
-  
+
   add_option Filigree::Configuration::HELP_OPTION
-  
+
   help 'Sets the target'
   required
   string_option 'target', 't'
-  
+
   help 'Set the port for the target'
   default 1025
   option 'port', 'p', conversions: [:to_i]
-  
+
   help 'Set credentials'
   default ['user', 'password']
   option 'credentials', 'c', conversions: [:to_s, :to_s]
-  
+
   help 'Be verbose'
   bool_option 'verbose', 'v'
-  
+
   auto 'next_port' { self.port + 1 }
-  
+
   help 'load data from file'
   option 'file', 'f' do |f|
     process_file f
@@ -282,18 +282,18 @@ Now that we can parse configuration options, how about we handle commands?
 ```Ruby
 class MyCommands
   include Filigree::Commands
-  
+
   help 'Adds two numbers together'
   param 'x', 'The first number to add'
   param 'y', 'The second number to add'
   command 'add' do |x, y|
     x.to_i + y.to_i
   end
-  
+
   help 'Say hello from the command handler'
   config do
     default 'world'
-    string_option 'subject', 's' 
+    string_option 'subject', 's'
   end
   command 'hello' do
     "hello #{subject}"
@@ -312,7 +312,7 @@ Type Checking
 
 Filigree provides two ways to perform basic type checking at run time:
 
-1. {check_type} and {check_array_type}
+1. {check\_type} and {check\_array\_type}
 2. {Filigree::TypedClass}
 
 The first option will simply check the type of an object or an array of objects.  Optionally, you can assign blame to a named variable, allow the value to be nil, or perform strict checking.  Strict checking uses the `instance_of?` method while non-strict checking uses `is_a?`.
@@ -322,10 +322,10 @@ The second option works like so:
 ```Ruby
 class Foo
 	include Filigree::TypedClass
-	
+
 	typed_ivar :bar, Integer
 	typed_ivar :baz, String
-	
+
 	default_constructor
 end
 

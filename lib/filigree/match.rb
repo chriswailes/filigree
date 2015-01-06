@@ -302,7 +302,9 @@ module Filigree
 		# @return [Integer]  Value corresponding to less than, equal to, or
 		#   greater than the right-hand side pattern.
 		def <=>(other)
-			self.weight - other.weight
+			# This is performed in the non-intuitive order due to
+			# higher-priority patterns having lower weights.
+			other.weight - self.weight
 		end
 
 		# Wraps this pattern in a {BindingPattern}, causing the object that
@@ -361,7 +363,7 @@ module Filigree
 				else                                                         -1
 				end
 			else
-				super
+				super(other)
 			end
 		end
 
