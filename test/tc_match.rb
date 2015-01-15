@@ -111,6 +111,14 @@ class MatchTester < Minitest::Test
 		end
 	end
 
+	def match_tester_bang_bind(o)
+		match o do
+			with(Fixnum.as(!:a)) { [:Fixnum, a] }
+			with(Float.as(!:a))  { [:Float,  a] }
+			with(String.as(!:a)) { [:String, a] }
+		end
+	end
+
 	def match_tester_manual_bind(o)
 		match o do
 			with(Fixnum.as(Bind(:a))) { [:Fixnum, a] }
@@ -229,6 +237,12 @@ class MatchTester < Minitest::Test
 		assert_equal :Fixnum, match_tester_literal(Fixnum)
 		assert_equal :Float,  match_tester_literal(Float)
 		assert_equal :Regexp, match_tester_literal(/a/)
+	end
+
+	def test_bang_bind
+		assert_equal [:Fixnum, 42],    match_tester_bang_bind(42)
+		assert_equal [:Float, 42.0],   match_tester_bang_bind(42.0)
+		assert_equal [:String, 'foo'], match_tester_bang_bind('foo')
 	end
 
 	def test_manual_bind

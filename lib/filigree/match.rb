@@ -657,3 +657,12 @@ class Regexp
 		binding_pattern.tap { |bp| bp.pattern_elem = Filigree::RegexpPattern.new(self) }
 	end
 end
+
+class Symbol
+	# Turns a symbol into a binding pattern.
+	#
+	# @return [Filigree::BindingPattern]
+	def !
+		Filigree::BindingPattern.new(self)
+	end
+end
