@@ -662,7 +662,7 @@ class Symbol
 	# Turns a symbol into a binding pattern.
 	#
 	# @return [Filigree::BindingPattern]
-	def !
+	def ~
 		Filigree::BindingPattern.new(self)
 	end
 end

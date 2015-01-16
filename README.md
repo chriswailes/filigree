@@ -73,7 +73,7 @@ The most basic pattern is the literal.  Here, the object or objects being matche
   foo(42) # => :other
 ```
 
-You may also match against variables.  This can sometimes conflict with the next kind of pattern, which is a binding pattern.  Here, the pattern will match any object, and then make the object it matched available to the *with block* via an attribute reader.  This is accomplished using the method_missing callback, so if there is a variable or function with that name you might accidentally compare against a variable or returned value.  To bind to a name that is already in scope you can use either the {Filigree::MatchEnvironment#Bind} method or the `!` Symbol method.  In addition, class and destructuring pattern results (see bellow) can be bound to a variable by using the {Filigree::BasicPattern#as} method.
+You may also match against variables.  This can sometimes conflict with the next kind of pattern, which is a binding pattern.  Here, the pattern will match any object, and then make the object it matched available to the *with block* via an attribute reader.  This is accomplished using the method_missing callback, so if there is a variable or function with that name you might accidentally compare against a variable or returned value.  To bind to a name that is already in scope you can use either the {Filigree::MatchEnvironment#Bind} method or the `~` Symbol method.  In addition, class and destructuring pattern results (see bellow) can be bound to a variable by using the {Filigree::BasicPattern#as} method.
 
 ```Ruby
 var = 42
@@ -94,7 +94,7 @@ x = 3
 match 42 do
   with(Bind(:x)) { x      }
   # Equivalent to the line above.
-  with(!:x)      { x      }
+  with(~:x)      { x      }
   with(42)       { :hoopy }
 end
 ```

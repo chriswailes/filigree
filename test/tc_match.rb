@@ -111,11 +111,11 @@ class MatchTester < Minitest::Test
 		end
 	end
 
-	def match_tester_bang_bind(o)
+	def match_tester_squiggle_bind(o)
 		match o do
-			with(Fixnum.as(!:a)) { [:Fixnum, a] }
-			with(Float.as(!:a))  { [:Float,  a] }
-			with(String.as(!:a)) { [:String, a] }
+			with(Fixnum.as(~:a)) { [:Fixnum, a] }
+			with(Float.as(~:a))  { [:Float,  a] }
+			with(String.as(~:a)) { [:String, a] }
 		end
 	end
 
@@ -239,10 +239,10 @@ class MatchTester < Minitest::Test
 		assert_equal :Regexp, match_tester_literal(/a/)
 	end
 
-	def test_bang_bind
-		assert_equal [:Fixnum, 42],    match_tester_bang_bind(42)
-		assert_equal [:Float, 42.0],   match_tester_bang_bind(42.0)
-		assert_equal [:String, 'foo'], match_tester_bang_bind('foo')
+	def test_squiggle_bind
+		assert_equal [:Fixnum, 42],    match_tester_squiggle_bind(42)
+		assert_equal [:Float, 42.0],   match_tester_squiggle_bind(42.0)
+		assert_equal [:String, 'foo'], match_tester_squiggle_bind('foo')
 	end
 
 	def test_manual_bind
