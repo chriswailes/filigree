@@ -305,5 +305,8 @@ class VisitorTester < Minitest::Test
 		tree.visit(nv, :postorder)
 
 		assert_equal expected, nv.vals
+
+		# Test behaviour whith no match.
+		assert(!tree.visit(HelperMethodVisitor.new), 'Visitable object falsely reported a matching.')
 	end
 end

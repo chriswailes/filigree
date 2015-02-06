@@ -237,8 +237,8 @@ module Filigree
 		def visit(visitor, method = :preorder)
 			case method
 			when :preorder
-				(visitor.visit(self) == MatchError) ||
-					children.flatten.compact.inject(false) { |mod, child| child.visit(visitor, :preorder) || mod }
+				res = (visitor.visit(self) != MatchError)
+				children.flatten.compact.inject(false) { |mod, child| child.visit(visitor, :preorder) || mod } || res
 
 			when :inorder
 				mod   = false
@@ -254,8 +254,8 @@ module Filigree
 				mod
 
 			when :postorder
-				children.flatten.compact.inject(false) { |mod, child| child.visit(visitor, :postorder) || mod } ||
-					(visitor.visit(self) == MatchError)
+				res = children.flatten.compact.inject(false) { |mod, child| child.visit(visitor, :postorder) || mod }
+				(visitor.visit(self) != MatchError) || res
 			end
 		end
 	end
