@@ -1,7 +1,7 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
-# Project: 	Filigree
-# Date:		2013/4/19
-# Description:	An implementation of an AbstractClass module.
+# Author:      Chris Wailes <chris.wailes@gmail.com>
+# Project:     Filigree
+# Date:        2013/4/19
+# Description: An implementation of an AbstractClass module.
 
 ############
 # Requires #
