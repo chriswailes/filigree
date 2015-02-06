@@ -306,6 +306,13 @@ class VisitorTester < Minitest::Test
 
 		assert_equal expected, nv.vals
 
+		# Test down-up
+		nv = NodeVisitor.new
+		expected = ['F', 'B', 'A', 'A', 'D', 'C', 'C', 'E', 'E', 'D', 'B', 'G', 'I', 'H', 'H', 'I', 'G', 'F']
+		tree.visit(nv, :downup)
+
+		assert_equal expected, nv.vals
+
 		# Test behaviour whith no match.
 		assert(!tree.visit(HelperMethodVisitor.new), 'Visitable object falsely reported a matching.')
 	end

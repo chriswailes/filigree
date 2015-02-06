@@ -230,8 +230,8 @@ module Filigree
 		# Visit this object with the provided visitor in pre-, post-, or
 		# in-order traversal.
 		#
-		# @param [Visitor]                          visitor  Visitor to call
-		# @param [:preorder, :inorder, :postorder]  method   How to visit
+		# @param [Visitor]                                   visitor  Visitor to call
+		# @param [:preorder, :inorder, :postorder, :downup]  method   How to visit
 		#
 		# @return [Boolean] If a pattern matched or not
 		def visit(visitor, method = :preorder)
@@ -255,6 +255,11 @@ module Filigree
 
 			when :postorder
 				res = children.flatten.compact.inject(false) { |mod, child| child.visit(visitor, :postorder) || mod }
+				(visitor.visit(self) != MatchError) || res
+
+			when :downup
+				res = (visitor.visit(self) != MatchError)
+				res = children.flatten.compact.inject(false) { |mod, child| child.visit(visitor, :downup) || mod } || res
 				(visitor.visit(self) != MatchError) || res
 			end
 		end
