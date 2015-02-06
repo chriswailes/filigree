@@ -230,7 +230,7 @@ class VisitorTester < Minitest::Test
 	def test_nonstrict_matching
 		nsmv = NonStrictMatchVisitor.new
 
-		assert_nil(nsmv.visit 0)
+		assert_equal(MatchError, nsmv.visit(0))
 	end
 
 	def test_simple_visitor

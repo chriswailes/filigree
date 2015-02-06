@@ -32,7 +32,7 @@ module Filigree
 		#
 		# @param [Object]  objects  Objects to pattern match.
 		#
-		# @return [Object]  Result of calling the matched pattern's block
+		# @return [Object, MatchError]  Result of calling the matched pattern's block or MatchError if nothing was found
 		#
 		# @raise [MatchError]  Raised when no matching pattern is found and
 		#                      strict matching is enabled.
@@ -58,7 +58,7 @@ module Filigree
 				# If we didn't find anything we raise a MatchError.
 				raise MatchError
 			else
-				nil
+				MatchError
 			end
 		end
 
@@ -233,24 +233,29 @@ module Filigree
 		# @param [Visitor]                          visitor  Visitor to call
 		# @param [:preorder, :inorder, :postorder]  method   How to visit
 		#
-		# @return [void]
+		# @return [Boolean] If a pattern matched or not
 		def visit(visitor, method = :preorder)
 			case method
 			when :preorder
-				visitor.visit(self)
-				children.flatten.compact.each { |child| child.visit(visitor, :preorder) }
+				(visitor.visit(self) == MatchError) ||
+					children.flatten.compact.inject(false) { |mod, child| child.visit(visitor, :preorder) || mod }
 
 			when :inorder
+				mod   = false
 				nodes = [self]
 
+				# Not all Ruby implementations support modifying arrays while
+				# you are iterating over them.
 				while node = nodes.shift
 					nodes += node.children.flatten.compact
-					visitor.visit(node)
+					mod = visitor.visit(node) || mod
 				end
 
+				mod
+
 			when :postorder
-				children.flatten.compact.each { |child| child.visit(visitor, :postorder) }
-				visitor.visit(self)
+				children.flatten.compact.inject(false) { |mod, child| child.visit(visitor, :postorder) || mod } ||
+					(visitor.visit(self) == MatchError)
 			end
 		end
 	end
