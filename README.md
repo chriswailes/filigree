@@ -164,7 +164,11 @@ Filigree's implementation of the visitor pattern is built on the pattern matchin
 ```Ruby
 class Binary < Struct.new(:x, :y)
   extend  Filigree::Destructurable
-  include Filigree::Visitor
+  include Filigree::Visitable
+
+  def children
+  	[x, y]
+  end
 
   def destructure(_)
     [x, y]
