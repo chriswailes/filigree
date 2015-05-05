@@ -1,7 +1,7 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
-# Project: 	Filigree
-# Date:		2013/05/04
-# Description:	Test cases for the match method.
+# Author:      Chris Wailes <chris.wailes@gmail.com>
+# Project:     Filigree
+# Date:        2013/05/04
+# Description: Test cases for the match method.
 
 ############
 # Requires #
@@ -18,6 +18,8 @@ require 'filigree/match'
 #######################
 
 class MatchTester < Minitest::Test
+
+	include Filigree
 
 	####################
 	# Internal Classes #
