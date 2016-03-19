@@ -117,7 +117,7 @@ module Filigree
 			# @return [void]
 			def config(&block)
 				@config = Class.new { include Filigree::Configuration }
-				@config.instance_exec &block
+				@config.instance_exec(&block)
 			end
 
 			# Attaches the provided help string to the command that is

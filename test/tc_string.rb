@@ -27,9 +27,6 @@ Hello, I am a test string.
   code can be tested.
 eos
 
-	def setup
-	end
-
 	def test_segmentation
 		assert_equal SEGMENTED.chomp, ORIGINAL.segment(2, 30)
 	end

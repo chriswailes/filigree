@@ -137,7 +137,7 @@ module Filigree
 				break if str == '--'
 
 				if option = find_option(str)
-					args = argv.shift(option.arity == -1 ? argv.index { |str| str[0,1] == '-' } : option.arity)
+					args = argv.shift(option.arity == -1 ? argv.index { |next_str| next_str[0,1] == '-' } : option.arity)
 
 					case option.handler
 					when Array
@@ -165,7 +165,7 @@ module Filigree
 		def handle_serialized_options(overloaded, set_opts)
 			options =
 			if overloaded.is_a? String
-				if File.exists? overloaded
+				if File.exist? overloaded
 					YAML.load_file overloaded
 				else
 					YAML.load overloaded
@@ -266,9 +266,6 @@ module Filigree
 			#
 			# @return [void]
 			def option(long, short = nil, conversions: nil, &block)
-
-				attr_accessor long.to_sym
-
 				long  = long.to_s
 				short = short.to_s if short
 

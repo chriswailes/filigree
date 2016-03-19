@@ -154,7 +154,7 @@ module Filigree
 				add_pattern (mp = OuterPattern.new(pattern, guard, block))
 
 				if block
-					@deferred.each { |pattern| pattern.block = block }
+					@deferred.each { |deferred_pattern| deferred_pattern.block = block }
 					@deferred.clear
 
 				else
@@ -241,25 +241,25 @@ module Filigree
 				children.flatten.compact.inject(false) { |mod, child| child.visit(visitor, :preorder) || mod } || res
 
 			when :inorder
-				mod   = false
+				lmod   = false
 				nodes = [self]
 
 				# Not all Ruby implementations support modifying arrays while
 				# you are iterating over them.
 				while node = nodes.shift
 					nodes += node.children.flatten.compact
-					mod = visitor.visit(node) || mod
+					lmod = visitor.visit(node) || lmod
 				end
 
-				mod
+				lmod
 
 			when :postorder
-				res = children.flatten.compact.inject(false) { |mod, child| child.visit(visitor, :postorder) || mod }
+				res = children.flatten.compact.inject(false) { |mod, child| child.visit(visitor, :postorder) or mod }
 				(visitor.visit(self) != MatchError) || res
 
 			when :downup
 				res = (visitor.visit(self) != MatchError)
-				res = children.flatten.compact.inject(false) { |mod, child| child.visit(visitor, :downup) || mod } || res
+				res = children.flatten.compact.inject(false) { |mod, child| child.visit(visitor, :downup) or mod } || res
 				(visitor.visit(self) != MatchError) || res
 			end
 		end

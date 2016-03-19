@@ -153,16 +153,16 @@ class MatchTester < Minitest::Test
 		end
 	end
 
-	def match_tester_tuple(*touple)
-		match *touple do
+	def match_tester_tuple(*tuple)
+		match(*tuple)do
 			with(1, 2) { :FOO }
 			with(3, 4) { :BAR }
 			with(5)    { :BAF }
 		end
 	end
 
-	def match_tester_tuple_wildcard(*touple)
-		match *touple do
+	def match_tester_tuple_wildcard(*tuple)
+		match(*tuple)do
 			with(1)
 			with(2, 3) { :DEF }
 			with(4, _) { :PART_WILD }

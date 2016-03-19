@@ -59,10 +59,7 @@ module Filigree
 			Signal.trap('QUIT') { self.stop }
 			Signal.trap('TERM') { self.stop }
 
-			Signal.trap('KILL') { self.kill }
-
 			Signal.trap('CONT') { self.resume }
-			Signal.trap('STOP') { self.pause  }
 		end
 
 		#################

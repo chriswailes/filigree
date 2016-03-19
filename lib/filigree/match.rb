@@ -163,7 +163,7 @@ module Filigree
 	def match(*objects, &block)
 		me = Filigree::MatchEnvironment.new
 
-		me.instance_exec &block
+		me.instance_exec(&block)
 
 		me.find_match(objects)
 	end
@@ -263,7 +263,7 @@ module Filigree
 			@patterns << (mp = OuterPattern.new(pattern, guard, block))
 
 			if block
-				@deferred.each { |pattern| pattern.block = block }
+				@deferred.each { |deferred_pattern| deferred_pattern.block = block }
 				@deferred.clear
 
 			else

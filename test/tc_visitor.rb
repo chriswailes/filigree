@@ -86,7 +86,7 @@ class VisitorTester < Minitest::Test
 			two
 		end
 
-		on /three/ do
+		on(/three/)do
 			:three
 		end
 

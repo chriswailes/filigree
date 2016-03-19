@@ -39,8 +39,8 @@ class ConfigurationTester < Minitest::Test
 		end
 
 		help 'This does daf'
-		option 'daf', 'd' do |*syms|
-			syms.map { |syms| syms.to_sym }
+		option 'daf', 'd' do |*strs|
+			strs.map { |str| str.to_sym }
 		end
 
 		bool_option :bool
