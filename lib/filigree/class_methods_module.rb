@@ -1,7 +1,7 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
-# Project: 	Filigree
-# Date:		2013/05/15
-# Description:	A module to automatically extend classes with an inner module.
+# Author:      Chris Wailes <chris.wailes@gmail.com>
+# Project:     Filigree
+# Date:        2013/05/15
+# Description: A module to automatically extend classes with an inner module.
 
 ############
 # Requires #

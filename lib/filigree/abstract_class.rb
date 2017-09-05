@@ -69,17 +69,11 @@ module Filigree
 		#
 		# @raise [AbstractClassError]
 		def new(*args)
-			if not self.instance_variable_defined?(:@abstract_class)
-				super
-			else
+			if self.instance_variable_defined?(:'@abstract_class') and @abstract_class == self
 				raise AbstractClassError, self.name
+			else
+				super
 			end
-		
-#			if self.instance_variable_defined?(:@abstract_class) and @abstract_class == self
-#				raise AbstractClassError, self.name
-#			else
-#				super
-#			end
 		end
 
 		#############

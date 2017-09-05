@@ -613,52 +613,56 @@ module Filigree
 	end
 end
 
-###################################
-# Standard Library Deconstructors #
-###################################
+################################
+# Standard Library Refinements #
+################################
 
-class Array
-	extend Filigree::Destructurable
+module Filigree
 
-	# Destructuring for the array class.  If the array is being matched
-	# against two patterns the destructuring of the array will be the first
-	# element and then an array containing the rest of the values.  If there
-	# are three patterns the destructuring of the array will be the first and
-	# second elements, and then an array containing the remainder of the
-	# values.
-	#
-	# @param [Fixnum]  num_elems  Number of sub-pattern elements
-	#
-	# @return [Array<Object>]
-	def destructure(num_elems)
-		[*self.first(num_elems - 1), self[(num_elems - 1)..-1]]
+	refine Array do
+		extend Filigree::Destructurable
+
+		# Destructuring for the array class.  If the array is being matched
+		# against two patterns the destructuring of the array will be the first
+		# element and then an array containing the rest of the values.  If there
+		# are three patterns the destructuring of the array will be the first and
+		# second elements, and then an array containing the remainder of the
+		# values.
+		#
+		# @param [Integer]  num_elems  Number of sub-pattern elements
+		#
+		# @return [Array<Object>]
+		def destructure(num_elems)
+			[*self.first(num_elems - 1), self[(num_elems - 1)..-1]]
+		end
 	end
-end
 
-class Class
-	# Causes an instance of a class to be bound the the given name.
-	#
-	# @param [BindingPattern]  binding_pattern  Name to bind the instance to
-	def as(binding_pattern)
-		binding_pattern.tap { |bp| bp.pattern_elem = Filigree::InstancePattern.new(self) }
+	refine Class do
+		# Causes an instance of a class to be bound the the given name.
+		#
+		# @param [BindingPattern]  binding_pattern  Name to bind the instance to
+		def as(binding_pattern)
+			binding_pattern.tap { |bp| bp.pattern_elem = Filigree::InstancePattern.new(self) }
+		end
 	end
-end
 
-class Regexp
-	# Causes a string matching the regular expression to be bound the the
-	# given name.
-	#
-	# @param [BindingPattern]  binding_pattern  Name to bind the instance to
-	def as(binding_pattern)
-		binding_pattern.tap { |bp| bp.pattern_elem = Filigree::RegexpPattern.new(self) }
+	refine Regexp do
+		# Causes a string matching the regular expression to be bound the the
+		# given name.
+		#
+		# @param [BindingPattern]  binding_pattern  Name to bind the instance to
+		def as(binding_pattern)
+			binding_pattern.tap { |bp| bp.pattern_elem = Filigree::RegexpPattern.new(self) }
+		end
 	end
-end
 
-class Symbol
-	# Turns a symbol into a binding pattern.
-	#
-	# @return [Filigree::BindingPattern]
-	def ~
-		Filigree::BindingPattern.new(self)
+	refine Symbol do
+		# Turns a symbol into a binding pattern.
+		#
+		# @return [Filigree::BindingPattern]
+		def ~
+			Filigree::BindingPattern.new(self)
+		end
 	end
+
 end

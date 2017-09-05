@@ -19,7 +19,7 @@ require 'filigree/match'
 
 class MatchTester < Minitest::Test
 
-	include Filigree
+	using Filigree
 
 	####################
 	# Internal Classes #
@@ -99,33 +99,33 @@ class MatchTester < Minitest::Test
 
 	def match_tester_class_pattern(o)
 		match o do
-			with(Fixnum.as a) { [:Fixnum, a] }
-			with(Float.as a)  { [:Float,  a] }
-			with(String.as a) { [:String, a] }
+			with(Integer.as a) { [:Integer, a] }
+			with(Float.as a)   { [:Float,  a] }
+			with(String.as a)  { [:String, a] }
 		end
 	end
 
 	def match_tester_literal(o)
 		match o do
-			with(Literal(Fixnum)) { :Fixnum }
-			with(Literal(Float))  { :Float  }
-			with(Literal(/a/))    { :Regexp }
+			with(Literal(Integer)) { :Integer }
+			with(Literal(Float))   { :Float  }
+			with(Literal(/a/))     { :Regexp }
 		end
 	end
 
 	def match_tester_squiggle_bind(o)
 		match o do
-			with(Fixnum.as(~:a)) { [:Fixnum, a] }
-			with(Float.as(~:a))  { [:Float,  a] }
-			with(String.as(~:a)) { [:String, a] }
+			with(Integer.as(~:a)) { [:Integer, a] }
+			with(Float.as(~:a))   { [:Float,  a] }
+			with(String.as(~:a))  { [:String, a] }
 		end
 	end
 
 	def match_tester_manual_bind(o)
 		match o do
-			with(Fixnum.as(Bind(:a))) { [:Fixnum, a] }
-			with(Float.as(Bind(:a)))  { [:Float,  a] }
-			with(String.as(Bind(:a))) { [:String, a] }
+			with(Integer.as(Bind(:a))) { [:Integer, a] }
+			with(Float.as(Bind(:a)))   { [:Float,  a] }
+			with(String.as(Bind(:a)))  { [:String, a] }
 		end
 	end
 
@@ -195,7 +195,7 @@ class MatchTester < Minitest::Test
 	end
 
 	def test_class_pattern
-		assert_equal [:Fixnum, 42],    match_tester_class_pattern(42)
+		assert_equal [:Integer, 42],   match_tester_class_pattern(42)
 		assert_equal [:Float, 42.0],   match_tester_class_pattern(42.0)
 		assert_equal [:String, 'foo'], match_tester_class_pattern('foo')
 	end
@@ -236,19 +236,19 @@ class MatchTester < Minitest::Test
 	end
 
 	def test_literals
-		assert_equal :Fixnum, match_tester_literal(Fixnum)
-		assert_equal :Float,  match_tester_literal(Float)
-		assert_equal :Regexp, match_tester_literal(/a/)
+		assert_equal :Integer, match_tester_literal(Integer)
+		assert_equal :Float,   match_tester_literal(Float)
+		assert_equal :Regexp,  match_tester_literal(/a/)
 	end
 
 	def test_squiggle_bind
-		assert_equal [:Fixnum, 42],    match_tester_squiggle_bind(42)
+		assert_equal [:Integer, 42],   match_tester_squiggle_bind(42)
 		assert_equal [:Float, 42.0],   match_tester_squiggle_bind(42.0)
 		assert_equal [:String, 'foo'], match_tester_squiggle_bind('foo')
 	end
 
 	def test_manual_bind
-		assert_equal [:Fixnum, 42],    match_tester_manual_bind(42)
+		assert_equal [:Integer, 42],   match_tester_manual_bind(42)
 		assert_equal [:Float, 42.0],   match_tester_manual_bind(42.0)
 		assert_equal [:String, 'foo'], match_tester_manual_bind('foo')
 	end

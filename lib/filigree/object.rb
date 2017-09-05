@@ -1,7 +1,7 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
-# Project: 	Filigree
-# Date:		2013/05/04
-# Description:	Additional features for all objects.
+# Author:      Chris Wailes <chris.wailes@gmail.com>
+# Project:     Filigree
+# Date:        2013/05/04
+# Description: Additional features for all objects.
 
 ############
 # Requires #
@@ -29,12 +29,15 @@ end
 # Classes and Modules #
 #######################
 
-# Object class extras.
-class Object
-	# A copy and modification helper.
-	#
-	# @return [Object] A copy of the object with the block evaluated in the context of the copy.
-	def clone_with(&block)
-		self.clone.tap { |clone| clone.instance_exec(&block) }
+module Filigree
+
+	# Object class extras.
+	refine Object do
+		# A copy and modification helper.
+		#
+		# @return [Object] A copy of the object with the block evaluated in the context of the copy.
+		def clone_with(&block)
+			self.clone.tap { |clone| clone.instance_exec(&block) }
+		end
 	end
 end

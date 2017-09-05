@@ -1,7 +1,7 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
-# Project: 	Filigree
-# Date:		2013/05/04
-# Description:	Test cases for Class extensions.
+# Author:      Chris Wailes <chris.wailes@gmail.com>
+# Project:     Filigree
+# Date:        2013/05/04
+# Description: Test cases for Class extensions.
 
 ############
 # Requires #
@@ -18,6 +18,9 @@ require 'filigree/class'
 #######################
 
 class ClassTester < Minitest::Test
+
+	using Filigree
+
 	module Foo; end
 
 	class Bar
@@ -36,10 +39,11 @@ class ClassTester < Minitest::Test
 		assert Bar.includes_module?(Foo)
 
 		assert_equal 'ClassTester::Bar::Baf', Bar::Baf.name
-		assert_equal 'Baf', Bar::Baf.short_name
+		assert_equal 'Baf',                   Bar::Baf.short_name
 
 		assert  Baz.subclass_of?(Bar)
-		assert !Baz.subclass_of?(Fixnum)
+		assert !Baz.subclass_of?(Integer)
+
 		assert_raises(TypeError) { Baz.subclass_of?(1) }
 	end
 end

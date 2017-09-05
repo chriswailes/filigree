@@ -1,15 +1,21 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
-# Project: 	Filigree
-# Date:		2013/4/19
-# Description:	Filigree's Rakefile.
+# Author:      Chris Wailes <chris.wailes@gmail.com>
+# Project:     Filigree
+# Date:        2013/4/19
+# Description: Filigree's Rakefile.
 
 ############
 # Requires #
 ############
 
+# Add the Filigree source directory to the load path.
+lib_dir = File.expand_path("./lib/", __FILE__)
+$LOAD_PATH << lib_dir unless $LOAD_PATH.include?(lib_dir)
+
+puts lib_dir
+
 # Filigree
-require File.expand_path("../lib/filigree/request_file", __FILE__)
-require File.expand_path("../lib/filigree/version", __FILE__)
+require 'filigree/request_file'
+require 'filigree/version'
 
 ###########
 # Bundler #
@@ -94,7 +100,7 @@ request_file('yard', 'Yard is not installed.') do
 			'-M',       'redcarpet',
 			'--private'
 		]
-		
+
 		t.files = Dir['lib/**/*.rb']
 	end
 end

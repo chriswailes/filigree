@@ -18,6 +18,9 @@ require 'filigree/boolean'
 #######################
 
 class BooleanTester < Minitest::Test
+
+	using Filigree
+
 	def setup
 
 	end

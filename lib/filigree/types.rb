@@ -1,7 +1,7 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
-# Project: 	Filigree
-# Date:		2013/05/04
-# Description:	Extensions to help with type checking.
+# Author:      Chris Wailes <chris.wailes@gmail.com>
+# Project:     Filigree
+# Date:        2013/05/04
+# Description: Extensions to help with type checking.
 
 ############
 # Requires #
@@ -27,7 +27,7 @@ require 'filigree/class_methods_module'
 # @raise [ArgumentError]  An error is raise if the type checking fails.
 #
 # @return [Object]  The object passed as parameter obj
-def check_type(obj, type, blame = nil, nillable = false, strict = false)
+def check_type(obj, type, blame: nil, nillable: false, strict: false)
 	type_ok = (obj.nil? && nillable) || (strict ? obj.instance_of?(type) : obj.is_a?(type))
 
 	if type_ok
@@ -54,7 +54,7 @@ end
 # @raise [ArgumentError]  An error is raise if the type checking fails
 #
 # @return [Object]  The object passed in parameter array
-def check_array_type(array, type, blame = nil, nillable = false, strict = false)
+def check_array_type(array, type, blame: nil, nillable: false, strict: false)
 	array.each do |obj|
 		type_ok = (obj.nil? && nillable) || (strict ? obj.instance_of?(type) : obj.is_a?(type))
 
@@ -125,7 +125,7 @@ module Filigree
 			# @return [void]
 			def define_typed_accessor(name, nillable, strict, type, checker)
 				define_method "#{name}=" do |obj|
-					self.instance_variable_set("@#{name}", checker.call(obj, type, name, nillable, strict))
+					self.instance_variable_set("@#{name}", checker.call(obj, type, blame: name, nillable: nillable, strict: strict))
 				end
 			end
 			private :define_typed_accessor
@@ -138,12 +138,11 @@ module Filigree
 			# @param [Boolean]  strict    To use strict checking or not
 			#
 			# @return [void]
-			def typed_ivar(name, type, nillable = false, strict = false)
+			def typed_ivar(name, type, nillable: false, strict: false)
 				typed_ivars << name
 
 				define_typed_accessor(name, nillable, strict, *
-					type.is_a?(Array) ? [type.first, method(:check_array_type)] : [type, method(:check_type)]
-				)
+					type.is_a?(Array) ? [type.first, method(:check_array_type)] : [type, method(:check_type)])
 
 				attr_reader name
 			end

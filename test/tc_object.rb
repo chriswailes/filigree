@@ -1,7 +1,7 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
-# Project: 	Filigree
-# Date:		2013/05/04
-# Description:	Test cases for the Object extensions.
+# Author:      Chris Wailes <chris.wailes@gmail.com>
+# Project:     Filigree
+# Date:        2013/05/04
+# Description: Test cases for the Object extensions.
 
 ############
 # Requires #
@@ -18,11 +18,10 @@ require 'filigree/object'
 #######################
 
 class ObjectTester < Minitest::Test
+
+	using Filigree
+
 	Foo = Struct.new :a, :b
-
-	def setup
-
-	end
 
 	def test_returning
 		assert( returning(true) { false } )
