@@ -19,6 +19,8 @@ require 'filigree/visitor'
 
 class VisitorTester < Minitest::Test
 
+	using Filigree
+
 	####################
 	# Internal Classes #
 	####################
@@ -86,7 +88,7 @@ class VisitorTester < Minitest::Test
 			two
 		end
 
-		on(/three/)do
+		on(/three/) do
 			:three
 		end
 
@@ -124,7 +126,7 @@ class VisitorTester < Minitest::Test
 			@total = 0
 		end
 
-		on(Foo.(Fixnum.as n)) do
+		on(Foo.(Integer.as n)) do
 			@total += n
 		end
 	end
@@ -138,7 +140,7 @@ class VisitorTester < Minitest::Test
 			@total = 1
 		end
 
-		on(Foo.(Fixnum.as n)) do
+		on(Foo.(Integer.as n)) do
 			@total *= n
 		end
 	end

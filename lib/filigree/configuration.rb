@@ -137,7 +137,7 @@ module Filigree
 				break if str == '--'
 
 				if option = find_option(str)
-					args = argv.shift(option.arity == -1 ? argv.index { |next_str| next_str[0,1] == '-' } : option.arity)
+					args = argv.shift(option.arity == -1 ? argv.index { |sub_str| sub_str[0,1] == '-' } : option.arity)
 
 					case option.handler
 					when Array

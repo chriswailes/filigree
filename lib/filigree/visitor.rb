@@ -254,12 +254,12 @@ module Filigree
 				lmod
 
 			when :postorder
-				res = children.flatten.compact.inject(false) { |mod, child| child.visit(visitor, :postorder) or mod }
+				res = children.flatten.compact.inject(false) { |modified, child| child.visit(visitor, :postorder) || modified }
 				(visitor.visit(self) != MatchError) || res
 
 			when :downup
 				res = (visitor.visit(self) != MatchError)
-				res = children.flatten.compact.inject(false) { |mod, child| child.visit(visitor, :downup) or mod } || res
+				res = children.flatten.compact.inject(false) { |modified, child| child.visit(visitor, :downup) || modified } || res
 				(visitor.visit(self) != MatchError) || res
 			end
 		end
