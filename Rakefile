@@ -8,10 +8,8 @@
 ############
 
 # Add the Filigree source directory to the load path.
-lib_dir = File.expand_path("./lib/", __FILE__)
+lib_dir = File.expand_path("./lib/", File.dirname(__FILE__))
 $LOAD_PATH << lib_dir unless $LOAD_PATH.include?(lib_dir)
-
-puts lib_dir
 
 # Filigree
 require 'filigree/request_file'
@@ -42,12 +40,12 @@ end
 # Flog #
 ########
 
-request_file('flog_cli', 'Flog is not installed.') do
+request_file('flog_task', 'Flog is not installed.') do
 	desc 'Analyze code complexity with Flog'
-	task :flog do
-		whip = FlogCLI.new
-		whip.flog('lib')
-		whip.report
+	FlogTask.new do |t|
+		t.dirs    = ['lib']
+		t.method  = :max_method
+		t.verbose = true
 	end
 end
 

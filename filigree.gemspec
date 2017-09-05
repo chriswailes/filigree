@@ -4,7 +4,7 @@
 # Description: Gem specification for the Filigree project.
 
 # Add the Filigree source directory to the load path.
-lib_dir = File.expand_path("./lib/", __FILE__)
+lib_dir = File.expand_path("./lib/", File.dirname(__FILE__))
 $LOAD_PATH << lib_dir unless $LOAD_PATH.include?(lib_dir)
 
 require 'filigree/version'

@@ -16,3 +16,4 @@
 * Use keyword arguments
 * Use the safe navigation operator
 * Integer replaces both Fixnum and Bignum
+* Use Forwardable module
