@@ -1,4 +1,4 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
+# Author:		Chris Wailes <chris.wailes+filigree@gmail.com>
 # Project: 	Filigree
 # Date:		2013/05/14
 # Description:	Easy application configuration.
@@ -349,7 +349,7 @@ module Filigree
 			# Print the option information out as a string.
 			#
 			# Layout:
-			# |       ||--`long`,|| ||-`short`|| - |
+			# |       ||--`long`,|| ||-`short`|| ~ |
 			# |_______||_________||_||________||___|
 			#   indent    max_l+3  1   max_s+1   3
 			#
@@ -363,9 +363,9 @@ module Filigree
 				segmented_help = self.help.segment(segment_indent)
 
 				if self.short
-					sprintf "#{' ' * indent}%-#{max_long + 3}s %-#{max_short + 1}s - %s", "--#{self.long},", '-' + self.short, segmented_help
+					sprintf "#{' ' * indent}%-#{max_long + 3}s %-#{max_short + 1}s ~ %s", "--#{self.long},", '-' + self.short, segmented_help
 				else
-					sprintf "#{' ' * indent}%-#{max_long + max_short + 5}s - %s", '--' + self.long, segmented_help
+					sprintf "#{' ' * indent}%-#{max_long + max_short + 5}s ~ %s", '--' + self.long, segmented_help
 				end
 			end
 

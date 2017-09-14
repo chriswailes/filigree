@@ -1,7 +1,7 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
-# Project: 	Filigree
-# Date:		2014/1/20
-# Description:	A helper for require.
+# Author:      Chris Wailes <chris.wailes+filigree@gmail.com>
+# Project:     Filigree
+# Date:        2014/1/20
+# Description: A helper for require.
 
 ############
 # Requires #

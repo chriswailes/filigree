@@ -1,8 +1,8 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
-# Project: 	Filigree
-# Date:		2013/04/19
-# Description:	This file contains the test suit for Filigree.  It requires the
-#			individual tests from their respective files.
+# Author:      Chris Wailes <chris.wailes+filigree@gmail.com>
+# Project:     Filigree
+# Date:        2013/04/19
+# Description: This file contains the test suit for Filigree.  It requires the
+#              individual tests from their respective files.
 
 ############
 # Requires #
@@ -19,11 +19,11 @@ end
 
 # Test Cases
 require 'tc_abstract_class'
-#require 'tc_application'
+require 'tc_application'
 require 'tc_boolean'
 require 'tc_class'
 require 'tc_class_methods_module'
-#require 'tc_commands'
+require 'tc_commands'
 require 'tc_configuration'
 require 'tc_match'
 require 'tc_object'

@@ -1,7 +1,7 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
-# Project: 	Filigree
-# Date:		2013/05/14
-# Description:	Easy application configuration.
+# Author:      Chris Wailes <chris.wailes+filigree@gmail.com>
+# Project:     Filigree
+# Date:        2013/05/14
+# Description: Easy application configuration.
 
 ############
 # Requires #
@@ -12,12 +12,13 @@
 # Filigree
 require 'filigree/class_methods_module'
 require 'filigree/configuration'
+require 'filigree/string'
 
 ##########
 # Errors #
 ##########
 
-class CommandNotFoundError  < RuntimeError
+class CommandNotFoundError < RuntimeError
 	def initialize(line)
 		super "No command found for '#{line}'"
 	end
@@ -217,6 +218,7 @@ module Filigree
 		# The default help command.  This can be added to your class via
 		# add_command.
 		HELP_COMMAND = Command.new('help', 'Prints this help message.', [], nil, Proc.new do
+
 			puts 'Usage: <command> [options] <args>'
 			puts
 			puts 'Commands:'

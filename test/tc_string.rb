@@ -1,4 +1,4 @@
-# Author:      Chris Wailes <chris.wailes@gmail.com>
+# Author:      Chris Wailes <chris.wailes+filigree@gmail.com>
 # Project:     Filigree
 # Date:        2014/02/05
 # Description: Test cases for the String extensions.

@@ -8,12 +8,4 @@
 
 # Review
 
-* Should anything that is currently a class be a module instead?
-
 # Updates
-
-* Use refinements
-* Use keyword arguments
-* Use the safe navigation operator
-* Integer replaces both Fixnum and Bignum
-* Use Forwardable module

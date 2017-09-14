@@ -1,7 +1,7 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
-# Project: 	Filigree
-# Date:		2013/05/17
-# Description:	Test cases the Commands module.
+# Author:      Chris Wailes <chris.wailes+filigree@gmail.com>
+# Project:     Filigree
+# Date:        2013/05/17
+# Description: Test cases the Commands module.
 
 ############
 # Requires #

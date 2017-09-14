@@ -1,7 +1,7 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
-# Project: 	Filigree
-# Date:		2013/05/14
-# Description:	Simple application framework.
+# Author:      Chris Wailes <chris.wailes+filigree@gmail.com>
+# Project:     Filigree
+# Date:        2013/05/14
+# Description: Simple application framework.
 
 ############
 # Requires #
@@ -36,8 +36,6 @@ module Filigree
 		#############
 
 		REQUIRED_METHODS = [
-			:kill,
-			:pause,
 			:resume,
 			:run,
 			:stop

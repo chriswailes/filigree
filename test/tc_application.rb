@@ -1,7 +1,7 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
-# Project: 	Filigree
-# Date:		2013/05/15
-# Description:	Test cases for the Application module.
+# Author:      Chris Wailes <chris.wailes+filigree@gmail.com>
+# Project:     Filigree
+# Date:        2013/05/15
+# Description: Test cases for the Application module.
 
 ############
 # Requires #
@@ -43,7 +43,7 @@ class ApplicationTester < Minitest::Test
 	end
 
 	def test_application
-		assert_raises(NoMethodError)	{ Foo.finalize }
+		assert_raises(NoMethodError) { Foo.finalize }
 		Bar.finalize
 	end
 

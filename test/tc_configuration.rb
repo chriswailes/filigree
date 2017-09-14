@@ -1,4 +1,4 @@
-# Author:		Chris Wailes <chris.wailes@gmail.com>
+# Author:		Chris Wailes <chris.wailes+filigree@gmail.com>
 # Project: 	Filigree
 # Date:		2013/05/15
 # Description:	Test cases the Configuration module.

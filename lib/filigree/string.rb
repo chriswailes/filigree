@@ -1,4 +1,4 @@
-# Author:      Chris Wailes <chris.wailes@gmail.com>
+# Author:      Chris Wailes <chris.wailes+filigree@gmail.com>
 # Project:     Filigree
 # Date:        2014/01/20
 # Description: Class extensions for the String class.
