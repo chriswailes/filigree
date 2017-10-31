@@ -13,6 +13,12 @@
 require 'filigree/class_methods_module'
 require 'filigree/string'
 
+#########
+# Notes #
+#########
+
+# TODO: Add support for configuration destructors
+
 #######################
 # Classes and Modules #
 #######################
@@ -204,6 +210,8 @@ module Filigree
 
 			# Define an automatic configuration variable.
 			#
+			# FIXME: These blocks should only be executed once and then memoized.
+			#
 			# @param [Symbol]  name   Name of the configuration variable
 			# @param [Proc]    block  Block to be executed to generate the value
 			#
@@ -266,8 +274,10 @@ module Filigree
 			#
 			# @return [void]
 			def option(long, short = nil, conversions: nil, &block)
-				long  = long.to_s
+				long  = long.to_s.gsub('-', '_')
 				short = short.to_s if short
+
+				attr_accessor long.to_sym
 
 				add_option Option.new(long, short, @help_string, @next_default,
 					                  conversions.nil? ? block : conversions)
@@ -336,6 +346,8 @@ module Filigree
 		# This class represents an option that can appear in the
 		# configuration.
 		class Option < Struct.new(:long, :short, :help, :default, :handler)
+			using Filigree
+
 			# Returns the number of arguments that this option takes.
 			#
 			# @return [Fixnum]  Number of arguments the option takes
@@ -363,9 +375,9 @@ module Filigree
 				segmented_help = self.help.segment(segment_indent)
 
 				if self.short
-					sprintf "#{' ' * indent}%-#{max_long + 3}s %-#{max_short + 1}s ~ %s", "--#{self.long},", '-' + self.short, segmented_help
+					sprintf "#{' ' * indent}%-#{max_long + 3}s %-#{max_short + 1}s   %s", "--#{self.long},", '-' + self.short, segmented_help
 				else
-					sprintf "#{' ' * indent}%-#{max_long + max_short + 5}s ~ %s", '--' + self.long, segmented_help
+					sprintf "#{' ' * indent}%-#{max_long + max_short + 5}s   %s", '--' + self.long, segmented_help
 				end
 			end
 
