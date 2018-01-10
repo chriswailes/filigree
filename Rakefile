@@ -76,16 +76,6 @@ request_file('reek/rake/task', 'Reek is not installed.') do
 	end
 end
 
-##################
-# Rubygems Tasks #
-##################
-
-request_file('rubygems/tasks', 'Rubygems-tasks is not installed.') do
-	Gem::Tasks.new do |t|
-		t.console.command = 'pry'
-	end
-end
-
 ########
 # YARD #
 ########
