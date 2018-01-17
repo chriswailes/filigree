@@ -30,6 +30,8 @@ end
 
 module Filigree
 	module Commands
+		using Filigree
+
 		include ClassMethodsModule
 
 		####################
@@ -42,6 +44,7 @@ module Filigree
 		#
 		# @return [Object]  Result of invoking the command's block
 		def call(line)
+			# FIXME: Let this take either a split array, or a string that needs to be split
 			namespace, rest = self.class.get_namespace(line.split)
 
 			if namespace == self.class.commands
@@ -63,6 +66,8 @@ module Filigree
 			if command.action.arity < 0 or command.action.arity == rest.length
 				self.instance_exec(*rest, &action)
 			else
+				# TODO: Specify the number of arguments expected and given.
+				# TODO: Display the help string for the command if present.
 				raise ArgumentError, "Wrong number of arguments for command: #{command.name}."
 			end
 		end
@@ -209,7 +214,8 @@ module Filigree
 		#################
 
 		# The POD representing a command.
-		Command = Struct.new(:name, :help, :param_help, :config, :action)
+		class Command < Struct.new(:name, :help, :param_help, :config, :action)
+		end
 
 		########################
 		# Pre-defined Commands #
@@ -244,6 +250,8 @@ module Filigree
 				end
 
 				puts
+				puts "\t#{comm.help}"
+				puts
 
 				if !comm.param_help.empty?
 					max_param_len = comm.param_help.inject(0) do |max, pair|
@@ -253,7 +261,7 @@ module Filigree
 
 					segment_indent	= max_param_len + 8
 					comm.param_help.each do |name, help|
-						printf "     %-#{max_param_len}s - %s\n", name, help.segment(segment_indent)
+						printf "\t%-#{max_param_len}s - %s\n", name, help.segment(segment_indent)
 					end
 				end
 			end

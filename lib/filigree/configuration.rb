@@ -98,7 +98,7 @@ module Filigree
 
 			case overloaded
 			when Array
-				handle_array_options(overloaded, set_opts)
+				handle_array_options(overloaded.clone, set_opts)
 
 			when String, IO
 				handle_serialized_options(overloaded, set_opts)
@@ -132,6 +132,8 @@ module Filigree
 		end
 
 		# Configure the object from an array of strings.
+		#
+		# TODO: Improve the way arguments are pulled out of the ARGV array.
 		#
 		# @param [Array<String>]  argv      String options
 		# @param [Array<String>]  set_opts  List of names of options already added
@@ -407,7 +409,7 @@ module Filigree
 
 		# The default help option.  This can be added to your class via
 		# add_option.
-		HELP_OPTION = Option.new('help', 'h', 'Prints this help message.', nil, Proc.new do
+		HELP_OPTION = Option.new('help', 'h', 'Prints this help message', nil, Proc.new do
 			puts "Usage: #{self.class.usage}"
 			puts
 			puts 'Options:'
