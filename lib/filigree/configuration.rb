@@ -115,6 +115,13 @@ module Filigree
 			self.class.required_options.each do |option|
 				raise ArgumentError, "Option #{option} not set." if self.send(option).nil?
 			end
+
+			# Initialize the auto options
+			self.class.auto_blocks.each do |name, block|
+				result = self.instance_exec(&block)
+
+				self.define_singleton_method(name) { result }
+			end
 		end
 
 		# Find the appropriate option object given a string.
@@ -193,6 +200,8 @@ module Filigree
 		#################
 
 		module ClassMethods
+			# @return [Hash<Symbol, Block>]  Hash of names to blocks used for auto configuration
+			attr_reader :auto_blocks
 			# @return [Hash<String, Option>]  Hash of options with long names used as keys
 			attr_reader :options_long
 			# @return [Hash<String, Option>]  hash of options with short name used as keys
@@ -212,14 +221,12 @@ module Filigree
 
 			# Define an automatic configuration variable.
 			#
-			# FIXME: These blocks should only be executed once and then memoized.
-			#
 			# @param [Symbol]  name   Name of the configuration variable
 			# @param [Proc]    block  Block to be executed to generate the value
 			#
 			# @return [void]
 			def auto(name, &block)
-				define_method(name, &block)
+				@auto_blocks[name.to_sym] = block
 			end
 
 			# Define a boolean option.  The variable will be set to true if
@@ -258,6 +265,7 @@ module Filigree
 			#
 			# @return [void]
 			def install_icvars
+				@auto_blocks   = Hash.new
 				@help_string   = ''
 				@next_default  = nil
 				@next_required = false
@@ -278,8 +286,6 @@ module Filigree
 			def option(long, short = nil, conversions: nil, &block)
 				long  = long.to_s.gsub('-', '_')
 				short = short.to_s if short
-
-				attr_accessor long.to_sym
 
 				add_option Option.new(long, short, @help_string, @next_default,
 					                  conversions.nil? ? block : conversions)
@@ -363,7 +369,7 @@ module Filigree
 			# Print the option information out as a string.
 			#
 			# Layout:
-			# |       ||--`long`,|| ||-`short`|| ~ |
+			# |       ||--`long`,|| ||-`short`||   |
 			# |_______||_________||_||________||___|
 			#   indent    max_l+3  1   max_s+1   3
 			#

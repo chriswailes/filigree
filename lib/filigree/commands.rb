@@ -40,15 +40,23 @@ module Filigree
 
 		# This will find the appropriate command and execute it.
 		#
-		# @param [String]  line  String containing the command to be processed and its arguments
+		# @param [String, Array<String>]  overloaded  String containing the command to be processed and its arguments
 		#
 		# @return [Object]  Result of invoking the command's block
-		def call(line)
-			# FIXME: Let this take either a split array, or a string that needs to be split
-			namespace, rest = self.class.get_namespace(line.split)
+		def call(overloaded)
+			split_line =
+			if overloaded.is_a?(String)
+				overloaded.split
+			elsif overloaded.is_a?(Array)
+				overloaded
+			else
+				raise TypeError, "Expected a String or Array of Strings."
+			end
+
+			namespace, rest = self.class.get_namespace(split_line)
 
 			if namespace == self.class.commands
-				raise CommandNotFoundError, line
+				raise CommandNotFoundError, split_line.join(' ')
 			end
 
 			command = namespace[:nil]
@@ -66,9 +74,9 @@ module Filigree
 			if command.action.arity < 0 or command.action.arity == rest.length
 				self.instance_exec(*rest, &action)
 			else
-				# TODO: Specify the number of arguments expected and given.
-				# TODO: Display the help string for the command if present.
-				raise ArgumentError, "Wrong number of arguments for command: #{command.name}."
+				raise ArgumentError,
+				      "Wrong number of arguments for command: #{command.name}. " +
+				      "Expected #{command.action.arity} but got #{rest.length}."
 			end
 		end
 
