@@ -164,6 +164,9 @@ module Filigree
 					end
 
 					set_opts << option.long
+				else
+					argv.unshift str
+					break
 				end
 			end
 
