@@ -32,14 +32,12 @@ def check_type(obj, type, blame: nil, nillable: false, strict: false)
 
 	if type_ok
 		obj
+	elsif blame
+		raise TypeError,
+			"Parameter #{blame} must be an instance of the #{type.name} class.  Received an instance of #{obj.class.name}."
 	else
-		if blame
-			raise TypeError,
-				"Parameter #{blame} must be an instance of the #{type.name} class.  Received an instance of #{obj.class.name}."
-		else
-			raise TypeError,
-				"Expected an object of type #{type.name}.  Received an instance of #{obj.class.name}."
-		end
+		raise TypeError,
+			"Expected an object of type #{type.name}.  Received an instance of #{obj.class.name}."
 	end
 end
 
@@ -65,6 +63,27 @@ def check_array_type(array, type, blame: nil, nillable: false, strict: false)
 				raise TypeError, "Expected an object of type #{type.name}."
 			end
 		end
+	end
+end
+
+# A method for checking enum membership for a Symbol.
+#
+# @param [Symbol]         sym       Symbol to check for enum membership
+# @param [Array<Symbol>]  enum_set  The symbols that comprise the set of enumerable values
+# @param [String, nil]    blame     Variable name to blame for failed enum checks
+# @param [Boolean]        nillable  Symbol can be nil?
+def check_enum_type(sym, enum_set, blame: nil, nillable: false)
+	check_type(sym, Symbol, blame: 'sym', nillable: nillable)
+	check_array_type(enum_set, Symbol, blame: 'enum_set', nillable: false)
+
+	if enum_set.include?(sym)
+		sym
+	elsif blame
+		raise TypeError,
+			"Parameter #{blame} (#{sym}) is not a member of the provided enum set: #{enum_set}"
+	else
+		raise TypeError,
+			"Symbol #{sym} is not a member of the provided enum set: #{enum_set}"
 	end
 end
 

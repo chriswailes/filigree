@@ -16,7 +16,39 @@
 #######################
 
 module Filigree
+	# Terminal color codes
+	COLOR_CODE_BLUE = "\u001b[34m"
+	COLOR_CODE_GREEN = "\u001b[32m"
+	COLOR_CODE_RED = "\u001b[31m"
+	COLOR_CODE_YELLOW = "\u001b[33m"
+
+	RESET_CODE = "\u001b[0m"
+
 	refine String do
+		#
+		# Colorization methods
+		#
+
+		def blue
+			colorize(COLOR_CODE_BLUE)
+		end
+
+		def green
+			colorize(COLOR_CODE_GREEN)
+		end
+
+		def red
+			colorize(COLOR_CODE_RED)
+		end
+
+		def yellow
+			colorize(COLOR_CODE_YELLOW)
+		end
+
+		def colorize(escape_code)
+			"#{escape_code}#{self}#{RESET_CODE}"
+		end
+
 		# Chop up the string into multiple lines so that no line is longer than
 		# the specified number of characters.
 		#

@@ -131,7 +131,7 @@ module Filigree
 		# @return [Option, nil]  Desired option or nil if it wasn't found
 		def find_option(str)
 			if str[0,2] == '--'
-				self.class.options_long[str[2..-1]]
+				self.class.options_long[str[2..-1].gsub('-', '_')]
 
 			elsif str[0,1] == '-'
 				self.class.options_short[str[1..-1]]
@@ -269,13 +269,30 @@ module Filigree
 			# @return [void]
 			def install_icvars
 				@auto_blocks   = Hash.new
-				@help_string   = ''
+				@help_string   = nil
 				@next_default  = nil
 				@next_required = false
 				@options_long  = Hash.new
 				@options_short = Hash.new
 				@required      = Array.new
 				@usage         = ''
+			end
+
+			# Copy the instance class variables from the current class (which
+			# this module has been included in) into the subclass.
+			#
+			# @param [Class]  klass  The subclass object.
+			#
+			# @return [void]
+			def inherited(klass)
+				klass.instance_variable_set(:@auto_blocks,   @auto_blocks)
+				klass.instance_variable_set(:@help_string,   @help_string)
+				klass.instance_variable_set(:@next_default,  @next_default)
+				klass.instance_variable_set(:@next_required, @next_required)
+				klass.instance_variable_set(:@options_long,  @options_long)
+				klass.instance_variable_set(:@options_short, @options_short)
+				klass.instance_variable_set(:@required,      @required)
+				klass.instance_variable_set(:@usage,         @usage)
 			end
 
 			# Define a new option.
@@ -296,7 +313,7 @@ module Filigree
 				@required << long.to_sym if @next_required
 
 				# Reset state between option declarations.
-				@help_string   = ''
+				@help_string   = nil
 				@next_default  = nil
 				@next_required = false
 			end
@@ -382,13 +399,15 @@ module Filigree
 			#
 			# @return [String]
 			def to_s(max_long, max_short, indent = 0)
-				segment_indent	= indent + max_long + max_short + 8
-				segmented_help = self.help.segment(segment_indent)
+				segment_indent = indent + max_long + max_short + 8
+				segmented_help = self.help&.segment(segment_indent) || ''
+
+				long_display_name = self.long.gsub('_', '-')
 
 				if self.short
-					sprintf "#{' ' * indent}%-#{max_long + 3}s %-#{max_short + 1}s   %s", "--#{self.long},", '-' + self.short, segmented_help
+					sprintf("#{' ' * indent}%-#{max_long + 3}s %-#{max_short + 1}s   %s", "--#{long_display_name},", "-#{self.short}", segmented_help)
 				else
-					sprintf "#{' ' * indent}%-#{max_long + max_short + 5}s   %s", '--' + self.long, segmented_help
+					sprintf("#{' ' * indent}%-#{max_long + max_short + 5}s   %s", "--#{long_display_name}", segmented_help)
 				end
 			end
 
