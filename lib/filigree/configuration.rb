@@ -122,6 +122,11 @@ module Filigree
 
 				self.define_singleton_method(name) { result }
 			end
+
+			# Call the finalize callback if present
+			if self.respond_to?(:finalize)
+				self.finalize
+			end
 		end
 
 		# Find the appropriate option object given a string.
