@@ -18,7 +18,15 @@ require 'filigree/string'
 # Errors #
 ##########
 
-class CommandNotFoundError < RuntimeError
+class CommandError < RuntimeError; end
+
+class EmptyCommand < CommandError
+	def initialize
+		super "No command specified"
+	end
+end
+
+class CommandNotFoundError < CommandError
 	def initialize(line)
 		super "No command found for '#{line}'"
 	end
@@ -53,13 +61,11 @@ module Filigree
 				raise TypeError, "Expected a String or Array of Strings."
 			end
 
-			namespace, rest = self.class.get_namespace(split_line)
-
-			if namespace == self.class.commands
-				raise CommandNotFoundError, split_line.join(' ')
+			if split_line.empty? or split_line.lazy.map(&:empty?).inject(true, &:&)
+				raise EmptyCommand
 			end
 
-			command = namespace[:nil]
+			command, rest = self.class.get_command(split_line)
 
 			action =
 			if command.config
@@ -155,6 +161,21 @@ module Filigree
 				@param_docs   = Array.new
 			end
 
+			# Get the command specified by the provided tokens.
+			#
+			# @param  [Array<String>]  tokens  String tokens specifying the command
+			#
+			# @return [Command]  The specified command, if it exists
+			def get_command(tokens)
+				namespace, rest = self.get_namespace(tokens)
+
+				if namespace == self.commands
+					raise CommandNotFoundError, tokens.join(' ')
+				end
+
+				[namespace[:nil], rest]
+			end
+
 			# Given a root namespace, find the namespace indicated by the
 			# provided tokens.
 			#
@@ -231,45 +252,52 @@ module Filigree
 
 		# The default help command.  This can be added to your class via
 		# add_command.
-		HELP_COMMAND = Command.new('help', 'Prints this help message.', [], nil, Proc.new do
+		HELP_COMMAND = Command.new('help', 'Prints helpful information about commands', ['Name of command to query'], nil, lambda do |command_name = nil|
 
-			puts 'Usage: <command> [options] <args>'
 			puts
-			puts 'Commands:'
 
-			comm_list = self.class.command_list
-
-			sorted_comm_list = comm_list.sort { |a, b| a.name <=> b.name }
-			max_length       = comm_list.lazy.map { |opt| opt.name.length }.max
-
-
-			sorted_comm_list.each do |comm|
-				printf "  % #{max_length}s", comm.name
-
-				if comm.config
-					print ' [options]'
-				end
-
-				puts comm.param_help.inject('') { |str, pair| str << " <#{pair.first}>" }
-
-				if comm.config
-					options = comm.config.options_long.values.sort { |a, b| a.long <=> b.long }
-					puts Filigree::Configuration::Option.to_s(options, max_length + 4)
-				end
-
+			if command_name.nil?
+				puts 'Usage: <command> [options] <args>'
 				puts
-				puts "\t#{comm.help}"
-				puts
+				puts 'Commands:'
 
-				if !comm.param_help.empty?
-					max_param_len = comm.param_help.inject(0) do |max, pair|
-						param_len = pair.first.to_s.length
-						max <=  param_len ? param_len : max
+				comm_list = self.class.command_list
+
+				sorted_comm_list = comm_list.sort { |a, b| a.name <=> b.name }
+				max_length       = comm_list.lazy.map { |opt| opt.name.length }.max
+
+				sorted_comm_list.each do |comm|
+					if comm.help.empty?
+						printf "  %-#{max_length}s\n", comm.name
+					else
+						printf "  %-#{max_length}s  %s\n", comm.name, comm.help
 					end
+				end
+			elsif command_name.empty?
+				raise EmptyCommand
+			else
+				command, rest = self.class.get_command(command_name.split(' '))
 
-					segment_indent	= max_param_len + 8
-					comm.param_help.each do |name, help|
-						printf "\t%-#{max_param_len}s - %s\n", name, help.segment(segment_indent)
+				puts "Usage: #{command_name} [options] <args>"
+				puts
+				puts "  #{command.help}" if not command.help.empty?
+
+				if command.config
+					options = command.config.options_long.values.sort { |a, b| a.long <=> b.long }
+					puts
+					puts "  Options:"
+					puts Filigree::Configuration::Option.to_s(options, 4)
+				end
+
+				if not command.param_help.empty?
+					max_param_len =
+						command.param_help.lazy.map {|pair| pair.first.to_s.length}.max
+
+					segment_indent = max_param_len + 7
+					puts
+					puts "  Parameters:"
+					command.param_help.each do |name, help|
+						printf "    %-#{max_param_len}s - %s\n", name, help.segment(segment_indent)
 					end
 				end
 			end
