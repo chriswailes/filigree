@@ -1,13 +1,14 @@
-# Author:		Chris Wailes <chris.wailes+filigree@gmail.com>
-# Project: 	Filigree
-# Date:		2013/05/14
-# Description:	Easy application configuration.
+# Author:      Chris Wailes <chris.wailes+filigree@gmail.com>
+# Project:     Filigree
+# Date:        2013/05/14
+# Description: Easy application configuration.
 
 ############
 # Requires #
 ############
 
 # Standard Library
+require 'set'
 
 # Filigree
 require 'filigree/class_methods_module'
@@ -62,7 +63,7 @@ module Filigree
 			require 'yaml'
 
 			vals =
-			if fields.empty? then self.class.options_long.keys else fields end.inject(Hash.new) do |hash, field|
+			if fields.empty? then self.class.options_long.values.map(&:storage) else fields end.inject(Hash.new) do |hash, field|
 				hash.tap { hash[field.to_s] = self.send(field) }
 			end
 
@@ -94,26 +95,33 @@ module Filigree
 		#
 		# @return [void]
 		def initialize(overloaded = ARGV.clone)
-			set_opts = Array.new
+			set_fields = Set.new
 
 			case overloaded
 			when Array
-				handle_array_options(overloaded.clone, set_opts)
+				handle_array_options(overloaded.clone, set_fields)
 
 			when String, IO
-				handle_serialized_options(overloaded, set_opts)
+				handle_serialized_options(overloaded, set_fields)
 			end
 
-			(self.class.options_long.keys - set_opts).each do |opt_name|
-				default = self.class.options_long[opt_name].default
-				default = self.instance_exec(&default) if default.is_a? Proc
+			self.class.options_long.each do |long_name, option|
+				next if set_fields.include?(option.storage)
 
-				self.send("#{opt_name}=", default)
+				default =
+					option.default.is_a?(Proc) ?
+						self.instance_exec(&option.default) :
+						option.default
+
+				self.send("#{option.storage}=", default)
 			end
 
 			# Check to make sure all the required options are set.
-			self.class.required_options.each do |option|
-				raise ArgumentError, "Option #{option} not set." if self.send(option).nil?
+			self.class.required_options.each do |option_name|
+				required_storage = self.class.options_long[option_name].storage
+
+				raise ArgumentError,
+					"Option #{option_name} not set." if self.send(required_storage).nil?
 			end
 
 			# Initialize the auto options
@@ -147,28 +155,30 @@ module Filigree
 		#
 		# TODO: Improve the way arguments are pulled out of the ARGV array.
 		#
-		# @param [Array<String>]  argv      String options
-		# @param [Array<String>]  set_opts  List of names of options already added
+		# @param [Array<String>]  argv        String options
+		# @param [Array<String>]  set_fields  List of names of fields already added
 		#
 		# @return [void]
-		def handle_array_options(argv, set_opts)
+		def handle_array_options(argv, set_fields)
 			while str = argv.shift
 
 				break if str == '--'
 
 				if option = find_option(str)
-					args = argv.shift(option.arity == -1 ? argv.index { |sub_str| sub_str[0,1] == '-' } : option.arity)
+					args = option.compute_args(argv)
 
 					case option.handler
 					when Array
-						tmp = args.zip(option.handler).map { |arg, sym| arg.send sym }
-						self.send("#{option.long}=", (option.arity == 1 and tmp.length == 1) ? tmp.first : tmp)
+						tmp = args.zip(option.handler).map { |arg, sym| arg.send(sym) }
+						self.send("#{option.storage}=",
+						          (option.handler.length == 1 and tmp.length == 1) ? tmp.first : tmp)
 
 					when Proc
-						self.send("#{option.long}=", self.instance_exec(*args, &option.handler))
+						self.send("#{option.storage}=",
+						          self.instance_exec(*args, &option.handler))
 					end
 
-					set_opts << option.long
+					set_fields << option.storage
 				else
 					argv.unshift str
 					break
@@ -182,24 +192,24 @@ module Filigree
 		# Configure the object from a serialization source.
 		#
 		# @param [String, IO]     overloaded  Serialization source
-		# @param [Array<String>]  set_opts    List of names of options already added
+		# @param [Array<String>]  set_fields  List of names of fields already added
 		#
 		# @return [void]
-		def handle_serialized_options(overloaded, set_opts)
-			options =
+		def handle_serialized_options(overloaded, set_fields)
+			fields =
 			if overloaded.is_a? String
 				if File.exist? overloaded
-					YAML.load_file overloaded
+					YAML.load_file(overloaded)
 				else
-					YAML.load overloaded
+					YAML.load(overloaded)
 				end
 			else
-				YAML.load overloaded
+				YAML.load(overloaded)
 			end
 
-			options.each do |option, val|
-				set_opts << option
-				self.send "#{option}=", val
+			fields.each do |field, val|
+				set_fields << field
+				self.send "#{field}=", val
 			end
 		end
 
@@ -221,7 +231,7 @@ module Filigree
 			#
 			# @return [void]
 			def add_option(opt)
-				attr_accessor opt.long
+				attr_accessor opt.storage
 
 				@options_long[opt.long]   = opt
 				@options_short[opt.short] = opt unless opt.short.nil?
@@ -240,13 +250,14 @@ module Filigree
 			# Define a boolean option.  The variable will be set to true if
 			# the flag is seen and be false otherwise.
 			#
-			# @param [String]  long   Long name of the option
-			# @param [String]  short  Short name of the option
+			# @param [String]  long     Long name of the option
+			# @param [String]  short    Short name of the option
+			# @param [String]  stroage  Name of variable result is stored in
 			#
 			# @return [void]
-			def bool_option(long, short = nil)
+			def bool_option(long, short = nil, storage: nil)
 				@next_default = false
-				option(long, short) { true }
+				option(long, short, storage: storage) { true }
 			end
 
 			# Sets the default value for the next command.  If a block is
@@ -305,17 +316,25 @@ module Filigree
 			# @param [String]         long         Long option name
 			# @param [String]         short        Short option name
 			# @param [Array<Symbol>]  conversions  List of methods used to convert string arguments
+			# @param [String]         storage      Name of variable result is stored in
 			# @param [Proc]           block        Block used when the option is encountered
 			#
 			# @return [void]
-			def option(long, short = nil, conversions: nil, &block)
-				long  = long.to_s.gsub('-', '_')
-				short = short.to_s if short
+			def option(long, short = nil, storage: nil, conversions: nil, &block)
+				long    = long.to_s.gsub('-', '_')
+				short   = short.to_s if short
+				storage = long if storage.nil?
 
-				add_option Option.new(long, short, @help_string, @next_default,
-					                  conversions.nil? ? block : conversions)
+				if block and block.parameters.lazy.map(&:first).include?(:key)
+					raise ArgumentError,
+						'Option handling blocks are not allowed to use keyword arguments.'
+				end
 
-				@required << long.to_sym if @next_required
+				add_option Option.new(long, short, storage,
+				                      @help_string, @next_default,
+									  conversions.nil? ? block : conversions)
+
+				@required << long if @next_required
 
 				# Reset state between option declarations.
 				@help_string   = nil
@@ -345,12 +364,13 @@ module Filigree
 
 			# Define an option that takes a single string argument.
 			#
-			# @param [String]  long   Long option name
-			# @param [String]  short  Short option name
+			# @param [String]  long     Long option name
+			# @param [String]  short    Short option name
+			# @param [String]  storage  Name of variable result is stored in
 			#
 			# @return [void]
-			def string_option(long, short = nil)
-				option(long, short) { |str| str }
+			def string_option(long, short = nil, storage: nil)
+				option(long, short, storage: storage) { |str| str }
 			end
 
 			# Add's a usage string to the entire configuration object.  If
@@ -378,16 +398,44 @@ module Filigree
 
 		# This class represents an option that can appear in the
 		# configuration.
-		class Option < Struct.new(:long, :short, :help, :default, :handler)
+		class Option < Struct.new(:long, :short, :storage, :help, :default, :handler)
 			using Filigree
 
-			# Returns the number of arguments that this option takes.
+			# Select arguments to pass to this option's handler from the
+			# provided list.
 			#
-			# @return [Fixnum]  Number of arguments the option takes
-			def arity
+			# @param  [Array<String>]  argv  Array of possible arguments
+			#
+			# @return [Array<String>] A number of arguments shifted off the
+			#                         front of argv
+			def compute_args(argv)
 				case self.handler
-				when Array then self.handler.length
-				when Proc  then self.handler.arity
+				when Array
+					argv.shift(self.handler.length)
+				when Proc
+					Array.new.tap do |args|
+						self.handler.parameters.each do |type, _|
+							more_args_available = !(argv.empty? or argv.first[0] == '-')
+
+							case type
+							when :req
+								if more_args_available
+									args << argv.shift
+								else
+									raise "Option #{self.long_name} requires additional arguments"
+								end
+							when :opt
+								if more_args_available
+									args << argv.shift
+								else
+									break
+								end
+							when :rest
+								# This type of parameter may only be in the tail position, so no need to break.
+								args.push(*argv.shift(argv.index { |str| str[0] == '-' }))
+							end
+						end
+					end
 				end
 			end
 

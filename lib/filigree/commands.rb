@@ -77,6 +77,7 @@ module Filigree
 				command.action
 			end
 
+			# FIXME: Change this to use Proc#parameters
 			if command.action.arity < 0 or command.action.arity == rest.length
 				self.instance_exec(*rest, &action)
 			else
@@ -276,7 +277,7 @@ module Filigree
 			elsif command_name.empty?
 				raise EmptyCommand
 			else
-				command, rest = self.class.get_command(command_name.split(' '))
+				command, _ = self.class.get_command(command_name.split(' '))
 
 				puts "Usage: #{command_name} [options] <args>"
 				puts
