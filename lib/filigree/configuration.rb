@@ -490,7 +490,7 @@ module Filigree
 
 		# The default help option.  This can be added to your class via
 		# add_option.
-		HELP_OPTION = Option.new('help', 'h', 'Prints this help message', nil, Proc.new do
+		HELP_OPTION = Option.new('help', 'h', 'help', 'Prints this help message', nil, Proc.new do
 			puts "Usage: #{self.class.usage}"
 			puts
 			puts 'Options:'
