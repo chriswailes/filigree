@@ -100,4 +100,10 @@ class ProxyClassTester < Minitest::Test
 		assert_equal(3.14,           var1.caz)
 		assert(var1.common)
 	end
+
+	def test_wrong_args
+		var = Baz.new
+
+		assert_raises(ArgumentError) { var.foo(1, 2) }
+	end
 end
