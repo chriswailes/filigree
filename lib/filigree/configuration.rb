@@ -94,7 +94,7 @@ module Filigree
 		#    @param [String, IO]  source  Serialized configuration source
 		#
 		# @return [void]
-		def initialize(overloaded = ARGV.clone)
+		def initialize(overloaded = ARGV.clone, instance_defaults: Hash.new)
 			set_fields = Set.new
 
 			case overloaded
@@ -109,11 +109,15 @@ module Filigree
 				next if set_fields.include?(option.storage)
 
 				default =
-					option.default.is_a?(Proc) ?
-						self.instance_exec(&option.default) :
-						option.default
+				if instance_defaults.has_key?(long_name)
+					instance_defaults[long_name]
+				elsif option.default.is_a?(Proc)
+					self.instance_exec(&option.default)
+				else
+					option.default
+				end
 
-				self.send("#{option.storage}=", default)
+				self.send("#{option.storage}=", default) if not default.nil?
 			end
 
 			# Check to make sure all the required options are set.
