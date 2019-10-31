@@ -20,6 +20,13 @@ require 'filigree/string'
 
 class CommandError < RuntimeError; end
 
+class CommandArgumentError < CommandError
+	def initialize(command_name, expected, actual)
+		super("Wrong number of arguments for command: #{command_name}. " +
+		      "Expected #{expected} but got #{actual}.")
+	end
+end
+
 class EmptyCommand < CommandError
 	def initialize
 		super "No command specified"
@@ -81,9 +88,7 @@ module Filigree
 			if command.action.arity < 0 or command.action.arity == rest.length
 				self.instance_exec(*rest, &action)
 			else
-				raise ArgumentError,
-				      "Wrong number of arguments for command: #{command.name}. " +
-				      "Expected #{command.action.arity} but got #{rest.length}."
+				raise CommandArgumentError.new(command.name, command.action.arity, rest.length)
 			end
 		end
 

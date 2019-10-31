@@ -60,7 +60,7 @@ class CommandTester < Minitest::Test
 	end
 
 	def test_command_with_wrong_args
-		assert_raises(ArgumentError) { @commander.('hello1 cat dog') }
+		assert_raises(CommandArgumentError) { @commander.('hello1 cat dog') }
 	end
 
 	def test_configured_command
