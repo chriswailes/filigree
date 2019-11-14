@@ -235,7 +235,7 @@ module Filigree
 			#
 			# @return [void]
 			def add_option(opt)
-				attr_accessor opt.storage
+				attr_accessor opt.storage unless self.instance_methods.include?(opt.storage.to_sym)
 
 				@options_long[opt.long]   = opt
 				@options_short[opt.short] = opt unless opt.short.nil?
