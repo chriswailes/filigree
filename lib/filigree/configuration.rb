@@ -305,13 +305,13 @@ module Filigree
 			#
 			# @return [void]
 			def inherited(klass)
-				klass.instance_variable_set(:@auto_blocks,   @auto_blocks)
+				klass.instance_variable_set(:@auto_blocks,   @auto_blocks.clone)
 				klass.instance_variable_set(:@help_string,   @help_string)
 				klass.instance_variable_set(:@next_default,  @next_default)
 				klass.instance_variable_set(:@next_required, @next_required)
-				klass.instance_variable_set(:@options_long,  @options_long)
-				klass.instance_variable_set(:@options_short, @options_short)
-				klass.instance_variable_set(:@required,      @required)
+				klass.instance_variable_set(:@options_long,  @options_long.clone)
+				klass.instance_variable_set(:@options_short, @options_short.clone)
+				klass.instance_variable_set(:@required,      @required.clone)
 				klass.instance_variable_set(:@usage,         @usage)
 			end
 
