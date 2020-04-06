@@ -8,6 +8,7 @@
 ############
 
 # Standard Library
+require 'forwardable'
 
 # Filigree
 require 'filigree/class_methods_module'
@@ -76,8 +77,14 @@ module Filigree
 
 			action =
 			if command.config
+				local_methods = self.methods - Filigree::Commands.methods - Filigree::Commands.instance_methods
+
 				conf_obj = command.config.new(rest)
 				rest     = conf_obj.rest
+
+				conf_obj.instance_variable_set(:@command_obj, self)
+				conf_obj.extend(Forwardable)
+				conf_obj.def_delegators(:@command_obj, *local_methods)
 
 				-> (*args) { conf_obj.instance_exec(*args, &command.action) }
 			else
